@@ -1,0 +1,8 @@
+{
+  "name": "搭把手社区生活服务平台ToG端管理后台",
+  "description": "「搭把手」社区生活服务平台ToG端管理后台是社区治理与运营的驾驶舱。提供数据看板、居民活跃度监测、公告/活动一键同步下发、共享空间维护、志愿者学分管理及居民诉求留言板闭环人工通道。",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
