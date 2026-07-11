@@ -99,3 +99,5 @@ docs/                    # 演示和工程文档
 ```
 
 PR #4 原始演示说明见 [docs/dual-ended-demo-v0.1.md](docs/dual-ended-demo-v0.1.md)。
+
+视觉系统、普通版/关怀版设计规范及 G/B/C 端页面说明见 [DESIGN.md](DESIGN.md)。

@@ -1,4 +1,5 @@
 import type { PublicServiceCard } from '../demo/types';
+import type { Announcement } from '../types';
 import { apiRequest, postJson, putJson } from './client';
 
 export const ACTORS = {
@@ -31,7 +32,7 @@ export const togApi = {
   toggleActivityItem: (activityId: string, item: 'qrCode' | 'venue' | 'speaker') => putJson<{ checklist: Record<'qrCode' | 'venue' | 'speaker', boolean> }>(ACTORS.community, `/api/activity-operations/${activityId}/checklist`, { item }),
   sendActivityNotice: (activityId: string) => postJson<{ sent: number; noticeSent: boolean }>(ACTORS.community, `/api/activity-operations/${activityId}/notify`, { content: '活动安排有更新，请查看最新信息。' }),
   createActivity: (body: unknown) => postJson<{ activity: Record<string, unknown> }>(ACTORS.community, '/api/activities', body),
-  createAnnouncement: (body: unknown) => postJson<{ announcement: Record<string, unknown>; sent: number }>(ACTORS.community, '/api/announcements', body),
+  createAnnouncement: (body: unknown) => postJson<{ announcement: Announcement; sent: number }>(ACTORS.community, '/api/announcements', body),
   saveVisit: (taskId: string, body: unknown) => putJson<{ id: string; status: string }>(ACTORS.socialWorker, `/api/social-work/tasks/${taskId}/visit`, body),
   submitVisit: (taskId: string) => postJson<{ id: string; status: string }>(ACTORS.socialWorker, `/api/social-work/tasks/${taskId}/visit/submit`, {}),
   resetDemo: () => postJson<{ ok: true }>(ACTORS.community, '/api/demo/reset', {}),
