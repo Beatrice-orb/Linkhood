@@ -2,8 +2,23 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
+  --font-mono: "Avenir Next Condensed", "Arial Narrow", sans-serif;
+  --font-number: "Avenir Next Condensed", "Arial Narrow", sans-serif;
+
+  --color-ink: #17313B;
+  --color-ink-muted: #5A6E74;
+  --color-ink-subtle: #94A4A8;
+  --color-jade: #2F6B5F;
+  --color-jade-hover: #3D8274;
+  --color-jade-light: #E8F2F3;
+  --color-coral: #F06A4B;
+  --color-coral-hover: #D85A3D;
+  --color-amber: #E9A23B;
+  --color-amber-light: #FDF5E6;
+  --color-canvas: #F8F7F0;
+  --color-surface: #FFFFFF;
+  --color-hairline: #E5E3DA;
 }
 
 /* Custom scrollbars inside the mobile view */
