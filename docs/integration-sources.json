@@ -1,39 +1,86 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "2.0",
   "asOf": "2026-07-12",
   "target": {
     "repository": "https://github.com/Beatrice-orb/TOC-Linkhood",
     "branch": "agent/pr6-resident-agent-bridge",
-    "purpose": "PR #6 resident service agent and anonymous demand bridge"
+    "purpose": "PR #6 resident community life assistant, full ToC Portal preservation, and isolated ToG dashboard"
   },
   "sources": {
     "toc": {
       "repository": "https://github.com/Beatrice-orb/TOC-Linkhood",
       "branch": "main",
-      "commit": "3e3b60402624555ef4dade7a137b69b4af746233",
-      "role": "native resident frontend and integration target"
+      "commit": "6e5bf2bcd8432e0c895822d9b7a421301c0ce2ec",
+      "role": "native resident frontend and integration target",
+      "preserve": [
+        "original Portal",
+        "existing resident pages and internal modes",
+        "existing navigation and page interactions"
+      ]
     },
     "tog": {
       "repository": "https://github.com/Beatrice-orb/TOG-Linkhood",
       "branch": "main",
-      "commit": "7160abc10218653830c4f1d40702890c9ffd08d5",
-      "role": "community desktop frontend upstream",
-      "integrationStrategy": "git-subtree",
+      "commit": "dc2dd601ce02ec794b11b648924fd82efcd03525",
+      "role": "complete community desktop dashboard upstream",
+      "sourceStrategy": "read-only vendor snapshot",
+      "runtimeIntegration": "iframe-isolated",
       "prefix": "vendor/tog-linkhood",
       "localEditsAllowed": false
     }
   },
-  "contracts": {
-    "anonymousDemandSignal": "docs/contracts/anonymous-demand-signal-v1.md",
-    "visibility": "community_only",
-    "notACase": true
+  "agent": {
+    "role": "resident community life assistant",
+    "capabilities": [
+      "search published community services and activities",
+      "understand and filter by non-sensitive resident constraints",
+      "compose grounded two-turn recommendations",
+      "route to allowlisted simulated department phone at the end of the second answer",
+      "emit aggregate-safe need insight tags"
+    ],
+    "excludedCapabilities": [
+      "create message",
+      "create ticket",
+      "create anonymous demand signal",
+      "bridge a conversation to the ToG message board",
+      "promise acceptance or staff follow-up"
+    ]
+  },
+  "needInsights": {
+    "purpose": "aggregate dashboard topics and trends only",
+    "allowedFields": [
+      "domain",
+      "goalTags",
+      "constraintTags",
+      "knowledgeCoverage",
+      "matchedSupplyIds",
+      "turnCount",
+      "isDemo"
+    ],
+    "forbiddenFields": [
+      "resident raw text",
+      "assistant raw text",
+      "name",
+      "phone",
+      "exact address",
+      "resident id",
+      "profile id",
+      "cross-session identifier",
+      "sensitive inference"
+    ],
+    "messageBoardBridge": false
   },
   "boundaries": {
+    "singlePageSurfaceSwitch": "small resident/community switch",
+    "defaultSurface": "resident",
+    "showLegacyFiveSurfaceLaunchpad": false,
+    "preserveOriginalTocPortal": true,
+    "preserveCompleteTogUi": true,
+    "isolateTogWithIframe": true,
     "askResidentToSubmit": false,
     "showResidentRecordSuccess": false,
     "showResidentAcceptanceStatus": false,
-    "anonymousDemandVisibleOnResidentSurface": false,
-    "anonymousDemandVisibleOnCommunitySurface": true,
+    "writeResidentConversationToMessageBoard": false,
     "retainTogMobileSurface": false
   }
 }

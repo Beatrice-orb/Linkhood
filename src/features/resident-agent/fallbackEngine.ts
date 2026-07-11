@@ -1,75 +1,53 @@
 import {
-  COMMUNITY_CATALOG_SOURCE,
-  DEMO_KNOWLEDGE,
+  COMMUNITY_ACTIVITY_SOURCE,
+  COMMUNITY_ROUTE_SOURCE,
   DEPARTMENT_DIRECTORY,
+  DIGITAL_SERVICE_SOURCE,
 } from './knowledge';
 import type {
-  AnonymousDemandCandidateV1,
   ResidentAgentMessage,
   ResidentAgentTurnResult,
+  ResidentNeedInsightCandidateV1,
 } from './types';
 
 const GREETING_PATTERN = /^(你好|您好|hi|hello|在吗|嗨)[呀啊，。!！\s]*$/i;
 const SAFETY_PATTERN = /(着火|火灾|有人晕倒|无法呼吸|煤气泄漏|燃气泄漏|正在被打|人身危险)/;
-const AI_COURSE_PATTERN = /(AI|人工智能|编程).*(课|活动|培训|入门)|(课|活动|培训|入门).*(AI|人工智能|编程)/i;
-const HOME_DELIVERY_PATTERN = /(助餐|老人餐|午餐).*(送餐|送上门|配送)|(送餐|送上门|配送).*(助餐|老人餐|午餐)/;
-const EVENING_ACTIVITY_PATTERN = /(下班|晚上|夜间|工作日).*(活动|夜校|课程)|(活动|夜校|课程).*(下班|晚上|夜间|工作日)/;
-const MEAL_PATTERN = /(助餐|老人餐|社区食堂|午餐)/;
-const REPAIR_PATTERN = /(报修|电梯|灯坏|漏水|物业|维修)/;
-const FORMAL_ACTION_PATTERN =
-  /(帮我|替我|给我).*(提交|投诉|留言|工单|申请)|(保证|承诺).*(回复|处理|解决)/;
-const DATA_EXFILTRATION_PATTERN =
-  /(忽略|绕过).*(规则|指令)|(居民|住户).*(名单|手机号|电话|住址|档案)/;
+const DIGITAL_LIFE_PATTERN = /(手机|挂号|水电费|缴费|乘车码|大课|慢慢教)/;
+const WEEKEND_CONSTRAINT_PATTERN = /(周六|周末|上午|陪她|陪他|付款|午休|休息)/;
+const LOW_PRESSURE_ACTIVITY_PATTERN = /(搬来|不认识|自我介绍|十节课|松一点|一个人).*(活动|邻居|认识)|活动.*(尴尬|一个人|自我介绍)/;
+const ACTIVITY_FOLLOWUP_PATTERN = /(周日|下午四点|四点以后|尴尬|已经认识)/;
+const FORMAL_ACTION_PATTERN = /(帮我|替我|给我).*(提交|投诉|留言|工单|申请)|(保证|承诺).*(回复|处理|解决)/;
+const DATA_EXFILTRATION_PATTERN = /(忽略|绕过).*(规则|指令)|(居民|住户).*(名单|手机号|电话|住址|档案)/;
 
-export function redactResidentText(value: string): string {
-  return value
-    .replace(/1[3-9]\d{9}/g, '[手机号已隐藏]')
-    .replace(/\d{1,2}\s*号楼\s*\d{2,4}\s*(?:室|房)?/g, '[门牌已隐藏]')
-    .replace(/\b(?:\d{15}|\d{17}[0-9Xx])\b/g, '[证件号已隐藏]')
-    .replace(/(我是|我叫|姓名是|本人是|联系人是)\s*[\u4e00-\u9fa5]{2,4}/g, '$1[姓名已隐藏]')
-    .replace(/[\u4e00-\u9fa5]{1,2}(?:某|先生|女士|阿姨|大爷|奶奶)/g, '[姓名已隐藏]')
-    .trim()
-    .slice(0, 80);
+function insight(
+  values: ResidentNeedInsightCandidateV1,
+): ResidentNeedInsightCandidateV1 {
+  return values;
 }
 
-function buildDemandCandidate(
-  values: Omit<AnonymousDemandCandidateV1, 'sourceRefs'>,
-): AnonymousDemandCandidateV1 {
-  return {
-    ...values,
-    sourceRefs: [COMMUNITY_CATALOG_SOURCE.id],
-  };
+function userMessages(messages: ResidentAgentMessage[]) {
+  return messages.filter((message) => message.role === 'user');
 }
 
-function notFoundAnswer(
-  routeKey: keyof typeof DEPARTMENT_DIRECTORY,
-  values: Omit<AnonymousDemandCandidateV1, 'sourceRefs' | 'routeDepartmentId'>,
-): ResidentAgentTurnResult {
-  const route = DEPARTMENT_DIRECTORY[routeKey];
-  return {
-    answerText: `我暂时没有在当前已核验的演示社区资料中查到这项服务。你可以联系${route.departmentName}进一步咨询：${route.phoneDisplay}（演示号码，不可拨打）。`,
-    status: 'not_found',
-    sourceRefs: [COMMUNITY_CATALOG_SOURCE],
-    route,
-    demandCandidate: buildDemandCandidate({
-      ...values,
-      routeDepartmentId: route.departmentId,
-    }),
-    usedFallback: true,
-  };
+function containsDigitalScenario(messages: ResidentAgentMessage[]) {
+  return userMessages(messages).some((message) => DIGITAL_LIFE_PATTERN.test(message.content));
+}
+
+function containsActivityScenario(messages: ResidentAgentMessage[]) {
+  return userMessages(messages).some((message) => LOW_PRESSURE_ACTIVITY_PATTERN.test(message.content));
 }
 
 export function runResidentAgentFallback(
   messages: ResidentAgentMessage[],
 ): ResidentAgentTurnResult {
-  const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
-  const query = lastUserMessage?.content.trim() ?? '';
+  const users = userMessages(messages);
+  const query = users.at(-1)?.content.trim() ?? '';
 
   if (!query || GREETING_PATTERN.test(query)) {
     return {
       answerText:
-        '你好，我可以帮你查询社区服务、社区活动和相关咨询电话。你可以问我“下班后有什么活动”或“社区有没有助餐服务”。',
-      status: 'answered',
+        '你好，我是社区生活助理。你可以把生活里真正卡住的事情讲完整一点，比如时间、距离、陪同方式或你最在意的感受；我会结合演示社区资料，帮你找更合适的服务和活动。',
+      status: 'needs_context',
       sourceRefs: [],
       usedFallback: true,
     };
@@ -78,7 +56,7 @@ export function runResidentAgentFallback(
   if (SAFETY_PATTERN.test(query)) {
     return {
       answerText:
-        '这可能涉及紧急安全风险，请立即离开危险区域，并根据现场情况拨打 110、119 或 120。这里不能替代紧急救援或创建处置工单。',
+        '这可能涉及紧急安全风险，请立即离开危险区域，并根据现场情况拨打 110、119 或 120。这里不能替代紧急救援。',
       status: 'safety_redirect',
       sourceRefs: [],
       usedFallback: true,
@@ -88,7 +66,7 @@ export function runResidentAgentFallback(
   if (DATA_EXFILTRATION_PATTERN.test(query)) {
     return {
       answerText:
-        '我不能查询、展示或猜测居民名单、电话、住址或档案。我只能依据公开的社区服务与活动演示资料提供答疑。',
+        '我不能查询、展示或猜测居民名单、电话、住址或档案。我只能依据公开的社区服务与活动演示资料提供建议。',
       status: 'answered',
       sourceRefs: [],
       usedFallback: true,
@@ -98,88 +76,121 @@ export function runResidentAgentFallback(
   if (FORMAL_ACTION_PATTERN.test(query)) {
     return {
       answerText:
-        '我不能替你正式提交投诉、创建工单，也不能承诺社区的回复或处理时间。我可以继续帮你查询公开服务信息和咨询科室。',
+        '我不能替你正式提交投诉、创建工单，也不能承诺社区的回复或处理时间。我可以继续帮你把生活目标和限制条件梳理清楚，再查找公开服务与活动。',
       status: 'answered',
       sourceRefs: [],
       usedFallback: true,
     };
   }
 
-  if (AI_COURSE_PATTERN.test(query)) {
-    return notFoundAnswer('activity_operations', {
-      domain: 'activity',
-      topicCode: 'weekday_evening_ai_course',
-      summary: '居民希望社区提供工作日晚间的 AI 入门课程。',
-      unmetFacet: '当前演示活动目录未覆盖工作日晚间 AI 入门课。',
-      contextTags: ['weekday_evening', 'digital_skills'],
-      knowledgeCoverage: 'none',
-      confidence: 0.96,
-    });
+  if (containsDigitalScenario(messages) && users.length >= 2 && WEEKEND_CONSTRAINT_PATTERN.test(query)) {
+    const route = DEPARTMENT_DIRECTORY.public_service;
+    return {
+      answerText:
+        `不是没有，更合适的选择需要从工作日下午的帮办桌换成周六专场。\n\n当前演示安排里，7 月 25 日周六 09:30 有一场「手机安心用小课堂」：前 40 分钟会用演示页面讲挂号和生活缴费，10:20 以后留有一对一练习时间。你可以陪她先把两个任务各操作一次，再让她照着纸质步骤卡自己重做一遍，这比工作日下午的帮办桌更符合你们的时间。\n\n关于付款安全，居民始终自己拿手机，工作人员只指步骤，不查看支付密码或短信验证码；涉及付款时可以练到确认页，最后一步不必真的支付。当前资料没有实时名额，请先确认当周场次。\n\n可联系${route.departmentName}：${route.phoneDisplay}，${route.serviceHours}（模拟号码，不可拨打）。`,
+      status: 'answered',
+      sourceRefs: [DIGITAL_SERVICE_SOURCE, COMMUNITY_ROUTE_SOURCE],
+      route,
+      insightCandidate: insight({
+        domain: 'digital_public_service',
+        goalTags: [
+          'independent_life_tasks',
+          'medical_registration_guidance',
+          'utility_payment_navigation',
+        ],
+        constraintTags: [
+          'slow_paced_guidance',
+          'weekend_morning',
+          'companion_preferred',
+          'privacy_conscious',
+        ],
+        matchedSupplyIds: ['digital-helpdesk-weekday', 'safe-phone-saturday'],
+        knowledgeCoverage: 'full',
+        confidence: 0.98,
+      }),
+      usedFallback: true,
+    };
   }
 
-  if (HOME_DELIVERY_PATTERN.test(query)) {
-    const route = DEPARTMENT_DIRECTORY.public_service;
-    const item = DEMO_KNOWLEDGE.find((knowledge) => knowledge.id === 'service-community-meal-point')!;
+  if (DIGITAL_LIFE_PATTERN.test(query)) {
     return {
-      answerText: `${item.answer} 如需进一步确认，可以联系${route.departmentName}：${route.phoneDisplay}（演示号码，不可拨打）。`,
-      status: 'partial',
-      sourceRefs: [item.source],
+      answerText:
+        '我理解你找的不是一节泛泛讲功能的“手机课”，而是有人围着“挂号、缴费”这两个具体任务，陪她一步一步练。\n\n当前演示资料里，更匹配的是党群服务中心一层的「数字生活帮办桌」：每周二、周四 14:00—16:00，采用一对一短时陪练，可以练医院小程序挂号、水电缴费页面怎么找、乘车码怎么打开。它不是大班讲座，第一次去可以只带自己的手机，再把最想学的两件事写在纸上，工作人员会按实际任务慢慢讲。\n\n地点从社区南门步行约 6 分钟，一层可直接进入。需要注意的是，帮办人员只做操作引导，不代替居民付款，也不会索要或保存支付密码、短信验证码。',
+      status: 'answered',
+      sourceRefs: [DIGITAL_SERVICE_SOURCE],
+      insightCandidate: insight({
+        domain: 'digital_public_service',
+        goalTags: [
+          'independent_life_tasks',
+          'medical_registration_guidance',
+          'utility_payment_navigation',
+        ],
+        constraintTags: ['slow_paced_guidance', 'nearby_service'],
+        matchedSupplyIds: ['digital-helpdesk-weekday', 'community-center-access'],
+        knowledgeCoverage: 'full',
+        confidence: 0.96,
+      }),
+      usedFallback: true,
+    };
+  }
+
+  if (containsActivityScenario(messages) && users.length >= 2 && ACTIVITY_FOLLOWUP_PATTERN.test(query)) {
+    const route = DEPARTMENT_DIRECTORY.activity_operations;
+    return {
+      answerText:
+        `这个时间正好能匹配周日 16:30 的场次，而且它专门保留了“第一次参加”入口：新参加的人会先拿一张社区地图任务卡，由主持人安排两三人一起完成，不需要自己找话题，也不会默认大家已经认识。\n\n建议你 16:25 到，在入口直接说“第一次来，想参加地图任务”即可；活动约 45 分钟，中途离开也没有影响。当前资料没有实时人数。\n\n如需确认本周是否照常开展，可联系${route.departmentName}：${route.phoneDisplay}，${route.serviceHours}（模拟号码，不可拨打）。`,
+      status: 'answered',
+      sourceRefs: [COMMUNITY_ACTIVITY_SOURCE, COMMUNITY_ROUTE_SOURCE],
       route,
-      demandCandidate: buildDemandCandidate({
-        domain: 'service',
-        topicCode: 'meal_home_delivery',
-        summary: '居民希望社区助餐服务增加送餐上门。',
-        unmetFacet: '已有助餐点，但当前资料未确认送餐上门。',
-        contextTags: ['home_delivery_requested'],
-        knowledgeCoverage: 'partial',
-        routeDepartmentId: route.departmentId,
+      insightCandidate: insight({
+        domain: 'community_activity',
+        goalTags: ['local_social_connection'],
+        constraintTags: [
+          'low_commitment',
+          'solo_attendance',
+          'no_public_introduction',
+          'sunday_late_afternoon',
+          'facilitated_entry',
+        ],
+        matchedSupplyIds: ['neighbour-exchange-table'],
+        knowledgeCoverage: 'full',
+        confidence: 0.96,
+      }),
+      usedFallback: true,
+    };
+  }
+
+  if (LOW_PRESSURE_ACTIVITY_PATTERN.test(query)) {
+    return {
+      answerText:
+        '你想找的重点不是“学一门课”，而是能一个人去、参与压力低、随时结束，同时自然认识几个人的活动。\n\n当前演示资料里，「邻里交换桌」比连续课程更合适：每周日下午在党群服务中心庭院开放 45 分钟，不要求连续报名，也没有上台自我介绍。可以带一本看完的书或一件闲置小物，也可以空手参加；主持人会用物品和社区地图做聊天引子，一个人去也会有人协助加入小组。\n\n如果第一次只想看看，可以先参加前 20 分钟，不需要承诺后续场次。',
+      status: 'answered',
+      sourceRefs: [COMMUNITY_ACTIVITY_SOURCE],
+      insightCandidate: insight({
+        domain: 'community_activity',
+        goalTags: ['local_social_connection'],
+        constraintTags: ['low_commitment', 'solo_attendance', 'no_public_introduction'],
+        matchedSupplyIds: ['neighbour-exchange-table'],
+        knowledgeCoverage: 'full',
         confidence: 0.94,
       }),
       usedFallback: true,
     };
   }
 
-  if (EVENING_ACTIVITY_PATTERN.test(query)) {
-    const item = DEMO_KNOWLEDGE.find(
-      (knowledge) => knowledge.id === 'activity-youth-night-school-2026-07',
-    )!;
-    return {
-      answerText: item.answer,
-      status: 'answered',
-      sourceRefs: [item.source],
-      usedFallback: true,
-    };
-  }
-
-  if (MEAL_PATTERN.test(query)) {
-    const item = DEMO_KNOWLEDGE.find((knowledge) => knowledge.id === 'service-community-meal-point')!;
-    return {
-      answerText: item.answer,
-      status: 'answered',
-      sourceRefs: [item.source],
-      usedFallback: true,
-    };
-  }
-
-  if (REPAIR_PATTERN.test(query)) {
-    const item = DEMO_KNOWLEDGE.find((knowledge) => knowledge.id === 'service-property-repair')!;
-    const route = DEPARTMENT_DIRECTORY.property_service;
-    return {
-      answerText: `${item.answer} 演示联系电话：${route.phoneDisplay}（不可拨打）。`,
-      status: 'answered',
-      sourceRefs: [item.source],
-      route,
-      usedFallback: true,
-    };
-  }
-
-  return notFoundAnswer('public_service', {
-    domain: 'service',
-    topicCode: 'uncategorized_community_service',
-    summary: '居民提出一项当前演示资料未覆盖的社区服务需求。',
-    unmetFacet: redactResidentText(query),
-    contextTags: ['community_service_inquiry'],
-    knowledgeCoverage: 'none',
-    confidence: 0.8,
-  });
+  return {
+    answerText:
+      '我还需要多一点生活情境，才能避免只做关键词客服。你可以补充：最想解决的具体事情、方便的时间、能走多远，以及你最不希望发生什么。我会再结合演示社区资料给出建议。',
+    status: 'needs_context',
+    sourceRefs: [],
+    insightCandidate: insight({
+      domain: 'community_service',
+      goalTags: ['needs_clarification'],
+      constraintTags: [],
+      matchedSupplyIds: [],
+      knowledgeCoverage: 'none',
+      confidence: 0.78,
+    }),
+    usedFallback: true,
+  };
 }

@@ -6,13 +6,10 @@ export interface ResidentAgentMessage {
   content: string;
   createdAt: string;
   sourceRefs?: ResidentAgentSourceRef[];
+  deliveryMode?: 'model' | 'fallback';
 }
 
-export type ResidentAgentAnswerStatus =
-  | 'answered'
-  | 'partial'
-  | 'not_found'
-  | 'safety_redirect';
+export type ResidentAgentAnswerStatus = 'answered' | 'needs_context' | 'safety_redirect';
 
 export interface ResidentAgentSourceRef {
   id: string;
@@ -29,15 +26,12 @@ export interface DepartmentRoute {
   isDemo: true;
 }
 
-export interface AnonymousDemandCandidateV1 {
-  domain: 'service' | 'activity';
-  topicCode: string;
-  summary: string;
-  unmetFacet: string;
-  contextTags: string[];
-  knowledgeCoverage: 'partial' | 'none';
-  sourceRefs: string[];
-  routeDepartmentId?: string;
+export interface ResidentNeedInsightCandidateV1 {
+  domain: 'digital_public_service' | 'community_activity' | 'community_service';
+  goalTags: string[];
+  constraintTags: string[];
+  matchedSupplyIds: string[];
+  knowledgeCoverage: 'full' | 'partial' | 'none';
   confidence: number;
 }
 
@@ -46,37 +40,23 @@ export interface ResidentAgentTurnResult {
   status: ResidentAgentAnswerStatus;
   sourceRefs: ResidentAgentSourceRef[];
   route?: DepartmentRoute;
-  demandCandidate?: AnonymousDemandCandidateV1;
+  insightCandidate?: ResidentNeedInsightCandidateV1;
   usedFallback: boolean;
 }
 
-export interface AnonymousDemandSignalV1 {
+export interface ResidentNeedInsightV1 extends ResidentNeedInsightCandidateV1 {
   schemaVersion: '1.0';
   id: string;
   isDemo: true;
-  visibility: 'community_only';
-  communityId: 'xihongmen-demo';
   source: 'resident_ai';
-  domain: 'service' | 'activity';
-  topicCode: string;
-  summary: string;
-  unmetFacet: string;
-  voiceFragments: string[];
-  contextTags: string[];
-  knowledgeCoverage: 'partial' | 'none';
-  sourceRefs: string[];
-  routeDepartmentId?: string;
-  confidence: number;
   firstSeenAt: string;
   lastSeenAt: string;
+  turnCount: number;
   occurrenceCount: number;
   dedupeKey: string;
-  recordKind: 'anonymous_demand_signal';
-  notACase: true;
-  piiScan: 'passed';
 }
 
-export interface DemandSignalEnvelopeV1 {
+export interface ResidentNeedInsightEnvelopeV1 {
   schemaVersion: '1.0';
-  signals: AnonymousDemandSignalV1[];
+  insights: ResidentNeedInsightV1[];
 }

@@ -19,5 +19,5 @@ if (IS_PRODUCTION) {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Linkhood running at http://localhost:${PORT}/#/demo`);
+  console.log(`Linkhood running at http://localhost:${PORT}/#/resident`);
 });

@@ -1,60 +1,74 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { DemoLaunchpad } from './demo/DemoLaunchpad';
-import { DemoProvider } from './demo/DemoStore';
-import { useHashRoute } from './demo/navigation';
-import { ResidentServicesApp } from './resident/ResidentServicesApp';
-import { TogDesktopApp } from './tog/TogDesktopApp';
-import { TogMobileApp } from './tog/TogMobileApp';
-import App from './App';
-import './demo/demo.css';
+import { Building2, House } from 'lucide-react';
+import { routeTo, useHashRoute } from './demo/navigation';
+import { ResidentWithAgent } from './resident/ResidentWithAgent';
 
-const GovernmentApp = lazy(() => import('./government/App').then((module) => ({ default: module.GovernmentApp })));
+const CommunitySurface = lazy(() => import('./integration/CommunitySurface'));
 
-const titles: Record<string, string> = {
-  '/demo': '搭把手 · 双端联动 Demo',
-  '/resident': '搭把手 · 居民社区生活端',
-  '/resident/services': '搭把手 · 居民端身边服务',
-  '/tog/desktop/services': '搭把手 · 公共服务接入台',
-  '/tog/desktop/workbench': '搭把手 · 社区今日工作台',
-  '/tog/desktop/residents': '搭把手 · 居民服务档案',
-  '/tog/desktop/permissions': '搭把手 · 数据与权限',
-  '/tog/desktop/services/new': '搭把手 · 新增公共服务',
-  '/tog/desktop/activities': '搭把手 · 活动运营台',
-  '/tog/desktop/activities/new': '搭把手 · 新建活动',
-  '/tog/desktop/insights': '搭把手 · 需求与反馈',
-  '/tog/mobile/workbench': '搭把手 · 社区工作台',
-  '/tog/mobile/activities': '搭把手 · 社工服务活动',
-  '/tog/mobile/followup': '搭把手 · 居民跟进',
-  '/tog/mobile/me': '搭把手 · 社工账号',
-  '/tog/mobile/visit': '搭把手 · 走访记录核对',
-  '/government': '搭把手 · G端社区治理驾驶舱',
-};
+type PreviewSurface = 'resident' | 'community';
 
-function RoutedApp() {
-  const route = useHashRoute();
+function PreviewSwitcher({ surface }: { surface: PreviewSurface }) {
+  const options = [
+    { id: 'resident' as const, label: '居民端', route: '/resident', icon: House },
+    { id: 'community' as const, label: '社区端', route: '/community', icon: Building2 },
+  ];
 
-  useEffect(() => {
-    document.title = titles[route] ?? titles['/demo'];
-  }, [route]);
-
-  if (route === '/resident') return <App />;
-  if (route === '/resident/services') return <ResidentServicesApp />;
-  if (route.startsWith('/tog/desktop/')) return <TogDesktopApp route={route} />;
-  if (route.startsWith('/tog/mobile/')) return <TogMobileApp route={route} />;
-  if (route.startsWith('/government')) {
-    return (
-      <Suspense fallback={<main className="government-loading" role="status">正在加载 G 端治理驾驶舱…</main>}>
-        <GovernmentApp />
-      </Suspense>
-    );
-  }
-  return <DemoLaunchpad />;
+  return (
+    <nav
+      aria-label="切换居民端与社区端"
+      className="fixed left-1/2 top-3 z-[120] flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/70 bg-white/90 p-1 shadow-[0_8px_24px_rgba(23,49,59,0.18)] backdrop-blur-md"
+    >
+      {options.map(({ id, label, route, icon: Icon }) => {
+        const active = surface === id;
+        return (
+          <button
+            key={id}
+            type="button"
+            aria-current={active ? 'page' : undefined}
+            onClick={() => routeTo(route)}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold transition-colors ${
+              active ? 'bg-[#2F6B5F] text-white' : 'text-[#53635E] hover:bg-[#EEF4F1]'
+            }`}
+          >
+            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+            {label}
+          </button>
+        );
+      })}
+    </nav>
+  );
 }
 
 export default function RootApp() {
+  const route = useHashRoute();
+  const surface: PreviewSurface = route === '/community' ? 'community' : 'resident';
+
+  useEffect(() => {
+    if (route !== '/resident' && route !== '/community') routeTo('/resident');
+  }, [route]);
+
+  useEffect(() => {
+    document.title = surface === 'community'
+      ? '搭把手 · 社区运营驾驶舱'
+      : '搭把手 · 居民社区生活端';
+  }, [surface]);
+
   return (
-    <DemoProvider>
-      <RoutedApp />
-    </DemoProvider>
+    <>
+      <PreviewSwitcher surface={surface} />
+      {surface === 'community' ? (
+        <Suspense
+          fallback={(
+            <main className="flex h-screen items-center justify-center bg-[#1F4A3A] text-sm font-semibold text-white/75" role="status">
+              正在加载社区运营驾驶舱…
+            </main>
+          )}
+        >
+          <CommunitySurface />
+        </Suspense>
+      ) : (
+        <ResidentWithAgent />
+      )}
+    </>
   );
 }
