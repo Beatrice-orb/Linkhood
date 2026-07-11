@@ -80,11 +80,14 @@ export default function ResidentAgentWidget() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="absolute right-4 bottom-20 z-[45] flex items-center gap-2 rounded-full bg-jade px-4 py-3 text-xs font-bold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-95"
+        className="group absolute right-4 bottom-20 z-[45] flex h-12 w-12 items-center justify-center rounded-2xl border border-white/40 bg-jade text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
         aria-label="打开社区服务助手"
+        title="社区服务助手"
       >
-        <Sparkles className="h-4 w-4" />
-        社区问一问
+        <Bot className="h-5 w-5 transition-transform group-hover:-rotate-6" />
+        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-surface bg-amber text-white shadow-xs">
+          <Sparkles className="h-2.5 w-2.5" />
+        </span>
       </button>
     );
   }

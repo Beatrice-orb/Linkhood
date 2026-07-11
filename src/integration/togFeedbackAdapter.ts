@@ -27,8 +27,8 @@ export function toTogFeedback(signal: AnonymousDemandSignalV1): Feedback {
     residentPhone: '未收集',
     building: '社区范围',
     room: '匿名信号',
-    question: `居民原声（已脱敏）：${quotes}`,
-    helpNeeded: `匿名需求信号 · 非工单 · 演示数据｜AI 整理：${signal.summary}｜供给缺口：${signal.unmetFacet}｜情境标签：${signal.contextTags.join(
+    question: `匿名需求信号 · 非工单 · 演示数据｜居民原声（已脱敏）：${quotes}`,
+    helpNeeded: `AI 整理：${signal.summary}｜供给缺口：${signal.unmetFacet}｜情境标签：${signal.contextTags.join(
       '、',
     )}｜建议路由：${routeText}｜演示数据，待人工研判，不是正式工单。`,
     time: formatDemandTime(signal.lastSeenAt),

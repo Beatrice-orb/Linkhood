@@ -15,7 +15,7 @@ flowchart LR
     D --> F["内部需求候选"]
     F --> G["脱敏、规则校验与会话内去重"]
     G --> H["匿名需求信号仓库"]
-    H --> I["ToG 居民声音 / 需求洞察适配器"]
+    H --> I["ToG 需求反馈 / 留言板适配器"]
 ```
 
 居民端和内部桥接层必须是两个输出通道：
@@ -54,7 +54,7 @@ flowchart LR
 
 - 将 `TOG-Linkhood` 固定快照作为 pristine subtree 使用，不在 vendor 内做私有修改。
 - 在 ToG 上游增加最小集成端口，例如 `externalDemandSignals` 和需求页面初始入口；上游合并后再同步 subtree。
-- 集成 adapter 把共享契约映射到 ToG 当前需求/反馈展示模型。
+- 集成 adapter 把共享契约映射到 ToG 现有“需求反馈 / 留言板”，不新增覆盖驾驶舱的大型悬浮面板。
 - 社区端展示摘要、脱敏短语、非敏感情境标签、知识缺口和建议承接科室。
 - 每条记录明确显示“匿名需求信号 · 非工单 · 演示数据”。
 - 同步居民端和 ToG 最终 `main` 后，只调整两个 UI adapter，不改 Agent、契约和仓库接口。
@@ -137,7 +137,7 @@ interface DemandRepository {
 ### CommunityDemandAdapter
 
 - 只在 ToG 社区端读取 `listForCommunity()`。
-- 将信号映射到居民声音或需求洞察页面。
+- 将信号映射到 ToG 现有“需求反馈 / 留言板”；ToG 首页保持原布局。
 - 不把信号映射为实名 `Feedback`、个案或工单。
 - 不把 `occurrenceCount` 表述为独立居民人数。
 
