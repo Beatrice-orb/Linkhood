@@ -813,6 +813,94 @@
   min-height: 44px;
 }
 
+/* Keep the community desktop as compact as the resident production surface. */
+:scope.tog-surface--community .tog-desktop-shell {
+  -webkit-font-smoothing: auto;
+}
+
+:scope.tog-surface--community .tog-sidebar .brand-lockup {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+:scope.tog-surface--community .tog-sidebar .brand-lockup__mark {
+  border-radius: 10px 10px 10px 4px;
+  height: 36px;
+  width: 36px;
+}
+
+:scope.tog-surface--community .tog-sidebar .brand-lockup__mark svg {
+  height: 22px;
+  width: 22px;
+}
+
+:scope.tog-surface--community .community-select {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+:scope.tog-surface--community .tog-nav-item {
+  font-size: 14px;
+  font-weight: 400;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+:scope.tog-surface--community .tog-nav-item.is-active {
+  font-weight: 500;
+}
+
+:scope.tog-surface--community .tog-nav-item svg {
+  height: 18px;
+  stroke-width: 1.8;
+  width: 18px;
+}
+
+:scope.tog-surface--community .operator-profile strong {
+  font-weight: 600;
+}
+
+:scope.tog-surface--community .tog-page-header h1 {
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+:scope.tog-surface--community .tog-page-header p {
+  font-size: 13px;
+}
+
+:scope.tog-surface--community .panel-heading strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+:scope.tog-surface--community .summary-card__copy small,
+:scope.tog-surface--community .summary-card__copy span {
+  font-size: 11px;
+}
+
+:scope.tog-surface--community .summary-card__copy strong {
+  font-size: 24px;
+}
+
+:scope.tog-surface--community .work-task-row__body strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+:scope.tog-surface--community .work-task-row__body p {
+  font-size: 12px;
+}
+
+:scope.tog-surface--community .work-task-row__meta small,
+:scope.tog-surface--community .task-priority,
+:scope.tog-surface--community .task-ai-tag {
+  font-size: 11px;
+}
+
 .operator-profile__avatar,
 .mobile-avatar {
   background: var(--dbs-green);

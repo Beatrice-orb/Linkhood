@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Check,
   CheckCircle2,
+  ChevronDown,
   CircleAlert,
   ExternalLink,
   FileSearch,
@@ -55,7 +56,7 @@ function DesktopSidebar({ route }: { route: string }) {
         <span>搭把手</span>
       </button>
       <button className="community-select" type="button" aria-label="当前社区：西红门社区" disabled title="本演示固定为西红门社区">
-        西红门社区 <span aria-hidden="true">⌄</span>
+        西红门社区 <ChevronDown size={15} aria-hidden="true" />
       </button>
 
       <nav className="tog-sidebar__nav" aria-label="社区运营导航">
