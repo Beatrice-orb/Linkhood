@@ -13,13 +13,18 @@
   --dbs-coral: #F06A4B;
   --dbs-coral-dark: #D85A3D;
   --dbs-yellow: #FDF5E6;
-  --dbs-yellow-text: #9A6513;
-  --dbs-danger: #D85A3D;
+  --dbs-yellow-text: #E9A23B;
+  --dbs-danger: #F06A4B;
   --dbs-shadow: 0 8px 24px rgba(23, 49, 59, 0.08);
   --dbs-shadow-soft: 0 1px 2px rgba(23, 49, 59, 0.04);
 }
 
 @scope (.tog-surface) {
+
+:scope.tog-surface--community {
+  --dbs-yellow-text: #9A6513;
+  --dbs-danger: #D85A3D;
+}
 
 .demo-launchpad,
 .tog-desktop-shell,
@@ -68,7 +73,8 @@
 .button:disabled { cursor: not-allowed; opacity: 0.4; }
 .button--primary { background: var(--dbs-green); color: #fff; }
 .button--primary:not(:disabled):hover { background: var(--dbs-green-hover); }
-.button--ghost { background: #fff; border-color: #b8c7c1; color: var(--dbs-green-dark); }
+.button--ghost { background: #fff; border-color: var(--dbs-line); color: var(--dbs-green); }
+:scope.tog-surface--community .button--ghost { border-color: #b8c7c1; color: var(--dbs-green-dark); }
 .button--ghost:not(:disabled):hover { background: var(--dbs-green-soft); border-color: var(--dbs-green); }
 .button--coral { background: var(--dbs-coral); color: #fff; }
 .button--coral:hover { background: var(--dbs-coral-dark); }

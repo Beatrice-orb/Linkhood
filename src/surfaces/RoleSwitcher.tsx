@@ -6,7 +6,7 @@ const surfaces = [
   {
     key: 'community',
     label: '社区电脑端',
-    route: '/tog/desktop/services',
+    route: '/tog/desktop/workbench',
     icon: Building2,
   },
   {

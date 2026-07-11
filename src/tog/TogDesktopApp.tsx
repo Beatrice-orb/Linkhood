@@ -50,7 +50,7 @@ function DesktopSidebar({ route }: { route: string }) {
 
   return (
     <aside className="tog-sidebar">
-      <button className="brand-lockup" type="button" onClick={() => routeTo('/tog/desktop/services')}>
+      <button className="brand-lockup" type="button" onClick={() => routeTo('/tog/desktop/workbench')}>
         <span className="brand-lockup__mark"><HandHeart aria-hidden="true" /></span>
         <span>搭把手</span>
       </button>
