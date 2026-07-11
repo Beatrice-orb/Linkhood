@@ -140,12 +140,12 @@ export function ResidentServicesApp() {
     setSelectedService(service);
   };
 
-  if (selectedService) return <div className="resident-page"><div className="resident-frame"><div className="resident-demo-disclaimer"><Info /> 演示环境 · 内容来自公开来源快照，不代表与来源机构存在合作关系</div><ServiceDetail service={selectedService} onBack={() => setSelectedService(null)} /></div></div>;
+  if (selectedService) return <div className="resident-page"><div className="resident-frame"><div className="resident-demo-disclaimer"><Info /> 试点环境 · 内容来自公开来源，不代表与来源机构存在合作关系</div><ServiceDetail service={selectedService} onBack={() => setSelectedService(null)} /></div></div>;
 
   return (
     <div className="resident-page">
       <div className="resident-frame">
-        <div className="resident-demo-disclaimer"><Info /> 演示环境 · 内容来自公开来源快照，不代表与来源机构存在合作关系</div>
+        <div className="resident-demo-disclaimer"><Info /> 试点环境 · 内容来自公开来源，不代表与来源机构存在合作关系</div>
         <main className="resident-main">{tab === 'home' ? <ResidentHome onOpenProfile={() => setTab('me')} onOpenService={openService} /> : tab === 'help' ? <ResidentHelp /> : <ResidentMe />}</main>
         <ResidentBottomNav active={tab} onChange={setTab} />
       </div>

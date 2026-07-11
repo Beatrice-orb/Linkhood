@@ -18,6 +18,13 @@ const entries = [
     description: '把真实通知整理成可核验、可发布的居民服务卡。',
   },
   {
+    route: '/resident',
+    icon: Users,
+    eyebrow: '居民完整端',
+    title: '社区生活与邻里互助',
+    description: '空间、活动、邻里圈、互助积分、信用和真实会话。',
+  },
+  {
     route: '/resident/services',
     icon: Users,
     eyebrow: '居民端',

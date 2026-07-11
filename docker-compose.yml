@@ -1,0 +1,16 @@
+services:
+  linkhood:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_PATH: /app/data/linkhood.sqlite
+      ALLOW_DEMO_LOGIN: "true"
+    volumes:
+      - linkhood-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  linkhood-data:

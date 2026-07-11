@@ -50,6 +50,9 @@ import {
   Sparkles
 } from 'lucide-react';
 import CareModeView from './components/CareModeView';
+import { residentApi } from './api/resident';
+import { ApiError } from './api/client';
+import { togApi } from './api/tog';
 
 export default function App() {
   // Current logged in user (starts with 小雅)
@@ -88,74 +91,6 @@ export default function App() {
     }
     setShowCareModeConfirm({ visible: false, targetMode: false });
     showToast(newVal ? '已成功切换至关怀版！' : '已返回普通版本！', 'info');
-  };
-
-  // Care-Mode Specific States
-  const [showCareNotices, setShowCareNotices] = useState(false);
-  const [showCarePublish, setShowCarePublish] = useState(false);
-  const [carePublishType, setCarePublishType] = useState<'help' | 'moment'>('help');
-  const [careHelpWhat, setCareHelpWhat] = useState('');
-  const [careHelpWhen, setCareHelpWhen] = useState('');
-  const [careHelpWhere, setCareHelpWhere] = useState('');
-  const [careMomentContent, setCareMomentContent] = useState('');
-  const [careActiveMenuModal, setCareActiveMenuModal] = useState<string | null>(null);
-  const [careNotificationUnread, setCareNotificationUnread] = useState(2);
-
-  // Submit caretaker publish form
-  const handleCarePublishSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (carePublishType === 'help') {
-      if (!careHelpWhat.trim()) return;
-      const content = `【求助】需要帮：${careHelpWhat}。时间：${careHelpWhen || '随时'}。地点：${careHelpWhere || '本楼栋/附近'}`;
-      const newItem: FeedItem = {
-        id: `care_help_${Date.now()}`,
-        type: 'help',
-        category: '代取',
-        authorName: currentUser.name,
-        authorRoom: currentUser.room,
-        distance: 12,
-        time: '刚刚',
-        content: content,
-        likes: 0,
-        hasLiked: false,
-        comments: [],
-        meetingTime: careHelpWhen || '随时',
-        bountyPoints: 5,
-        creditScore: currentUser.creditScore,
-        helpCount: currentUser.helpCount,
-        actionText: '我来帮',
-        actionStatus: 'idle',
-        tags: ['长辈求助']
-      };
-      setFeedItems([newItem, ...feedItems]);
-      showToast('求助信息发布成功！邻居们会尽快看到！', 'success');
-    } else {
-      if (!careMomentContent.trim()) return;
-      const newItem: FeedItem = {
-        id: `care_moment_${Date.now()}`,
-        type: 'moment',
-        authorName: currentUser.name,
-        authorRoom: currentUser.room,
-        distance: 15,
-        time: '刚刚',
-        content: careMomentContent,
-        likes: 0,
-        hasLiked: false,
-        comments: [],
-        creditScore: currentUser.creditScore,
-        helpCount: currentUser.helpCount,
-        tags: ['日常分享']
-      };
-      setFeedItems([newItem, ...feedItems]);
-      showToast('动态发布成功！', 'success');
-    }
-
-    // Reset fields
-    setCareHelpWhat('');
-    setCareHelpWhen('');
-    setCareHelpWhere('');
-    setCareMomentContent('');
-    setShowCarePublish(false);
   };
 
   // Sub tab inside Home (社区地图)
@@ -304,6 +239,7 @@ export default function App() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>(mockFeedItems);
   const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements);
   const [weeklyReport, setWeeklyReport] = useState<WeeklyReport>(mockWeeklyReport);
+  const [pointTransactions, setPointTransactions] = useState<Array<{ id: string; amount: number; balance_after: number; reason: string; created_at: string }>>([]);
 
   // New post states
   const [showCreatePost, setShowCreatePost] = useState(false);
@@ -339,47 +275,55 @@ export default function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  useEffect(() => {
+    let cancelled = false;
+    residentApi.bootstrap(currentUser.id)
+      .then((payload) => {
+        if (cancelled) return;
+        setCurrentUser(payload.user);
+        setSpaces(payload.spaces);
+        setServices(payload.services);
+        setEvents(payload.events);
+        setFeedItems(payload.feedItems);
+        setAnnouncements(payload.announcements);
+        setWeeklyReport(payload.weeklyReport);
+        setChatSessions(payload.chatSessions as ChatSession[]);
+      })
+      .catch(() => {
+        // Keep the fixture-backed interface usable when the API is unavailable.
+      });
+    return () => { cancelled = true; };
+  }, [currentUser.id]);
+
+  useEffect(() => {
+    residentApi.points(currentUser.id)
+      .then((payload) => setPointTransactions(payload.transactions))
+      .catch(() => undefined);
+  }, [currentUser.id, currentUser.points]);
+
   // Switch profiles
   const handleUserChange = (userId: string) => {
     const selected = mockUsers.find(u => u.id === userId);
     if (selected) {
       setCurrentUser({ ...selected });
+      setSelectedChatSession(null);
       showToast(`切换为住户：${selected.name} (${selected.room}室)`, 'info');
     }
   };
 
   // 1. Booking slot functionality
-  const handleBookSlot = (spaceId: string, timeSlot: string) => {
-    setSpaces(prevSpaces => 
-      prevSpaces.map(sp => {
-        if (sp.id === spaceId) {
-          const updatedBookings = sp.bookings.map(b => {
-            if (b.timeSlot === timeSlot) {
-              if (b.isBooked) {
-                // If it was booked by me, allow canceling
-                if (b.bookerName === currentUser.name) {
-                  showToast(`已取消预约 ${sp.name} (${timeSlot})`);
-                  return { ...b, isBooked: false, bookerName: undefined, bookerRoom: undefined };
-                }
-                return b;
-              } else {
-                // Check points/booking restrictions if any
-                showToast(`成功预约 ${sp.name} (${timeSlot})！`);
-                return { 
-                  ...b, 
-                  isBooked: true, 
-                  bookerName: currentUser.name, 
-                  bookerRoom: currentUser.room 
-                };
-              }
-            }
-            return b;
-          });
-          return { ...sp, bookings: updatedBookings };
-        }
-        return sp;
-      })
-    );
+  const handleBookSlot = async (spaceId: string, timeSlot: string) => {
+    const space = spaces.find((item) => item.id === spaceId);
+    const booking = space?.bookings.find((item) => item.timeSlot === timeSlot);
+    try {
+      const payload = booking?.isBooked && booking.bookerName === currentUser.name
+        ? await residentApi.cancelSpaceBooking(currentUser.id, spaceId, timeSlot)
+        : await residentApi.bookSpace(currentUser.id, spaceId, timeSlot);
+      setSpaces(payload.spaces);
+      showToast(booking?.isBooked ? `已取消预约 ${space?.name} (${timeSlot})` : `成功预约 ${space?.name} (${timeSlot})！`);
+    } catch (error) {
+      showToast(error instanceof ApiError && error.code === 'SLOT_BOOKED' ? '该时段刚刚已被其他邻居预约' : '预约操作失败，请稍后重试', 'info');
+    }
   };
 
   // Update selected space when state updates
@@ -394,57 +338,16 @@ export default function App() {
   const [newCommentText, setNewCommentText] = useState('');
   const [newCommentRating, setNewCommentRating] = useState(5);
 
-  const handleAddSpaceReview = (spaceId: string) => {
+  const handleAddSpaceReview = async (spaceId: string) => {
     if (!newCommentText.trim()) return;
-    setSpaces(prevSpaces =>
-      prevSpaces.map(sp => {
-        if (sp.id === spaceId) {
-          const newReview = {
-            rating: newCommentRating,
-            comment: newCommentText,
-            authorName: currentUser.name,
-            authorRoom: currentUser.room,
-            date: '刚刚'
-          };
-          const updatedReviews = [newReview, ...sp.reviews];
-          const averageRating = parseFloat(
-            ((sp.rating * sp.reviewsCount + newCommentRating) / (sp.reviewsCount + 1)).toFixed(1)
-          );
-          showToast(`已发表对 ${sp.name} 的评价！`);
-          return {
-            ...sp,
-            reviews: updatedReviews,
-            reviewsCount: sp.reviewsCount + 1,
-            rating: averageRating
-          };
-        }
-        return sp;
-      })
-    );
-    setNewCommentText('');
-  };
-
-  // 3. Register for events
-  const ensureEventGroupChat = (eventName: string) => {
-    setChatSessions(prev => {
-      const exists = prev.some(chat => chat.name === `${eventName}交流群` || chat.name === eventName);
-      if (exists) return prev;
-
-      const newGroupChat: ChatSession = {
-        id: `chat_event_${Date.now()}`,
-        name: `${eventName}交流群`,
-        type: 'group',
-        avatar: '🧁',
-        lastMessage: '系统消息: 你已加入活动，群聊已自动建立。大家一起来聊天吧！',
-        lastTime: '刚刚',
-        unreadCount: 0,
-        subLabel: '活动群聊',
-        messages: [
-          { id: 'm_init', sender: '系统', content: `欢迎加入【${eventName}】活动群聊！群聊已自动建立，快和大家打个招呼吧。`, time: '刚刚', isMe: false }
-        ]
-      };
-      return [newGroupChat, ...prev];
-    });
+    try {
+      const payload = await residentApi.reviewSpace(currentUser.id, spaceId, newCommentRating, newCommentText);
+      setSpaces(payload.spaces);
+      setNewCommentText('');
+      showToast('评价已发布');
+    } catch {
+      showToast('评价发布失败，请稍后重试', 'info');
+    }
   };
 
   const handleStartPrivateChat = (targetName: string, subLabel: string = '邻里私聊') => {
@@ -454,6 +357,21 @@ export default function App() {
       setSelectedChatSession(existing);
       setActiveTab('chat');
       showToast(`已为您打开与 ${targetName} 的聊天框`, 'info');
+      return;
+    }
+
+    const target = mockUsers.find((user) => targetName.includes(user.name));
+    const targetUserId = target?.id || (/居委会|社工|政策|补贴/.test(targetName) ? 'staff_li' : null);
+    if (targetUserId) {
+      residentApi.startPrivateChat(currentUser.id, targetUserId, targetName)
+        .then((payload) => {
+          const sessions = payload.chatSessions as ChatSession[];
+          setChatSessions(sessions);
+          setSelectedChatSession(sessions.find((session) => session.id === payload.conversationId) || null);
+          setActiveTab('chat');
+          showToast(`已成功发起与 ${targetName} 的私聊`);
+        })
+        .catch(() => showToast('私聊创建失败，请稍后重试', 'info'));
       return;
     }
 
@@ -495,64 +413,26 @@ export default function App() {
   const handleSendMessage = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!typedMessage.trim() || !selectedChatSession) return;
-
-    const newMessage: ChatMessage = {
-      id: `msg_${Date.now()}`,
-      sender: currentUser.name,
-      content: typedMessage,
-      time: '刚刚',
-      isMe: true
-    };
-
-    const sessionToReply = selectedChatSession.name;
-    const sessionType = selectedChatSession.type;
-
-    setChatSessions(prev => prev.map(session => {
-      if (session.id === selectedChatSession.id) {
-        return {
-          ...session,
-          lastMessage: typedMessage,
-          lastTime: '刚刚',
-          messages: [...session.messages, newMessage]
-        };
-      }
-      return session;
-    }));
-
+    const content = typedMessage;
+    const conversationId = selectedChatSession.id;
     setTypedMessage('');
-
-    // Trigger auto reply after 1.2 second for premium feel
-    setTimeout(() => {
-      const replies: { [key: string]: string } = {
-        '居委会小张': '好的小雅，我已经收到你的咨询。区里人才办刚刚更新了最新的系统申报指南，建议你可以先在小程序里把个人实名认证和社保缴纳证明关联上，有任何进展我会在私聊或社工服务区第一时间同步给你！加油！',
-        '阿杰 (3-308)': '哈哈，收到啦！我今天正好有空，大蒜我已经装好袋了，大概六点半我拿到502给你。顺便期待你做的蔓越莓曲奇饼干呀！',
-        '周末烘焙分享群': '阿华: 哇！小雅老师居然亲自建群了，支持支持！我一定会准时参加，顺便带个保温盒！',
-        '青年政策与补贴申领窗口': '居委会办事处: 收到您的政策咨询。为了提高办事效率，建议您先登录国家政务平台小程序完成个人社保关联，准备好本科毕业证书照片，周一直接来前台，3分钟即可搞定！'
-      };
-
-      const replyContent = replies[sessionToReply] || `好的，${currentUser.name}！搭把手邻居收到你的消息啦。我们社区的小伙伴们都是热心肠，一有空就会回复你。祝你在咱们青年公寓住得开心！🌻`;
-
-      const autoReplyMessage: ChatMessage = {
-        id: `msg_reply_${Date.now()}`,
-        sender: sessionType === 'group' ? '阿华' : sessionToReply,
-        content: replyContent,
-        time: '刚刚',
-        isMe: false
-      };
-
-      setChatSessions(prev => prev.map(session => {
-        if (session.id === selectedChatSession.id) {
-          return {
-            ...session,
-            lastMessage: replyContent,
-            lastTime: '刚刚',
-            messages: [...session.messages, autoReplyMessage]
-          };
-        }
-        return session;
-      }));
-    }, 1200);
+    residentApi.sendMessage(currentUser.id, conversationId, content)
+      .then((payload) => setChatSessions(payload.chatSessions as ChatSession[]))
+      .catch(() => {
+        setTypedMessage(content);
+        showToast('消息发送失败，请稍后重试', 'info');
+      });
   };
+
+  useEffect(() => {
+    if (activeTab !== 'chat') return;
+    const timer = window.setInterval(() => {
+      residentApi.conversations(currentUser.id)
+        .then((payload) => setChatSessions(payload.chatSessions as ChatSession[]))
+        .catch(() => undefined);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [activeTab, currentUser.id]);
 
   useEffect(() => {
     if (selectedChatSession) {
@@ -561,37 +441,17 @@ export default function App() {
     }
   }, [chatSessions]);
 
-  const handleRegisterEvent = (eventId: string) => {
-    setEvents(prev => 
-      prev.map(ev => {
-        if (ev.id === eventId) {
-          if (ev.joinedByMe) {
-            // Cancel registration
-            showToast(`已取消报名活动：${ev.name}`);
-            return {
-              ...ev,
-              joinedByMe: false,
-              signedUp: ev.signedUp - 1,
-              activeMembers: ev.activeMembers.filter(m => !m.includes(currentUser.name))
-            };
-          } else {
-            if (ev.signedUp >= ev.capacity && ev.capacity > 0) {
-              showToast('该活动名额已满！', 'info');
-              return ev;
-            }
-            showToast(`成功报名活动：${ev.name}！已为您自动建立群聊。`);
-            ensureEventGroupChat(ev.name);
-            return {
-              ...ev,
-              joinedByMe: true,
-              signedUp: ev.signedUp + 1,
-              activeMembers: [...ev.activeMembers, `${currentUser.room} ${currentUser.name}`]
-            };
-          }
-        }
-        return ev;
-      })
-    );
+  const handleRegisterEvent = async (eventId: string) => {
+    const event = events.find((item) => item.id === eventId);
+    try {
+      const payload = await residentApi.toggleActivity(currentUser.id, eventId);
+      setEvents(payload.events);
+      const chats = await residentApi.conversations(currentUser.id);
+      setChatSessions(chats.chatSessions as ChatSession[]);
+      showToast(event?.joinedByMe ? `已取消报名活动：${event.name}` : `成功报名活动：${event?.name}！已为您加入活动群聊。`);
+    } catch (error) {
+      showToast(error instanceof ApiError && error.code === 'CAPACITY_FULL' ? '该活动名额已满！' : '活动报名操作失败', 'info');
+    }
   };
 
   // Keep selected event modal synchronized
@@ -603,134 +463,100 @@ export default function App() {
   }, [events]);
 
   // 4. Neighborhood Circle Interactions: Like, Comment, Claim/Help
-  const handleLikePost = (postId: string) => {
-    setFeedItems(prev =>
-      prev.map(item => {
-        if (item.id === postId) {
-          const hasLiked = !item.hasLiked;
-          return {
-            ...item,
-            hasLiked,
-            likes: hasLiked ? item.likes + 1 : item.likes - 1
-          };
-        }
-        return item;
-      })
-    );
+  const handleLikePost = async (postId: string) => {
+    try {
+      const payload = await residentApi.toggleLike(currentUser.id, postId);
+      setFeedItems(payload.feedItems);
+    } catch {
+      showToast('点赞失败，请稍后重试', 'info');
+    }
   };
 
   const [feedCommentInput, setFeedCommentInput] = useState<{ [postId: string]: string }>({});
 
-  const handleAddFeedComment = (postId: string) => {
+  const handleAddFeedComment = async (postId: string) => {
     const commentText = feedCommentInput[postId];
     if (!commentText || !commentText.trim()) return;
 
-    setFeedItems(prev =>
-      prev.map(item => {
-        if (item.id === postId) {
-          const newComment = {
-            id: `comment_${Date.now()}`,
-            authorName: currentUser.name,
-            authorRoom: currentUser.room,
-            content: commentText
-          };
-          return {
-            ...item,
-            comments: [...item.comments, newComment]
-          };
-        }
-        return item;
-      })
-    );
-
-    setFeedCommentInput(prev => ({ ...prev, [postId]: '' }));
-    showToast('发表评论成功！');
+    try {
+      const payload = await residentApi.addComment(currentUser.id, postId, commentText);
+      setFeedItems(payload.feedItems);
+      setFeedCommentInput(prev => ({ ...prev, [postId]: '' }));
+      showToast('发表评论成功！');
+    } catch {
+      showToast('评论发布失败，请稍后重试', 'info');
+    }
   };
 
-  const handleHelpAction = (postId: string) => {
-    setFeedItems(prev =>
-      prev.map(item => {
-        if (item.id === postId) {
-          if (item.actionStatus === 'claimed') {
-            showToast('您已经响应了该需求！可在“我的”页面联系邻居。', 'info');
-            return item;
-          }
-
-          // User helps neighbor: gains points, credit score goes up slightly, adds system comment
-          const gainedPoints = item.bountyPoints || 0;
-          setCurrentUser(prevUser => ({
-            ...prevUser,
-            points: prevUser.points + gainedPoints,
-            helpCount: prevUser.helpCount + 1,
-            creditScore: Math.min(prevUser.creditScore + 1, 100)
-          }));
-
-          // Add a systematic confirmation comment
-          const sysComment = {
-            id: `sys_comment_${Date.now()}`,
-            authorName: '系统小助手',
-            content: `✨ 邻居 [${currentUser.name}] 响应了该互助请求，正快马加鞭前往帮手！`
-          };
-
-          showToast(`恭喜！您接下了 [${item.authorName}] 的需求！帮人玫瑰，手留余香。 ${gainedPoints > 0 ? `+${gainedPoints} 积分` : ''}`);
-
-          // Update Operator Report Stats dynamically
-          setWeeklyReport(prevReport => ({
-            ...prevReport,
-            helpCompleted: prevReport.helpCompleted + 1,
-            helpRate: `${Math.round(((prevReport.helpCompleted + 1) / prevReport.helpRequests) * 100)}%`
-          }));
-
-          return {
-            ...item,
-            actionStatus: 'claimed',
-            comments: [...item.comments, sysComment]
-          };
-        }
-        return item;
-      })
-    );
+  const handleHelpAction = async (postId: string) => {
+    const item = feedItems.find((post) => post.id === postId);
+    if (!item) return;
+    try {
+      if (item.authorId === currentUser.id && item.helpStatus === 'active') {
+        const payload = await residentApi.cancelHelp(currentUser.id, postId);
+        setFeedItems(payload.feedItems);
+        setCurrentUser(payload.user);
+        showToast('互助需求已取消，托管积分已退回');
+        return;
+      }
+      if (item.authorId === currentUser.id && item.helpStatus === 'claimed') {
+        const payload = await residentApi.completeHelp(currentUser.id, postId);
+        setFeedItems(payload.feedItems);
+        setCurrentUser(payload.user);
+        showToast(`互助已确认完成，${item.bountyPoints || 0} 积分已结算给帮助者`);
+        return;
+      }
+      if (item.actionStatus === 'claimed') {
+        showToast('您已经响应了该需求，可在“我的聊天”中协商交接。', 'info');
+        setActiveTab('chat');
+        return;
+      }
+      const payload = await residentApi.claimHelp(currentUser.id, postId);
+      setFeedItems(payload.feedItems);
+      setChatSessions(payload.chatSessions as ChatSession[]);
+      showToast(`已接下 ${item.authorName} 的需求，完成后由对方确认并结算积分`);
+    } catch (error) {
+      const message = error instanceof ApiError && error.code === 'ALREADY_CLAIMED' ? '这条需求刚刚已被其他邻居响应' : '响应互助失败，请稍后重试';
+      showToast(message, 'info');
+    }
   };
 
   // 5. Create Dynamic Post
-  const handleCreatePostSubmit = (e: React.FormEvent) => {
+  const handleCreatePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPostContent.trim()) return;
 
-    const newItem: FeedItem = {
-      id: `custom_${Date.now()}`,
-      type: newPostType,
-      category: newPostType === 'help' ? (newPostCategory as any) : undefined,
-      authorName: currentUser.name,
-      authorRoom: currentUser.room,
-      distance: Math.floor(Math.random() * 200) + 10,
-      time: '刚刚',
-      content: newPostContent,
-      likes: 0,
-      hasLiked: false,
-      comments: [],
-      meetingTime: newPostType === 'help' ? newPostMeeting || '今晚或随时商议' : undefined,
-      bountyPoints: newPostType === 'help' ? newPostBounty : undefined,
-      creditScore: currentUser.creditScore,
-      helpCount: currentUser.helpCount,
-      actionText: newPostType === 'help' ? (newPostCategory === '闲置' ? '我想要' : '我来帮') : undefined,
-      actionStatus: 'idle',
-      tags: newPostType === 'moment' ? ['新发布', '日常分享'] : undefined
-    };
+    try {
+      const payload = await residentApi.createPost(currentUser.id, {
+        type: newPostType,
+        category: newPostType === 'help' ? newPostCategory : undefined,
+        content: newPostContent,
+        meetingTime: newPostType === 'help' ? newPostMeeting || '今晚或随时商议' : undefined,
+        bountyPoints: newPostType === 'help' ? newPostBounty : 0,
+      });
+      setFeedItems(payload.feedItems);
+      setCurrentUser(payload.user);
+      setShowCreatePost(false);
+      setNewPostContent('');
+      setNewPostMeeting('');
+      setWeeklyReport(prev => ({ ...prev, feedPosts: prev.feedPosts + 1, helpRequests: newPostType === 'help' ? prev.helpRequests + 1 : prev.helpRequests }));
+      showToast(newPostType === 'help' ? '发布成功，悬赏积分已进入托管' : '发布成功！快来看看邻里圈里的反馈吧。');
+    } catch (error) {
+      showToast(error instanceof ApiError && error.code === 'INSUFFICIENT_POINTS' ? '积分不足，请降低悬赏积分' : '发布失败，请稍后重试', 'info');
+    }
+  };
 
-    setFeedItems([newItem, ...feedItems]);
-    setShowCreatePost(false);
-    setNewPostContent('');
-    setNewPostMeeting('');
-    
-    // Update dashboard metrics
-    setWeeklyReport(prev => ({
-      ...prev,
-      feedPosts: prev.feedPosts + 1,
-      helpRequests: newPostType === 'help' ? prev.helpRequests + 1 : prev.helpRequests
-    }));
-
-    showToast('发布成功！快来看看邻里圈里的反馈吧。');
+  const persistCarePost = async (body: { type: 'help' | 'moment'; category?: string; content: string; meetingTime?: string; bountyPoints?: number }) => {
+    try {
+      const payload = await residentApi.createPost(currentUser.id, body);
+      setFeedItems(payload.feedItems);
+      setCurrentUser(payload.user);
+      showToast(body.type === 'help' ? '求助信息发布成功，悬赏积分已进入托管' : '动态发布成功！');
+      return true;
+    } catch (error) {
+      showToast(error instanceof ApiError && error.code === 'INSUFFICIENT_POINTS' ? '当前积分不足' : '发布失败，请稍后重试', 'info');
+      return false;
+    }
   };
 
   // 6. Onboarding On-Click Steps
@@ -766,14 +592,17 @@ export default function App() {
   };
 
   // Claim onboarding reward
-  const claimOnboardingReward = () => {
+  const claimOnboardingReward = async () => {
     if (completedSteps.length === 8 && !onboardingClaimed) {
-      setOnboardingClaimed(true);
-      setCurrentUser(prev => ({
-        ...prev,
-        points: prev.points + 30
-      }));
-      showToast('🎉 成功解锁本社区！新手大礼包：+30 积分已发放到您的账户。', 'success');
+      try {
+        const payload = await residentApi.claimOnboardingReward(currentUser.id);
+        setOnboardingClaimed(true);
+        setCurrentUser(payload.user);
+        showToast('🎉 成功解锁本社区！新手大礼包：+30 积分已发放到您的账户。', 'success');
+      } catch (error) {
+        if (error instanceof ApiError && error.code === 'REWARD_ALREADY_CLAIMED') setOnboardingClaimed(true);
+        showToast('新手奖励已经领取或暂时无法发放', 'info');
+      }
     }
   };
 
@@ -954,6 +783,7 @@ export default function App() {
                 showToast={showToast}
                 triggerToggleCareMode={triggerToggleCareMode}
                 handleStartPrivateChat={handleStartPrivateChat}
+                persistPost={persistCarePost}
               />
             ) : (
               <>
@@ -1517,6 +1347,23 @@ export default function App() {
                               <MessageSquare className="w-4 h-4 text-ink-muted" />
                               <span className="font-number">{item.comments.length}</span>
                             </span>
+                            {item.authorId !== currentUser.id && (
+                              <button
+                                type="button"
+                                title="举报不当内容"
+                                aria-label="举报不当内容"
+                                onClick={() => {
+                                  const reason = window.prompt('请简要说明举报原因');
+                                  if (!reason?.trim()) return;
+                                  residentApi.reportPost(currentUser.id, item.id, reason.trim())
+                                    .then(() => showToast('举报已提交，社区工作人员会尽快核查'))
+                                    .catch(() => showToast('举报提交失败，请稍后重试', 'info'));
+                                }}
+                                className="hover:text-coral transition-colors"
+                              >
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
 
                           {/* Quick Interactive Button */}
@@ -1876,6 +1723,20 @@ export default function App() {
                       </p>
                     )}
                   </div>
+                </div>
+
+                <div className="bg-surface p-4 rounded-xl border border-hairline space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-ink">🪙 最近积分流水</h4>
+                    <span className="text-[9px] text-ink-muted font-number">余额 {currentUser.points}</span>
+                  </div>
+                  {pointTransactions.slice(0, 5).map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between border-b border-hairline last:border-0 pb-2 last:pb-0">
+                      <div><p className="text-[10px] font-bold text-ink">{transaction.reason}</p><span className="text-[9px] text-ink-subtle font-number">余额 {transaction.balance_after}</span></div>
+                      <strong className={`text-xs font-number ${transaction.amount >= 0 ? 'text-jade' : 'text-coral'}`}>{transaction.amount >= 0 ? '+' : ''}{transaction.amount}</strong>
+                    </div>
+                  ))}
+                  {pointTransactions.length === 0 && <p className="text-[10px] text-ink-muted">暂无积分变动记录</p>}
                 </div>
 
               </div>
@@ -2385,7 +2246,7 @@ export default function App() {
                         className="w-full accent-jade"
                       />
                       <p className="text-[9px] text-ink-subtle">
-                        * 对方响应并完成互助后，您的积分将 safe 托管并转移至对方。
+                        * 发布后积分进入平台托管；对方响应并由您确认完成后，积分才会结算给帮助者。
                       </p>
                     </div>
                   )}
@@ -2486,29 +2347,7 @@ export default function App() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (completedSteps.length === 8 && !onboardingClaimed) {
-                          setOnboardingClaimed(true);
-                          setChatSessions(prev => [
-                            {
-                              id: `chat_system_${Date.now()}`,
-                              name: '搭把手官方小助手',
-                              type: 'system',
-                              avatar: '🤖',
-                              lastMessage: '恭喜！您已成功领取30个新手积分福利，快去试试发布或响应互助吧。',
-                              lastTime: '刚刚',
-                              unreadCount: 1,
-                              subLabel: '官方福利',
-                              messages: [
-                                { id: 'sys_1', sender: '系统', content: '恭喜您完成了搭把手「青年邻里共建指南」的所有关卡！30积分已顺利发送到您的账户，系统积分总额已更新。在搭把手，积分不仅仅是数字，更是邻里之间热心、信任与友爱的象征。', time: '刚刚', isMe: false }
-                              ]
-                            },
-                            ...prev
-                          ]);
-                          setCurrentUser(prev => ({ ...prev, points: prev.points + 30 }));
-                          showToast('成功领取30积分新人探索礼！', 'success');
-                        }
-                      }}
+                      onClick={() => { void claimOnboardingReward(); }}
                       disabled={completedSteps.length < 8 || onboardingClaimed}
                       className={`px-3 py-1.5 rounded-lg text-[10px] font-bold shrink-0 flex items-center gap-1 ${
                         onboardingClaimed 
@@ -2968,7 +2807,7 @@ export default function App() {
         </div>
 
         <p className="text-xs text-ink-muted bg-surface p-3 rounded-xl border border-hairline leading-relaxed">
-          🏆 泊寓A区积极推进 <strong>ToG 邻里共治共建</strong>，通过「搭把手」小程序的邻里圈互助，解决末端配送、闲置置换等难题。以下为本周智能运维产生的真实报表。
+          🏆 泊寓A区积极推进 <strong>ToG 邻里共治共建</strong>，通过「搭把手」的邻里圈互助，解决末端配送、闲置置换等难题。以下指标由当前数据库中的居民行为实时汇总。
         </p>
 
         {/* Weekly Report Stat Widgets */}
@@ -3065,20 +2904,22 @@ export default function App() {
 
           {/* Quick toggle announcement trigger */}
           <div className="bg-surface p-4 rounded-xl border border-hairline space-y-2">
-            <h4 className="text-xs font-bold text-ink">🛠️ 快速模拟下发停水/紧急公告</h4>
-            <p className="text-[10px] text-ink-muted">点击下发一条全新紧急通知，手机小程序首页将实时展现滚动横幅。</p>
+            <h4 className="text-xs font-bold text-ink">🛠️ 快速下发停水/紧急公告</h4>
+            <p className="text-[10px] text-ink-muted">点击后写入公告库，并向当前社区居民生成站内通知。</p>
             <button
               onClick={() => {
-                const waterEmergency: Announcement = {
-                  id: `ann_emergency_${Date.now()}`,
+                const waterEmergency = {
                   type: '紧急',
                   title: '【紧急】电网抢修临时停电通知',
                   content: '因小区外部高压电网突发临时故障，5号楼、6号楼将于今天23:00 - 23:30进行电网紧急割接，期间会短暂断电5分钟，请备好照明并避免使用电梯。',
-                  time: '刚刚',
                   importance: '🔴紧急'
                 };
-                setAnnouncements([waterEmergency, ...announcements]);
-                showToast('紧急电力抢修公告已在手机小程序顶部横幅中生效！', 'success');
+                togApi.createAnnouncement(waterEmergency)
+                  .then((payload) => {
+                    setAnnouncements([payload.announcement as Announcement, ...announcements]);
+                    showToast(`紧急公告已发布，并通知 ${payload.sent} 位居民！`, 'success');
+                  })
+                  .catch(() => showToast('公告发布失败，请稍后重试', 'info'));
               }}
               className="w-full bg-coral hover:bg-coral-hover text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs"
             >

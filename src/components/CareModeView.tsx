@@ -59,6 +59,7 @@ interface CareModeViewProps {
   showToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
   triggerToggleCareMode: (target: boolean) => void;
   handleStartPrivateChat: (name: string, type: string) => void;
+  persistPost: (body: { type: 'help' | 'moment'; category?: string; content: string; meetingTime?: string; bountyPoints?: number }) => Promise<boolean>;
 }
 
 export default function CareModeView({
@@ -93,6 +94,7 @@ export default function CareModeView({
   showToast,
   triggerToggleCareMode,
   handleStartPrivateChat,
+  persistPost,
 }: CareModeViewProps) {
 
   // Care-Mode Specific States
@@ -107,52 +109,17 @@ export default function CareModeView({
   const [careNotificationUnread, setCareNotificationUnread] = useState(2);
 
   // Submit caretaker publish form
-  const handleCarePublishSubmit = (e: React.FormEvent) => {
+  const handleCarePublishSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (carePublishType === 'help') {
       if (!careHelpWhat.trim()) return;
       const content = `【求助】需要帮：${careHelpWhat}。时间：${careHelpWhen || '随时'}。地点：${careHelpWhere || '本楼栋/附近'}`;
-      const newItem: FeedItem = {
-        id: `care_help_${Date.now()}`,
-        type: 'help',
-        category: '代取',
-        authorName: currentUser.name,
-        authorRoom: currentUser.room,
-        distance: 12,
-        time: '刚刚',
-        content: content,
-        likes: 0,
-        hasLiked: false,
-        comments: [],
-        meetingTime: careHelpWhen || '随时',
-        bountyPoints: 5,
-        creditScore: currentUser.creditScore,
-        helpCount: currentUser.helpCount,
-        actionText: '我来帮',
-        actionStatus: 'idle',
-        tags: ['长辈求助']
-      };
-      setFeedItems([newItem, ...feedItems]);
-      showToast('求助信息发布成功！邻居们会尽快看到！', 'success');
+      const saved = await persistPost({ type: 'help', category: '代取', content, meetingTime: careHelpWhen || '随时', bountyPoints: 5 });
+      if (!saved) return;
     } else {
       if (!careMomentContent.trim()) return;
-      const newItem: FeedItem = {
-        id: `care_moment_${Date.now()}`,
-        type: 'moment',
-        authorName: currentUser.name,
-        authorRoom: currentUser.room,
-        distance: 15,
-        time: '刚刚',
-        content: careMomentContent,
-        likes: 0,
-        hasLiked: false,
-        comments: [],
-        creditScore: currentUser.creditScore,
-        helpCount: currentUser.helpCount,
-        tags: ['日常分享']
-      };
-      setFeedItems([newItem, ...feedItems]);
-      showToast('动态发布成功！', 'success');
+      const saved = await persistPost({ type: 'moment', content: careMomentContent });
+      if (!saved) return;
     }
 
     // Reset fields

@@ -1,4 +1,4 @@
-import { useState, type ElementType } from 'react';
+import { useEffect, useState, type ElementType } from 'react';
 import {
   ArrowLeft,
   CalendarDays,
@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useDemoStore } from '../demo/DemoStore';
 import { routeTo } from '../demo/navigation';
+import { togApi } from '../api/tog';
 
 function MobileBottomNav({ active }: { active: 'workbench' | 'activities' | 'followup' | 'me' }) {
   const items: { key: typeof active; label: string; icon: ElementType }[] = [
@@ -36,11 +37,33 @@ function MobileBottomNav({ active }: { active: 'workbench' | 'activities' | 'fol
   return (
     <nav className="mobile-bottom-nav" aria-label="社区工作台导航">
       {items.map(({ key, label, icon: Icon }) => (
-        <button className={key === active ? 'is-active' : ''} aria-current={key === active ? 'page' : undefined} type="button" key={key} disabled={key !== 'workbench'} onClick={() => routeTo('/tog/mobile/workbench')} title={key !== 'workbench' ? '后续版本开放' : undefined}>
+        <button className={key === active ? 'is-active' : ''} aria-current={key === active ? 'page' : undefined} type="button" key={key} onClick={() => routeTo(`/tog/mobile/${key}`)}>
           <Icon aria-hidden="true" /><span>{label}</span>
         </button>
       ))}
     </nav>
+  );
+}
+
+function MobileSectionPage({ section }: { section: 'activities' | 'followup' | 'me' }) {
+  const [tasks, setTasks] = useState<Array<Record<string, any>>>([]);
+  useEffect(() => {
+    if (section === 'followup') togApi.tasks().then((payload) => setTasks(payload.tasks)).catch(() => undefined);
+  }, [section]);
+
+  return (
+    <div className="tog-mobile-frame">
+      <main className="mobile-workbench">
+        <header className="mobile-workbench__header">
+          <div><div className="mobile-brand"><HandHeart aria-hidden="true" /> 搭把手 · 社区工作台</div><span>西红门社区</span></div>
+          <button className="mobile-avatar" type="button" onClick={() => routeTo('/demo')}>李</button>
+        </header>
+        {section === 'activities' && <section className="mobile-priority"><h2>服务活动</h2><WorkTaskCard icon={Users} title="银龄反诈小课堂" subtitle="14:00 · 西红门党群服务中心" meta="签到与通知状态已同步到社区电脑端" action="进入签到" tone="coral" onClick={() => routeTo('/tog/mobile/workbench')} /><WorkTaskCard icon={CalendarDays} title="活动运营台" subtitle="查看全部活动和报名情况" meta="新建活动请使用社区电脑端" action="查看电脑端" onClick={() => routeTo('/tog/desktop/activities')} /></section>}
+        {section === 'followup' && <section className="mobile-priority"><h2>居民跟进</h2>{tasks.map((task) => <WorkTaskCard key={task.id} icon={UserRound} title={task.title} subtitle={task.resident_name ? `${task.resident_name} · 已授权任务` : '社区服务跟进'} meta={task.description || '暂无补充说明'} status={task.status} action={task.id === 'task_visit_a017' ? '记录走访' : undefined} tone="gray" onClick={() => task.id === 'task_visit_a017' && routeTo('/tog/mobile/visit')} />)}{tasks.length === 0 && <div className="mobile-ai-notice"><Info /> 当前没有待处理的居民跟进任务。</div>}</section>}
+        {section === 'me' && <section className="mobile-priority"><h2>我的账号</h2><WorkTaskCard icon={UserRound} title="李老师" subtitle="认证社区社工" meta="西红门社区 · 仅可访问被分配的居民任务" status="权限有效" /><div className="mobile-ai-notice"><LockKeyhole /> 所有走访保存、提交和查看操作均写入审计日志。</div></section>}
+      </main>
+      <MobileBottomNav active={section} />
+    </div>
   );
 }
 
@@ -165,7 +188,7 @@ function VisitReview() {
           <label><span><UserRound /> 社工判断</span><textarea disabled={submitted} defaultValue="需先核验服务资格，不自动作出结论。" /></label>
           <div className="follow-up-plan"><span><CalendarDays /> 后续跟进</span><label><input type="checkbox" defaultChecked disabled={submitted} /> 周五前确认助餐申请材料</label><div><button type="button" disabled>责任人　李老师</button><button type="button" disabled>日期　7 月 17 日</button></div></div>
         </section>
-        {submitted && <div className="visit-submitted" role="status"><CheckCircle2 /> 已提交负责人审核；Demo 不执行真实入档。</div>}
+        {submitted && <div className="visit-submitted" role="status"><CheckCircle2 /> 已提交负责人审核，记录已入库并转为只读。</div>}
       </main>
       <footer className="visit-actions">
         <p><Info /> 仅保存你确认过的内容；修改记录将被保留。</p>
@@ -176,5 +199,5 @@ function VisitReview() {
 }
 
 export function TogMobileApp({ route }: { route: string }) {
-  return <div className="tog-mobile-page">{route === '/tog/mobile/visit' ? <VisitReview /> : <MobileWorkbench />}</div>;
+  return <div className="tog-mobile-page">{route === '/tog/mobile/visit' ? <VisitReview /> : route === '/tog/mobile/activities' ? <MobileSectionPage section="activities" /> : route === '/tog/mobile/followup' ? <MobileSectionPage section="followup" /> : route === '/tog/mobile/me' ? <MobileSectionPage section="me" /> : <MobileWorkbench />}</div>;
 }

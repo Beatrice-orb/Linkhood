@@ -7,9 +7,15 @@
 - `#/resident`：居民社区生活端，包括社区地图、活动、空间、邻里圈、互助、聊天、积分信用与关怀版。
 - `#/resident/services`：居民公共服务入口。
 - `#/tog/desktop/services`：社区公共服务接入、核验与发布。
+- `#/tog/desktop/workbench`：社区今日工作台。
+- `#/tog/desktop/residents`：居民服务档案与跟进概览。
+- `#/tog/desktop/permissions`：角色权限与审计日志。
 - `#/tog/desktop/activities`：社区活动运营。
 - `#/tog/desktop/insights`：居民需求与服务反馈。
 - `#/tog/mobile/workbench`：社工今日工作台。
+- `#/tog/mobile/activities`：社工活动入口。
+- `#/tog/mobile/followup`：社工居民跟进任务。
+- `#/tog/mobile/me`：社工账号与权限说明。
 - `#/tog/mobile/visit`：社工走访记录与审核提交。
 - `#/demo`：三端演示启动页。
 
@@ -46,6 +52,7 @@ npm run test       # 后端领域与 API 测试
 npm run build      # 前端生产构建
 npm start          # 运行生产服务，需先 build
 npm run db:reset   # 重建本地开发数据库
+npm run db:backup  # 创建 SQLite 在线备份
 ```
 
 ## MVP 业务闭环

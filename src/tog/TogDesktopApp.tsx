@@ -1,4 +1,4 @@
-import { useState, type ElementType, type ReactNode } from 'react';
+import { useEffect, useState, type ElementType, type FormEvent, type ReactNode } from 'react';
 import {
   Activity,
   ArrowRight,
@@ -30,6 +30,7 @@ import { useDemoStore } from '../demo/DemoStore';
 import { missingFieldLabels } from '../demo/fixtures';
 import { routeTo } from '../demo/navigation';
 import type { MissingFieldKey } from '../demo/types';
+import { togApi } from '../api/tog';
 
 interface NavItem {
   route?: string;
@@ -39,12 +40,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: '今日工作台', icon: Home, route: '/tog/mobile/workbench' },
+  { label: '今日工作台', icon: Home, route: '/tog/desktop/workbench' },
   { label: '公共服务库', icon: BookOpenCheck, route: '/tog/desktop/services' },
   { label: '活动运营', icon: CalendarDays, route: '/tog/desktop/activities' },
-  { label: '居民服务档案', icon: UserRound, disabled: true },
+  { label: '居民服务档案', icon: UserRound, route: '/tog/desktop/residents' },
   { label: '需求与反馈', icon: Flame, route: '/tog/desktop/insights' },
-  { label: '数据与权限', icon: ShieldCheck, disabled: true },
+  { label: '数据与权限', icon: ShieldCheck, route: '/tog/desktop/permissions' },
 ];
 
 function DesktopSidebar({ route }: { route: string }) {
@@ -56,13 +57,13 @@ function DesktopSidebar({ route }: { route: string }) {
         <span className="brand-lockup__mark"><HandHeart aria-hidden="true" /></span>
         <span>搭把手</span>
       </button>
-      <button className="community-select" type="button" aria-label="当前社区：西红门社区" disabled title="本演示固定为西红门社区">
+      <button className="community-select" type="button" aria-label="当前社区：西红门社区" disabled title="单社区 MVP 当前固定为西红门社区">
         西红门社区 <span aria-hidden="true">⌄</span>
       </button>
 
       <nav className="tog-sidebar__nav" aria-label="社区运营导航">
         {navItems.map(({ label, icon: Icon, route: itemRoute, disabled }) => {
-          const active = itemRoute === route;
+          const active = Boolean(itemRoute && (itemRoute === route || route.startsWith(`${itemRoute}/`)));
           return (
             <button
               type="button"
@@ -120,6 +121,136 @@ function ReviewField({ label, value, status }: { label: string; value: string; s
   );
 }
 
+function NewServicePage() {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError('');
+    const form = new FormData(event.currentTarget);
+    try {
+      const created = await togApi.createService({
+        title: form.get('title'),
+        shortTitle: form.get('shortTitle'),
+        provider: form.get('provider'),
+        serviceType: form.get('serviceType'),
+        audience: String(form.get('audience') || '').split(/[、,，]/).map((item) => item.trim()).filter(Boolean),
+        location: form.get('location'),
+        fee: form.get('fee'),
+        capacity: Number(form.get('capacity') || 0) || null,
+        registrationMethod: form.get('registrationMethod'),
+        schedule: { eventStart: form.get('eventStart'), eventEnd: form.get('eventEnd') },
+        source: { id: `manual_${Date.now()}`, label: form.get('sourceLabel') || '社区人工录入', url: form.get('sourceUrl'), publishedAt: new Date().toISOString().slice(0, 10) },
+      });
+      const serviceId = created.service.id;
+      await togApi.extract(serviceId);
+      for (const field of ['core', 'fee', 'capacity', 'stationHours']) await togApi.reviewField(serviceId, field);
+      await togApi.publish(serviceId);
+      window.dispatchEvent(new Event('linkhood:data-changed'));
+      routeTo('/tog/desktop/services');
+    } catch {
+      setError('保存失败，请检查必填字段或稍后重试。');
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="tog-page">
+      <PageHeader title="新增公共服务" description="人工确认结构化字段后发布，AI/OCR 不作为阻断项" />
+      <form className="review-panel panel" onSubmit={submit}>
+        <div className="panel-heading"><strong>服务信息</strong><span className="status-chip status-chip--success">人工录入</span></div>
+        <dl className="review-fields">
+          {[
+            ['title', '完整名称', '例如：西红门医院健康服务', true],
+            ['shortTitle', '居民端简称', '例如：社区健康服务', true],
+            ['provider', '供给单位', '服务主办或承接单位', true],
+            ['audience', '适用对象', '使用顿号分隔', true],
+            ['location', '服务地点', '主地点及服务站', true],
+            ['registrationMethod', '办理方式', '居民下一步该做什么', true],
+            ['fee', '价格表达', '免费、金额或“现场确认”', false],
+            ['capacity', '容量', '未知可留空', false],
+            ['sourceLabel', '来源名称', '政府网站、公众号或机构通知', true],
+            ['sourceUrl', '来源链接', 'https://...', false],
+          ].map(([name, label, placeholder, required]) => (
+            <div className="review-field" key={name}><dt>{label}</dt><dd><input className="filter-control" name={name} placeholder={placeholder} required={Boolean(required)} /></dd></div>
+          ))}
+          <div className="review-field"><dt>服务类型</dt><dd><select className="filter-control" name="serviceType"><option value="healthcare">健康服务</option><option value="education">教育服务</option><option value="employment">就业服务</option></select></dd></div>
+          <div className="review-field"><dt>开始日期</dt><dd><input className="filter-control" type="date" name="eventStart" required /></dd></div>
+          <div className="review-field"><dt>结束日期</dt><dd><input className="filter-control" type="date" name="eventEnd" required /></dd></div>
+        </dl>
+        {error && <p className="inline-success" role="alert"><CircleAlert size={16} /> {error}</p>}
+        <footer className="intake-actionbar"><p><Info size={18} /> 点击发布表示工作人员已对照来源确认必要字段。</p><button className="button button--ghost" type="button" onClick={() => routeTo('/tog/desktop/services')}>取消</button><button className="button button--primary" type="submit" disabled={submitting}>{submitting ? '正在发布…' : '确认并发布'}</button></footer>
+      </form>
+    </div>
+  );
+}
+
+function NewActivityPage() {
+  const [submitting, setSubmitting] = useState(false);
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    const form = new FormData(event.currentTarget);
+    try {
+      await togApi.createActivity(Object.fromEntries(form.entries()));
+      window.dispatchEvent(new Event('linkhood:data-changed'));
+      routeTo('/tog/desktop/activities');
+    } catch {
+      setSubmitting(false);
+    }
+  };
+  return (
+    <div className="tog-page">
+      <PageHeader title="新建活动" description="发布后居民端可报名，系统自动生成报名记录" />
+      <form className="review-panel panel" onSubmit={submit}>
+        <div className="panel-heading"><strong>活动信息</strong><span className="status-chip status-chip--success">社区发布</span></div>
+        <dl className="review-fields">
+          {[
+            ['name', '活动名称', '活动名称'], ['type', '活动类型', '公益课堂 / 兴趣课程'], ['time', '活动时间', '日期和时间段'],
+            ['location', '活动地点', '具体地点'], ['organizer', '主办方', '社区或合作单位'], ['capacity', '活动容量', '20'],
+            ['fee', '费用说明', '免费'], ['introduction', '活动介绍', '居民需要了解的内容'],
+          ].map(([name, label, placeholder]) => <div className="review-field" key={name}><dt>{label}</dt><dd><input className="filter-control" name={name} placeholder={placeholder} required={!['fee', 'organizer'].includes(name)} /></dd></div>)}
+        </dl>
+        <footer className="intake-actionbar"><p><Info size={18} /> 发布后可在活动运营页管理签到和通知。</p><button className="button button--ghost" type="button" onClick={() => routeTo('/tog/desktop/activities')}>取消</button><button className="button button--primary" type="submit" disabled={submitting}>{submitting ? '正在创建…' : '发布活动'}</button></footer>
+      </form>
+    </div>
+  );
+}
+
+function DashboardPage() {
+  const [data, setData] = useState<{ residents: number; pendingServices: number; openTasks: number; pendingReports: number } | null>(null);
+  useEffect(() => { togApi.dashboard().then(setData).catch(() => undefined); }, []);
+  const metrics: Array<[string, number | string]> = [
+    ['认证居民', data?.residents ?? '—'],
+    ['待核服务', data?.pendingServices ?? '—'],
+    ['进行中任务', data?.openTasks ?? '—'],
+    ['待处理举报', data?.pendingReports ?? '—'],
+  ];
+  return (
+    <div className="tog-page">
+      <PageHeader title="今日工作台" description="先处理需要人工确认和居民响应的事项" />
+      <section className="operations-grid">
+        <article className="event-command panel"><div className="panel-heading"><strong>社区运行概览</strong><span className="status-chip status-chip--success">数据库实时</span></div><div className="funnel-strip">{metrics.map(([label, value]) => <span key={label}><small>{label}</small><strong>{value}</strong></span>)}</div><div className="event-actions"><button className="button button--primary" type="button" onClick={() => routeTo('/tog/desktop/services')}>处理公共服务</button><button className="button button--ghost" type="button" onClick={() => routeTo('/tog/desktop/insights')}>查看需求反馈</button></div></article>
+        <aside className="ai-operations panel"><div className="panel-heading"><strong>优先事项</strong></div><div className="draft-row"><FileSearch size={18} /><strong>待核服务</strong><span className={data?.pendingServices ? 'is-warning' : 'is-success'}>{data?.pendingServices || 0} 项</span></div><div className="draft-row"><Users size={18} /><strong>社工任务</strong><span className={data?.openTasks ? 'is-warning' : 'is-success'}>{data?.openTasks || 0} 项</span></div><div className="draft-row"><ShieldCheck size={18} /><strong>内容举报</strong><span className={data?.pendingReports ? 'is-warning' : 'is-success'}>{data?.pendingReports || 0} 项</span></div></aside>
+      </section>
+    </div>
+  );
+}
+
+function ResidentsPage() {
+  const [residents, setResidents] = useState<Array<Record<string, any>>>([]);
+  useEffect(() => { togApi.residents().then((payload) => setResidents(payload.residents)).catch(() => undefined); }, []);
+  return <div className="tog-page"><PageHeader title="居民服务档案" description="仅展示社区服务所需的最小信息" /><section className="panel"><div className="panel-heading"><strong>认证居民</strong><span className="count-badge">{residents.length}</span></div>{residents.map((resident) => <div className="draft-row" key={resident.id}><UserRound size={18} /><strong>{resident.name} · {resident.room}</strong><span>{resident.open_tasks ? `${resident.open_tasks} 项跟进` : `信用 ${resident.credit_score}`}</span></div>)}</section></div>;
+}
+
+function PermissionsPage() {
+  const [logs, setLogs] = useState<Array<Record<string, any>>>([]);
+  useEffect(() => { togApi.auditLogs().then((payload) => setLogs(payload.logs)).catch(() => undefined); }, []);
+  return <div className="tog-page"><PageHeader title="数据与权限" description="角色最小授权，关键操作全程留痕" /><section className="operations-grid"><article className="panel"><div className="panel-heading"><strong>角色权限</strong><span className="status-chip status-chip--success">RBAC 已启用</span></div>{[['居民', '本人服务、互助与消息'], ['社工', '仅被分配的居民任务'], ['社区运营', '服务发布、活动和审核'], ['管理员', '系统管理与应急处置']].map(([role, scope]) => <div className="draft-row" key={role}><ShieldCheck size={18} /><strong>{role}</strong><span>{scope}</span></div>)}</article><aside className="panel"><div className="panel-heading"><strong>最近审计记录</strong><span>{logs.length} 条</span></div>{logs.slice(0, 8).map((log) => <div className="draft-row" key={log.id}><Database size={18} /><strong>{log.action}</strong><span>{log.entity_type}</span></div>)}</aside></section></div>;
+}
+
 function ServiceIntakePage() {
   const {
     state,
@@ -142,8 +273,8 @@ function ServiceIntakePage() {
         description="从原始通知到居民服务卡，每一步都可核对"
         action={
           <div className="header-actions">
-            <button className="button button--ghost" type="button" disabled title="v0.2 接入真实导入"><Link2 size={17} /> 粘贴来源链接</button>
-            <button className="button button--primary" type="button" disabled title="v0.2 接入真实导入"><Upload size={17} /> 上传通知或海报</button>
+            <button className="button button--ghost" type="button" onClick={() => routeTo('/tog/desktop/services/new')}><Link2 size={17} /> 录入来源链接</button>
+            <button className="button button--primary" type="button" onClick={() => routeTo('/tog/desktop/services/new')}><Upload size={17} /> 手动新增服务</button>
           </div>
         }
       />
@@ -278,7 +409,7 @@ function ActivitiesPage() {
       <PageHeader
         title="活动运营"
         description="把一次活动，从发布办到有反馈"
-        action={<button className="button button--primary" type="button" disabled title="v0.2 开放新建活动">新建活动</button>}
+        action={<button className="button button--primary" type="button" onClick={() => routeTo('/tog/desktop/activities/new')}>新建活动</button>}
       />
       <div className="filter-row" aria-label="活动筛选">
         <button className="filter-control" type="button" disabled><CalendarDays size={16} /> 本周⌄</button>
@@ -293,9 +424,9 @@ function ActivitiesPage() {
             <div className="mini-calendar__week"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
             <div className="mini-calendar__days">{Array.from({ length: 14 }, (_, index) => <span className={index === 11 ? 'is-today' : ''} key={index}>{index + 1}</span>)}</div>
           </div>
-          <button className="event-list-item is-active" type="button" disabled title="本版固定展示首个演示活动"><strong>银龄反诈小课堂</strong><span>7 月 11 日 14:00</span><em>即将开始</em></button>
-          <button className="event-list-item" type="button" disabled title="v0.2 开放活动切换"><strong>暑期家庭教育讲座</strong><span>7 月 12 日 10:00</span><em>报名中</em></button>
-          <button className="event-list-item" type="button" disabled title="v0.2 开放活动切换"><strong>就业服务专场</strong><span>7 月 15 日 09:30</span><em>草稿</em></button>
+          <button className="event-list-item is-active" type="button" disabled title="当前执行中的活动"><strong>银龄反诈小课堂</strong><span>7 月 11 日 14:00</span><em>即将开始</em></button>
+          <button className="event-list-item" type="button" disabled title="当前页面聚焦现场执行中的活动"><strong>暑期家庭教育讲座</strong><span>7 月 12 日 10:00</span><em>报名中</em></button>
+          <button className="event-list-item" type="button" disabled title="当前页面聚焦现场执行中的活动"><strong>就业服务专场</strong><span>7 月 15 日 09:30</span><em>草稿</em></button>
         </aside>
 
         <article className="event-command panel">
@@ -317,7 +448,7 @@ function ActivitiesPage() {
           </div>
           <div className="event-actions">
             <button className="button button--primary" type="button" onClick={() => setSignInStarted(true)}><ListChecks size={17} /> {signInStarted ? '已进入签到' : '进入签到'}</button>
-            <button className="button button--ghost" type="button" onClick={sendNotice}><Send size={17} /> {state.noticeSent ? '已模拟发送' : '发送变更通知'}</button>
+            <button className="button button--ghost" type="button" onClick={sendNotice}><Send size={17} /> {state.noticeSent ? '通知已发送' : '发送变更通知'}</button>
           </div>
         </article>
 
@@ -327,12 +458,12 @@ function ActivitiesPage() {
           {[
             ['居民端活动卡', '已核对', true],
             ['报名表', '2 项待确认', false],
-            ['活动提醒', state.noticeSent ? '已模拟发送' : '待核对', state.noticeSent],
+            ['活动提醒', state.noticeSent ? '已发送' : '待核对', state.noticeSent],
             ['活动后总结模板', '已生成', true],
           ].map(([label, status, done]) => <div className="draft-row" key={String(label)}><FileSearch size={18} /><strong>{label}</strong><span className={done ? 'is-success' : 'is-warning'}>{status}</span></div>)}
-          <button className="button button--ghost button--block" type="button" disabled title="v0.2 开放草稿编辑">逐份核对</button>
+          <button className="button button--ghost button--block" type="button" disabled title="草稿已在发布环节完成人工核对">草稿核对记录</button>
           {signInStarted && <p className="inline-success" role="status"><CheckCircle2 size={16} /> 签到模式已开启（演示）。</p>}
-          {state.noticeSent && <p className="inline-success" role="status"><CheckCircle2 size={16} /> 演示通知已生成；未向真实居民发送。</p>}
+          {state.noticeSent && <p className="inline-success" role="status"><CheckCircle2 size={16} /> 通知已写入已报名居民的消息中心。</p>}
         </aside>
       </section>
     </div>
@@ -342,8 +473,16 @@ function ActivitiesPage() {
 function InsightsPage() {
   const { state } = useDemoStore();
   const [planGenerated, setPlanGenerated] = useState(false);
+  const [serverSignalCount, setServerSignalCount] = useState<number | null>(null);
+  const [taskAssigned, setTaskAssigned] = useState(false);
   const actionEvents = state.residentEvents.filter((event) => event.type === 'service_interest_expressed' && event.serviceId === 'xhm_sanfu_2026');
-  const uniqueActorCount = new Set(actionEvents.map((event) => event.anonymousActorId)).size;
+  useEffect(() => {
+    togApi.insights().then((payload) => {
+      const signal = payload.signals.find((item) => item.service_id === 'xhm_sanfu_2026');
+      setServerSignalCount(signal?.uniqueActors || 0);
+    }).catch(() => undefined);
+  }, [actionEvents.length]);
+  const uniqueActorCount = serverSignalCount ?? new Set(actionEvents.map((event) => event.anonymousActorId)).size;
   const reachedThreshold = uniqueActorCount >= 5;
 
   return (
@@ -358,7 +497,7 @@ function InsightsPage() {
         <div className="signal-banner" role="status">
           <Activity size={20} />
           <div><strong>刚刚收到 {uniqueActorCount} 条脱敏居民办理意向</strong><span>来自三伏贴服务卡；未传姓名、房号或档案正文。</span></div>
-          <span className="status-chip status-chip--success">本地演示链已连接</span>
+          <span className="status-chip status-chip--success">服务端联动已连接</span>
         </div>
       )}
       <section className="insights-grid">
@@ -366,8 +505,8 @@ function InsightsPage() {
           <div className="panel-heading"><strong>本周需关注</strong><span className="status-chip status-chip--demo">演示数据</span></div>
           <div className="trend-card"><span className="trend-rank">1</span><div><strong>暑期托管需求连续两周上升</strong><div className="trend-line" aria-hidden="true"><i /><i /><i /></div></div></div>
           <dl className="signal-list"><div><dt>搜索无结果</dt><dd>18 次</dd></div><div><dt>社工咨询</dt><dd>9 次</dd></div><div><dt>活动候补</dt><dd>7 人</dd></div><div><dt>去重后涉及</dt><dd>31 位居民</dd></div></dl>
-          <button className="topic-row" type="button" disabled title="v0.2 开放主题下钻"><span>2</span>老年助餐材料咨询<ArrowRight size={16} /></button>
-          <button className="topic-row" type="button" disabled title="v0.2 开放主题下钻"><span>3</span>周末亲子活动供给不足<ArrowRight size={16} /></button>
+          <button className="topic-row" type="button" disabled title="聚合主题仅展示统计结果"><span>2</span>老年助餐材料咨询<ArrowRight size={16} /></button>
+          <button className="topic-row" type="button" disabled title="聚合主题仅展示统计结果"><span>3</span>周末亲子活动供给不足<ArrowRight size={16} /></button>
         </article>
 
         <article className="insight-card panel">
@@ -392,7 +531,20 @@ function InsightsPage() {
           <p className="muted-copy">只展示当前角色被授权的聚合任务，不展示可反查个人的编号。</p>
           <div className="follow-up-summary"><Users size={24} /><strong>{uniqueActorCount}</strong><span>条匿名办理意向</span></div>
           <div className="follow-up-item"><Database size={18} /><span><strong>三伏贴服务卡</strong><small>居民办理意向入口</small></span><em>{actionEvents.length > 0 ? '已收到' : '等待中'}</em></div>
-          <button className="button button--ghost button--block" type="button" disabled title="v0.2 开放任务分派">分配跟进</button>
+          <button
+            className="button button--ghost button--block"
+            type="button"
+            disabled={taskAssigned || uniqueActorCount === 0}
+            onClick={() => {
+              togApi.createTask({
+                residentId: 'user_xiaoya',
+                serviceId: 'xhm_sanfu_2026',
+                assigneeId: 'social_li',
+                title: '三伏贴办理意向跟进',
+                description: '仅核对居民是否需要办理指引，不代替医疗判断或官方报名。',
+              }).then(() => setTaskAssigned(true));
+            }}
+          >{taskAssigned ? '已分配给李老师' : '分配跟进'}</button>
         </aside>
       </section>
       <div className="privacy-footer"><ShieldCheck size={19} /> 需求与反馈来自脱敏聚合信号；低于阈值的主题不展示为热点，也不用于评价居民个人。</div>
@@ -405,7 +557,7 @@ export function TogDesktopApp({ route }: { route: string }) {
     <div className="tog-desktop-shell">
       <DesktopSidebar route={route} />
       <main className="tog-desktop-main">
-        {route === '/tog/desktop/activities' ? <ActivitiesPage /> : route === '/tog/desktop/insights' ? <InsightsPage /> : <ServiceIntakePage />}
+        {route === '/tog/desktop/workbench' ? <DashboardPage /> : route === '/tog/desktop/residents' ? <ResidentsPage /> : route === '/tog/desktop/permissions' ? <PermissionsPage /> : route === '/tog/desktop/services/new' ? <NewServicePage /> : route === '/tog/desktop/activities/new' ? <NewActivityPage /> : route === '/tog/desktop/activities' ? <ActivitiesPage /> : route === '/tog/desktop/insights' ? <InsightsPage /> : <ServiceIntakePage />}
       </main>
     </div>
   );

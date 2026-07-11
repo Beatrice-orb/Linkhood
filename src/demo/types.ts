@@ -11,7 +11,7 @@ export interface PublicServiceCard {
   schemaVersion: '0.1';
   id: string;
   dataKind: 'real_public_source';
-  workflowMode: 'demo';
+  workflowMode: 'demo' | 'mvp';
   communityId: 'xihongmen' | 'daxing';
   geoScope: 'xihongmen_local' | 'daxing_district' | 'daxing_district_multi_site';
   title: string;

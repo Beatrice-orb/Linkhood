@@ -5,8 +5,10 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useState,
   type ReactNode,
 } from 'react';
+import { togApi, ACTORS, type ServiceStateResponse } from '../api/tog';
 import { primaryService, secondaryServices } from './fixtures';
 import type {
   DemoState,
@@ -29,20 +31,13 @@ const initialState: DemoState = {
     facts: '7 月 11 日上午入户走访，居民本人在场。',
     quote: '最近做饭不太方便，想了解社区助餐。',
   },
-  activityChecklist: {
-    qrCode: true,
-    venue: true,
-    speaker: false,
-  },
+  activityChecklist: { qrCode: true, venue: true, speaker: false },
   noticeSent: false,
 };
 
 type Action =
   | { type: 'hydrate'; state: DemoState }
-  | { type: 'run-extraction' }
-  | { type: 'confirm-core'; reviewedAt: string }
-  | { type: 'confirm-field'; field: MissingFieldKey }
-  | { type: 'publish'; publishedAt: string }
+  | { type: 'service-state'; payload: ServiceStateResponse }
   | { type: 'resident-event'; event: ResidentActionEvent }
   | { type: 'save-visit'; facts: string; quote: string }
   | { type: 'submit-visit'; facts: string; quote: string }
@@ -54,28 +49,22 @@ function reducer(state: DemoState, action: Action): DemoState {
   switch (action.type) {
     case 'hydrate':
       return action.state;
-    case 'run-extraction':
-      return { ...state, intakePhase: 'review', coreFieldsConfirmed: false };
-    case 'confirm-core':
-      return { ...state, coreFieldsConfirmed: true, reviewedAt: action.reviewedAt };
-    case 'confirm-field':
-      return state.confirmedUnknownFields.includes(action.field)
-        ? state
-        : {
-            ...state,
-            confirmedUnknownFields: [...state.confirmedUnknownFields, action.field],
-          };
-    case 'publish':
-      return state.coreFieldsConfirmed && state.confirmedUnknownFields.length === 3
-        ? { ...state, intakePhase: 'published', publishedAt: action.publishedAt }
-        : state;
+    case 'service-state': {
+      const workflowStatus = action.payload.service.workflowStatus;
+      const fields = action.payload.fields;
+      return {
+        ...state,
+        intakePhase: workflowStatus === 'published' ? 'published' : workflowStatus === 'pending_review' || workflowStatus === 'approved' ? 'review' : 'source',
+        coreFieldsConfirmed: fields.some((field) => field.field_key === 'core' && field.status === 'confirmed'),
+        confirmedUnknownFields: fields
+          .filter((field) => field.field_key !== 'core' && field.status === 'unknown_confirmed')
+          .map((field) => field.field_key as MissingFieldKey),
+        reviewedAt: action.payload.service.review.reviewedAt,
+        publishedAt: action.payload.service.publication.publishedAt,
+      };
+    }
     case 'resident-event':
-      return state.residentEvents.some(
-        (event) =>
-          event.type === action.event.type &&
-          event.serviceId === action.event.serviceId &&
-          event.anonymousActorId === action.event.anonymousActorId,
-      )
+      return state.residentEvents.some((event) => event.type === action.event.type && event.serviceId === action.event.serviceId)
         ? state
         : { ...state, residentEvents: [...state.residentEvents, action.event] };
     case 'save-visit':
@@ -83,13 +72,7 @@ function reducer(state: DemoState, action: Action): DemoState {
     case 'submit-visit':
       return { ...state, visitDraft: { facts: action.facts, quote: action.quote }, visitStatus: 'submitted' };
     case 'toggle-activity-item':
-      return {
-        ...state,
-        activityChecklist: {
-          ...state.activityChecklist,
-          [action.item]: !state.activityChecklist[action.item],
-        },
-      };
+      return { ...state, activityChecklist: { ...state.activityChecklist, [action.item]: !state.activityChecklist[action.item] } };
     case 'send-notice':
       return { ...state, noticeSent: true };
     case 'reset':
@@ -99,66 +82,11 @@ function reducer(state: DemoState, action: Action): DemoState {
   }
 }
 
-const allowedMissingFields = new Set<MissingFieldKey>(['fee', 'capacity', 'stationHours']);
-const allowedEventTypes = new Set<ResidentActionType>(['service_card_viewed', 'service_source_opened', 'service_interest_expressed']);
-
-function normalizeState(value: unknown): DemoState {
-  if (!value || typeof value !== 'object') return initialState;
-  const candidate = value as Partial<DemoState>;
-  const requestedIntakePhase = candidate.intakePhase === 'review' || candidate.intakePhase === 'published' ? candidate.intakePhase : 'source';
-  const storedUnknownFields = Array.isArray(candidate.confirmedUnknownFields)
-    ? [...new Set(candidate.confirmedUnknownFields.filter((field): field is MissingFieldKey => allowedMissingFields.has(field as MissingFieldKey)))]
-    : [];
-  const confirmedUnknownFields = requestedIntakePhase === 'source' ? [] : storedUnknownFields;
-  const residentEvents = Array.isArray(candidate.residentEvents)
-    ? candidate.residentEvents.filter((event): event is ResidentActionEvent => Boolean(
-        event &&
-        typeof event === 'object' &&
-        typeof event.id === 'string' &&
-        typeof event.serviceId === 'string' &&
-        typeof event.anonymousActorId === 'string' &&
-        allowedEventTypes.has(event.type),
-      ))
-    : [];
-  const visitDraft = candidate.visitDraft && typeof candidate.visitDraft === 'object'
-    ? {
-        facts: typeof candidate.visitDraft.facts === 'string' ? candidate.visitDraft.facts : initialState.visitDraft.facts,
-        quote: typeof candidate.visitDraft.quote === 'string' ? candidate.visitDraft.quote : initialState.visitDraft.quote,
-      }
-    : initialState.visitDraft;
-  const checklist = candidate.activityChecklist && typeof candidate.activityChecklist === 'object'
-    ? {
-        qrCode: typeof candidate.activityChecklist.qrCode === 'boolean' ? candidate.activityChecklist.qrCode : true,
-        venue: typeof candidate.activityChecklist.venue === 'boolean' ? candidate.activityChecklist.venue : true,
-        speaker: typeof candidate.activityChecklist.speaker === 'boolean' ? candidate.activityChecklist.speaker : false,
-    }
-    : initialState.activityChecklist;
-  const coreFieldsConfirmed = requestedIntakePhase !== 'source' && candidate.coreFieldsConfirmed === true;
-  const reviewedAt = requestedIntakePhase !== 'source' && typeof candidate.reviewedAt === 'string' ? candidate.reviewedAt : undefined;
-  const publishedAt = typeof candidate.publishedAt === 'string' ? candidate.publishedAt : undefined;
-  const publishGateSatisfied = coreFieldsConfirmed && confirmedUnknownFields.length === 3 && Boolean(reviewedAt);
-  const intakePhase = requestedIntakePhase === 'published' && (!publishGateSatisfied || !publishedAt) ? 'review' : requestedIntakePhase;
-
-  return {
-    schemaVersion: 2,
-    intakePhase,
-    confirmedUnknownFields,
-    coreFieldsConfirmed,
-    reviewedAt,
-    publishedAt: intakePhase === 'published' ? publishedAt : undefined,
-    residentEvents,
-    visitStatus: candidate.visitStatus === 'submitted' ? 'submitted' : 'draft',
-    visitDraft,
-    activityChecklist: checklist,
-    noticeSent: candidate.noticeSent === true,
-  };
-}
-
 function readStoredState(): DemoState {
   try {
     const raw = window.localStorage.getItem(DEMO_STORAGE_KEY);
     if (!raw) return initialState;
-    return normalizeState(JSON.parse(raw));
+    return { ...initialState, ...JSON.parse(raw) } as DemoState;
   } catch {
     return initialState;
   }
@@ -184,94 +112,129 @@ interface DemoContextValue {
 
 const DemoContext = createContext<DemoContextValue | null>(null);
 
+function eventFromApi(type: ResidentActionType, serviceId: string, id: string, occurredAt: string): ResidentActionEvent {
+  const actionMap: Record<ResidentActionType, ResidentActionEvent['context']['action']> = {
+    service_card_viewed: 'view_card',
+    service_source_opened: 'view_source',
+    service_interest_expressed: 'express_interest',
+  };
+  return {
+    schemaVersion: '0.1',
+    id,
+    type,
+    serviceId,
+    communityId: 'xihongmen',
+    occurredAt,
+    anonymousActorId: ACTORS.resident,
+    context: { action: actionMap[type] },
+    isDemo: true,
+  };
+}
+
 export function DemoProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, readStoredState);
+  const [services, setServices] = useState<PublicServiceCard[]>([primaryService, ...secondaryServices]);
+
+  const hydrateFromApi = useCallback(async () => {
+    try {
+      const [serviceList, primaryState, actions, tasks, activityOperation] = await Promise.all([
+        togApi.listServices(ACTORS.community),
+        togApi.serviceState(ACTORS.community, primaryService.id),
+        togApi.mineActions(),
+        togApi.tasks(),
+        togApi.activityOperation('event_anti_fraud'),
+      ]);
+      setServices(serviceList.services);
+      const residentEvents = actions.actions.map((action) => {
+        const type = action.action_type === 'view_card' ? 'service_card_viewed'
+          : action.action_type === 'view_source' ? 'service_source_opened'
+            : 'service_interest_expressed';
+        return eventFromApi(type, action.service_id, action.id, action.created_at);
+      });
+      const task = tasks.tasks.find((item) => item.id === 'task_visit_a017');
+      dispatch({
+        type: 'hydrate',
+        state: {
+          ...state,
+          intakePhase: primaryState.service.workflowStatus === 'published' ? 'published' : primaryState.service.workflowStatus === 'draft' ? 'source' : 'review',
+          coreFieldsConfirmed: primaryState.fields.some((field) => field.field_key === 'core' && field.status === 'confirmed'),
+          confirmedUnknownFields: primaryState.fields.filter((field) => field.field_key !== 'core' && field.status === 'unknown_confirmed').map((field) => field.field_key as MissingFieldKey),
+          reviewedAt: primaryState.service.review.reviewedAt,
+          publishedAt: primaryState.service.publication.publishedAt,
+          residentEvents,
+          visitStatus: task?.status === 'submitted' || task?.status === 'completed' ? 'submitted' : 'draft',
+          activityChecklist: activityOperation.checklist,
+          noticeSent: activityOperation.noticeSent,
+        },
+      });
+    } catch {
+      // Keep the fixture-backed demo available when the API is offline.
+    }
+  }, []);
+
+  useEffect(() => {
+    void hydrateFromApi();
+  }, [hydrateFromApi]);
+
+  useEffect(() => {
+    const refresh = () => { void hydrateFromApi(); };
+    window.addEventListener('linkhood:data-changed', refresh);
+    return () => window.removeEventListener('linkhood:data-changed', refresh);
+  }, [hydrateFromApi]);
 
   useEffect(() => {
     try {
       window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(state));
     } catch {
-      // The demo still works in memory when storage is unavailable.
+      // The server remains the source of truth.
     }
   }, [state]);
 
-  useEffect(() => {
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key !== DEMO_STORAGE_KEY || !event.newValue) return;
-      try {
-        dispatch({ type: 'hydrate', state: normalizeState(JSON.parse(event.newValue)) });
-      } catch {
-        // Ignore malformed state written by an older local prototype.
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+  const applyServiceResponse = useCallback((response: ServiceStateResponse) => {
+    dispatch({ type: 'service-state', payload: response });
+    setServices((current) => current.map((service) => service.id === response.service.id ? response.service : service));
   }, []);
-
-  const resolvedPrimaryService = useMemo<PublicServiceCard>(
-    () => ({
-      ...primaryService,
-      review: {
-        status: state.coreFieldsConfirmed && state.confirmedUnknownFields.length === 3 ? 'verified' : state.intakePhase === 'source' ? 'ai_draft' : 'needs_review',
-        reviewedBy: state.coreFieldsConfirmed ? '演示账号 · 李敏' : undefined,
-        reviewedAt: state.reviewedAt,
-        confirmedUnknownFields: state.confirmedUnknownFields.map((field) => field),
-      },
-      publication:
-        state.intakePhase === 'published'
-          ? { status: 'published', publishedAt: state.publishedAt }
-          : { status: 'draft' },
-    }),
-    [state.confirmedUnknownFields, state.coreFieldsConfirmed, state.intakePhase, state.publishedAt, state.reviewedAt],
-  );
-
-  const services = useMemo(
-    () => [resolvedPrimaryService, ...secondaryServices],
-    [resolvedPrimaryService],
-  );
 
   const recordResidentEvent = useCallback((type: ResidentActionType, serviceId: string) => {
-    const actionMap: Record<ResidentActionType, ResidentActionEvent['context']['action']> = {
-      service_card_viewed: 'view_card',
-      service_source_opened: 'view_source',
-      service_interest_expressed: 'express_interest',
-    };
-    dispatch({
-      type: 'resident-event',
-      event: {
-        schemaVersion: '0.1',
-        id: `${type}:${serviceId}:demo-anon-01`,
-        type,
-        serviceId,
-        communityId: 'xihongmen',
-        occurredAt: new Date().toISOString(),
-        anonymousActorId: 'demo-anon-01',
-        context: { action: actionMap[type] },
-        isDemo: true,
-      },
-    });
+    const action = type === 'service_card_viewed' ? 'view_card' : type === 'service_source_opened' ? 'view_source' : 'express_interest';
+    void togApi.recordAction(serviceId, action).catch(() => undefined);
+    dispatch({ type: 'resident-event', event: eventFromApi(type, serviceId, `${type}:${serviceId}:${ACTORS.resident}`, new Date().toISOString()) });
   }, []);
 
-  const value = useMemo<DemoContextValue>(
-    () => ({
-      state,
-      services,
-      primaryService: resolvedPrimaryService,
-      remainingReviewCount: 3 - state.confirmedUnknownFields.length,
-      canPublish: state.intakePhase === 'review' && state.coreFieldsConfirmed && state.confirmedUnknownFields.length === 3,
-      runExtraction: () => dispatch({ type: 'run-extraction' }),
-      confirmCoreFields: () => dispatch({ type: 'confirm-core', reviewedAt: new Date().toLocaleString('zh-CN', { hour12: false }) }),
-      confirmField: (field) => dispatch({ type: 'confirm-field', field }),
-      publish: () => dispatch({ type: 'publish', publishedAt: new Date().toLocaleString('zh-CN', { hour12: false }) }),
-      recordResidentEvent,
-      saveVisitDraft: (facts, quote) => dispatch({ type: 'save-visit', facts, quote }),
-      submitVisit: (facts, quote) => dispatch({ type: 'submit-visit', facts, quote }),
-      toggleActivityItem: (item) => dispatch({ type: 'toggle-activity-item', item }),
-      sendNotice: () => dispatch({ type: 'send-notice' }),
-      resetDemo: () => dispatch({ type: 'reset' }),
-    }),
-    [recordResidentEvent, resolvedPrimaryService, services, state],
-  );
+  const resolvedPrimaryService = services.find((service) => service.id === primaryService.id) || primaryService;
+  const value = useMemo<DemoContextValue>(() => ({
+    state,
+    services,
+    primaryService: resolvedPrimaryService,
+    remainingReviewCount: 3 - state.confirmedUnknownFields.length,
+    canPublish: state.intakePhase === 'review' && state.coreFieldsConfirmed && state.confirmedUnknownFields.length === 3,
+    runExtraction: () => { void togApi.extract(primaryService.id).then(applyServiceResponse); },
+    confirmCoreFields: () => { void togApi.reviewField(primaryService.id, 'core').then(applyServiceResponse); },
+    confirmField: (field) => { void togApi.reviewField(primaryService.id, field).then(applyServiceResponse); },
+    publish: () => { void togApi.publish(primaryService.id).then(applyServiceResponse); },
+    recordResidentEvent,
+    saveVisitDraft: (facts, quote) => {
+      dispatch({ type: 'save-visit', facts, quote });
+      void togApi.saveVisit('task_visit_a017', { facts, quote, assessment: '需先核验服务资格，不自动作出结论。', consentConfirmed: true });
+    },
+    submitVisit: (facts, quote) => {
+      void togApi.saveVisit('task_visit_a017', { facts, quote, assessment: '需先核验服务资格，不自动作出结论。', consentConfirmed: true })
+        .then(() => togApi.submitVisit('task_visit_a017'))
+        .then(() => dispatch({ type: 'submit-visit', facts, quote }));
+    },
+    toggleActivityItem: (item) => {
+      void togApi.toggleActivityItem('event_anti_fraud', item)
+        .then(() => dispatch({ type: 'toggle-activity-item', item }));
+    },
+    sendNotice: () => {
+      void togApi.sendActivityNotice('event_anti_fraud')
+        .then(() => dispatch({ type: 'send-notice' }));
+    },
+    resetDemo: () => {
+      dispatch({ type: 'reset' });
+      void togApi.resetDemo().then(hydrateFromApi);
+    },
+  }), [applyServiceResponse, hydrateFromApi, recordResidentEvent, resolvedPrimaryService, services, state]);
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
 }
