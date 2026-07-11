@@ -4,6 +4,10 @@
 
 搭把手是以社区为入口的公共服务连接与运营协作平台。当前 Demo 只做深一条主链：把真实公开服务来源整理成可核验的居民服务卡，由工作人员确认后发布；居民表达办理意向，再以脱敏信号回流到社区端。低风险邻里互助只作为品牌第二重含义的一张侧卡，不扩成陌生人社交平台。
 
+在线预览：[https://linkhood-demo.vercel.app/#/demo](https://linkhood-demo.vercel.app/#/demo)
+
+> 当前 `main` 生产站仍是旧居民端；本分支未合并前，新双端闭环只在上面的 Preview 地址。
+
 ## 运行
 
 ```bash
@@ -75,10 +79,23 @@ npm run build
 
 已验证 1440×900 桌面与 390×844 手机视口；核心闭环、走访提交只读、状态持久化和隐私提示均通过浏览器验收。
 
+## 协作与部署
+
+推荐流程：队友在本地 clone 并从 feature 分支开发；连接 Vercel Git Integration 后，每次 push / PR 自动生成 Preview，团队确认后合并 `main`，Vercel 自动更新生产站。
+
+- Vercel Project：`bera-projects-live/linkhood`
+- Production Branch：`main`
+- Build Command：`npm run build`
+- Output Directory：`dist`
+- 当前 `main` 生产站：[https://linkhood-two.vercel.app](https://linkhood-two.vercel.app)
+- 本 PR Preview：[https://linkhood-demo.vercel.app/#/demo](https://linkhood-demo.vercel.app/#/demo)
+
+自动部署启用前，需在 Vercel 项目 **Settings → Git** 连接 `Beatrice-orb/Linkhood`。如果仓库未出现在列表中，需要仓库 owner 为 Vercel GitHub App 授权。
+
 ## 分支状态
 
 - 分支：`agent/build-tog-demo-v0-1`
 - 基线：`origin/main@13d8ddc`
-- 当前：本地实现已完成并通过 QA；尚未推送、尚未创建 Draft PR、尚无团队预览地址。
+- 当前：实现已完成并通过 QA；commit `948ee8f` 已推送并创建 Draft PR #4，Vercel Preview 已上线。
 
-推送和 Draft PR 需在团队 Review 本版产品边界后执行，避免与供给数据 PR #1、核心理念 PR #2、ToG PRD PR #3 混入同一变更。
+PR #4 与供给数据 PR #1、核心理念 PR #2、ToG PRD PR #3 保持独立，分别 Review、分别合并。
