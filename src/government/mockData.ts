@@ -14,7 +14,7 @@ import {
 } from './types';
 
 export const INITIAL_USER: User = {
-  name: '李主任',
+  name: '杨主任',
   phone: '13812345678',
   role: 'COMMUNITY_STAFF',
   community: '西红门镇演示社区'

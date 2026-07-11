@@ -17,7 +17,7 @@
 - `#/tog/mobile/followup`：社工居民跟进任务。
 - `#/tog/mobile/me`：社工账号与权限说明。
 - `#/tog/mobile/visit`：社工走访记录与审核提交。
-- `#/government`：G端社区治理驾驶舱，包括全域总览、活动公告、空间服务、居民社工、防诈骗与需求反馈。
+- `#/government`：G端社区治理工作区，包括工作台、数据看板、活动公告、空间服务、居民社工与需求反馈。
 - `#/demo`：三端演示启动页。
 
 ## 技术架构
@@ -34,7 +34,7 @@ Express + TypeScript + RBAC
 
 SQLite 使用 Node.js 内置 `node:sqlite`，无需额外数据库驱动。开发环境由 Express 同时启动 API 与 Vite 中间件，生产环境由 Express 提供 API 并托管 `dist`。
 
-G端通过 `/api/government/bootstrap` 读取治理工作区，通过 `/api/government/state` 持久化页面操作。活动、公告、社区空间和便民服务会同步写入居民端使用的业务表；居民与社工扩展档案、反馈、反诈提醒、热线和待办保存在 `government_workspaces`，并记录操作审计。
+G端通过 `/api/government/bootstrap` 读取治理工作区，通过 `/api/government/state` 持久化页面操作。活动、公告、社区空间和便民服务会同步写入居民端使用的业务表；居民与社工扩展档案、反馈、热线和待办保存在 `government_workspaces`，并记录操作审计。旧版本反诈提醒字段继续保留在工作区数据中用于兼容历史数据库，但当前版本不再提供独立反诈管理入口。
 
 ## 本地运行
 
@@ -98,7 +98,7 @@ src/api/                 # 前端 API 客户端与仓储适配
 src/demo/                # PR4 共享契约和离线演示状态
 src/resident/            # 公共服务居民端
 src/tog/                 # 社区电脑端与社工手机端
-src/government/          # 镇街、居委会、党群中心与妇联使用的 G 端治理 UI
+src/government/          # 当前以社区主任视角呈现的 G 端治理工作区
 src/App.tsx              # 原居民社区生活端
 src/components/          # 共享组件与关怀版
 data/public-service/     # 公共服务来源数据集

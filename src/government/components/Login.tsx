@@ -59,7 +59,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <ShieldCheck className="w-6 h-6" />
           </div>
           <h1 className="text-xl font-bold font-display tracking-tight text-ink">
-            「搭把手」G端社区治理系统
+            「搭把手」To G端社区治理系统
           </h1>
           <p className="text-xs text-ink-muted mt-1.5">
             一个社区 · 应该有一张地图 · 让社区工作更智慧温暖
@@ -123,40 +123,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </div>
           </div>
 
-          <div>
-            <label className="block text-2xs font-medium uppercase tracking-wider text-ink-muted mb-2">
-              请选择您的登录身份
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { id: 'COMMUNITY_STAFF', label: '社区居委会', icon: Home },
-                { id: 'STREET_STAFF', label: '街道办事处', icon: Building2 },
-                { id: 'PARTY_CENTER_OPERATOR', label: '党群中心运营', icon: Flag },
-                { id: 'WOMEN_FEDERATION', label: '妇联/群团组织', icon: Heart },
-              ].map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setRole(item.id as Role)}
-                    className={`p-3.5 text-left border rounded-xl transition-all flex flex-col justify-between h-22 ${
-                      role === item.id
-                        ? 'border-jade bg-jade-light/20 text-jade shadow-sm'
-                        : 'border-hairline bg-canvas/30 text-ink-muted hover:border-hairline hover:bg-canvas/60'
-                    }`}
-                  >
-                    <IconComponent className="w-5 h-5 mb-1" />
-                    <span className="text-xs font-medium">{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           <button
             type="submit"
-            className="w-full py-3.5 bg-jade hover:bg-jade-hover text-canvas font-medium text-sm rounded-xl transition-colors mt-2 shadow-md cursor-pointer text-center"
+            className="w-full py-3.5 bg-jade hover:bg-jade-hover text-canvas font-medium text-sm rounded-xl transition-colors mt-4 shadow-md cursor-pointer text-center"
           >
             进入治理工作台
           </button>
@@ -164,7 +133,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
         <div className="mt-6 pt-5 border-t border-hairline text-center text-2xs text-ink-subtle flex items-center justify-center gap-1.5">
           <HelpCircle className="w-3.5 h-3.5" />
-          首次登录将按手机号码自动关联网格与职务体系
+          当前为演示登录；正式版将接入组织账号与社区权限体系
         </div>
       </div>
     </div>
