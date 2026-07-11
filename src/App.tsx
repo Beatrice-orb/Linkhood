@@ -2950,6 +2950,41 @@ export default function App() {
             </div>
           )}
 
+          {/* OVERLAY MODAL: CARE MODE SWITCH CONFIRMATION (切换至关怀版 / 切换至普通版) */}
+          {showCareModeConfirm.visible && (
+            <div className="absolute inset-0 bg-ink/75 z-50 animate-fade-in flex items-center justify-center p-6">
+              <div className="bg-canvas border-2 border-jade rounded-[32px] w-full max-w-sm p-6 text-center space-y-5 shadow-2xl">
+                <div className="w-16 h-16 bg-jade/10 rounded-full flex items-center justify-center mx-auto text-jade text-3xl animate-bounce">
+                  {showCareModeConfirm.targetMode ? '👵' : '📱'}
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-extrabold text-lg text-ink">
+                    {showCareModeConfirm.targetMode ? '切换到「关怀版」？' : '切换到「普通版」？'}
+                  </h3>
+                  <p className="text-xs text-ink-muted leading-relaxed font-bold">
+                    {showCareModeConfirm.targetMode 
+                      ? '关怀版专为社区老年人及视力障碍居民设计，提供超大字体、醒目按键、一键呼救及防诈提醒等贴心功能。'
+                      : '普通版提供更丰富的社区空间预约、邻里活动报名、私聊以及完整的社区运营报表等全功能视角。'}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <button
+                    onClick={() => setShowCareModeConfirm({ visible: false, targetMode: false })}
+                    className="py-3 bg-surface border-2 border-hairline hover:bg-canvas text-ink font-bold text-xs rounded-2xl"
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={handleConfirmToggleCareMode}
+                    className="py-3 bg-jade hover:bg-jade-hover text-white font-black text-xs rounded-2xl shadow-md"
+                  >
+                    确认切换
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
 
       </div>
