@@ -1,20 +1,273 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+搭把手 —— 社区生活地图
 
-# Run and deploy your AI Studio app
+一个社区，应该有一张地图。
+https://img.shields.io/badge/License-MIT-green.svg
+https://img.shields.io/badge/Platform-WeChat-07C160
+https://img.shields.io/badge/PRs-welcome-brightgreen.svg
 
-This contains everything you need to run your app locally.
+📖 项目简介
 
-View your app in AI Studio: https://ai.studio/apps/fe9194d9-9d65-4ef8-8211-584490b50901
+「搭把手」是一个社区生活信息平台，旨在解决社区居民普遍存在的 “信息不对称” 问题——新搬来的住户不知道社区有什么设施、周边有什么服务；老住户不知道社区最近有什么活动、公共空间怎么预约；想找人帮忙却不知道找谁。
 
-## Run Locally
+平台以 “社区生活地图” 为核心，整合社区公共空间、活动信息、周边服务和社工服务四大板块，让居民打开小程序就能知道 “社区有什么、在发生什么、能做什么”。同时通过“邻里圈”的互助和社交功能，促进邻里互动，降低社区治理成本。
 
-**Prerequisites:**  Node.js
+🎯 解决的核心问题
 
+问题	我们的解法
+新住户不知道社区有什么	社区新手指南 + 社区地图
+居民不知道周边能干什么	周边服务 + 公共空间 信息聚合
+社区活动信息传播低效	本周活动 信息流 + 在线报名
+邻里“相邻不相识”	邻里圈 互助 + 动态 + 私聊
+物业/居委会信息传达困难	最新公告 + 管理后台统一发布
+居民遇到问题不知道找谁	社工服务 + 楼栋管家信息展示
+📱 产品体验
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+模块	功能	截图占位
+社区地图	公共空间、本周活动、周边服务、社工服务	🖼️
+邻里圈	互助拼单、日常动态、小活动召集	🖼️
+我的聊天	活动群聊、互助对话、私聊会话	🖼️
+我的	信用分、积分、发布记录、成就	🖼️
+✨ 核心功能
+
+居民端（微信小程序）
+
+功能模块	核心功能	说明
+社区地图	公共空间	查看社区所有公共空间（活动室、健身房、共享厨房等），支持分类筛选、收藏、查看详情
+本周活动	查看本周所有社区活动，在线报名，报名后自动加入活动群聊
+周边服务	查看周边商家/服务信息（超市、药店、快递、餐饮等），一键导航/打电话
+社工服务	查看社区工作者、志愿者、楼栋管家信息，一键联系
+顶部悬浮区	当前居住	查看当前社区/楼栋信息
+最新公告	查看物业/居委会发布的社区公告
+新手指南	8步引导新住户快速了解社区全貌
+邻里圈	邻里互助	发布/响应拼单、代取、照看、闲置等互助需求
+日常动态	发布/浏览邻里日常分享、生活共鸣
+小活动召集	发布/参与非正式社区活动
+我的聊天	活动群聊	报名活动后自动加入活动群聊
+互助对话	响应互助后自动建立对话
+私聊	从邻里圈点击头像发起私聊
+系统通知	活动提醒、评论通知、公告推送
+我的	个人中心	头像、昵称、楼栋、兴趣标签
+信用体系	信用分 + 互助积分
+发布/帮助/活动记录	管理所有参与记录
+成就徽章	拼单达人、热心肠、社区活宝等
+喊一声	快速发布	30秒内发布互助/动态/活动
+管理端（Web后台）
+
+功能	说明
+信息管理	增删改查公共空间/周边服务/社工信息
+活动管理	发布官方活动、管理报名、签到
+公告管理	发布社区公告（定时发布、分类管理）
+数据看板	居民活跃度、活动参与率、互助完成率、满意度
+🏗️ 技术架构
+
+系统架构图
+
+text
+┌─────────────────────────────────────────────────────────┐
+│                    小程序端（微信）                     │
+│  ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐         │
+│  │社区地图│  │邻里圈 │  │我的聊天│  │ 我的  │         │
+│  └───────┘  └───────┘  └───────┘  └───────┘         │
+└───────────────────────┬─────────────────────────────────┘
+                        │ HTTPS / WebSocket
+┌───────────────────────▼─────────────────────────────────┐
+│                    API Gateway（网关）                   │
+│              鉴权 / 路由 / 限流 / 日志                  │
+└───────────────────────┬─────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────┐
+│                    业务服务层（微服务）                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
+│  │ 用户服务  │ │ 地图服务  │ │ 社交服务  │ │ 聊天服务  │  │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
+│  │ 活动服务  │ │ 公告服务  │ │ 信用服务  │ │ 通知服务  │  │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
+└───────────────────────┬─────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────┐
+│                      数据层                             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
+│  │  MySQL   │ │  Redis   │ │  OSS存储  │ │ WebSocket│  │
+│  │ 主数据库  │ │  缓存    │ │ 图片/文件 │ │ 实时通讯 │  │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
+└─────────────────────────────────────────────────────────┘
+技术选型
+
+层级	技术栈	说明
+小程序端	微信小程序原生框架 + WeUI	微信官方生态，性能最优
+Web后台	React + Ant Design + Vite	现代化管理界面
+后端服务	Node.js (NestJS) / Python (FastAPI)	高性能、可扩展
+数据库	MySQL 8.0 + Redis 7.0	关系型 + 缓存
+实时通讯	WebSocket（小程序原生支持）	活动群聊/互助对话
+文件存储	阿里云 OSS / 腾讯云 COS	图片存储
+部署	Docker + Nginx	容器化部署
+数据库核心表
+
+表名	说明
+users	用户表（昵称/楼栋/信用分/积分）
+spaces	公共空间表（名称/位置/时间/设施）
+services	周边服务表（名称/位置/电话/标签）
+social_workers	社工服务表（姓名/角色/区域/联系方式）
+activities	活动表（名称/时间/地点/报名信息）
+activity_registrations	活动报名表
+posts	邻里圈动态表（互助/日常/活动）
+help_records	互助记录表（评价/信用变动）
+conversations	会话表（群聊/互助/私聊）
+messages	消息表
+notices	公告表
+🚀 快速开始
+
+前置条件
+
+Node.js 18+
+MySQL 8.0+
+Redis 7.0+
+微信开发者工具
+微信小程序 AppID
+1. 克隆项目
+
+bash
+git clone https://github.com/yourusername/dabashou.git
+cd dabashou
+2. 项目结构
+
+text
+dabashou/
+├── miniprogram/          # 小程序端
+│   ├── pages/           # 页面
+│   │   ├── map/         # 社区地图
+│   │   ├── circle/      # 邻里圈
+│   │   ├── chat/        # 我的聊天
+│   │   └── mine/        # 我的
+│   ├── components/      # 公共组件
+│   ├── utils/           # 工具函数
+│   ├── api/             # 接口封装
+│   └── app.js           # 小程序入口
+├── admin/               # 管理后台
+│   ├── src/
+│   │   ├── pages/       # 页面
+│   │   ├── components/  # 组件
+│   │   └── api/         # 接口
+│   └── package.json
+├── server/              # 后端服务
+│   ├── src/
+│   │   ├── modules/     # 业务模块
+│   │   ├── common/      # 公共模块
+│   │   └── config/      # 配置文件
+│   └── package.json
+├── database/            # 数据库脚本
+│   └── schema.sql
+├── docker/              # Docker配置
+└── README.md
+3. 后端启动
+
+bash
+cd server
+npm install
+
+# 配置环境变量
+cp .env.example .env
+# 编辑 .env 配置数据库连接等信息
+
+# 数据库迁移
+npm run migration:run
+
+# 启动开发服务
+npm run start:dev
+4. 管理后台启动
+
+bash
+cd admin
+npm install
+npm run dev
+5. 小程序启动
+
+用微信开发者工具打开 miniprogram 目录
+修改 app.js 中的 API 地址为本地后端地址
+点击“编译”即可预览
+6. Docker 部署（生产环境）
+
+bash
+docker-compose up -d
+🧪 数据 Mock
+
+项目提供完整的 Mock 数据，用于快速演示和开发测试：
+
+数据类型	数量	说明
+社区公共空间	8个	共享厨房、健身房、活动室等
+周边服务	12家	便利店、超市、药店等
+社工服务	3人	楼栋管家、志愿者等
+本周活动	5场	烘焙课、篮球赛等
+用户	10人	覆盖不同年龄/职业
+互助需求	5条	拼单/代取/照看/闲置
+Mock 数据文件位于 database/mock_data.sql
+
+📊 试点数据（参考）
+
+以下为某青年公寓社区试点数据：
+
+指标	数据
+社区总户数	800户
+入住率	94%
+30岁以下住户占比	69.57%
+用户注册率	67%（3个月）
+月均互助需求	45条
+互助完成率	91%
+7日留存	76%
+🗺️ 产品路线图
+
+阶段	时间	目标
+MVP	2026 Q4	完成核心功能开发，启动试点社区验证
+验证期	2027 Q1	试点社区跑通“信息-互动-治理”闭环
+增长期	2027 Q2	复制至10+社区，完善管理后台和数据看板
+拓展期	2027 Q3	接入更多社区类型，探索商业化路径
+🤝 如何贡献
+
+我们欢迎任何形式的贡献！
+
+Fork 本仓库
+创建你的功能分支 (git checkout -b feature/AmazingFeature)
+提交你的改动 (git commit -m 'Add some AmazingFeature')
+推送到分支 (git push origin feature/AmazingFeature)
+提交 Pull Request
+贡献类型
+
+🐛 Bug 修复
+✨ 新功能
+📝 文档完善
+🎨 UI/UX 优化
+🔧 代码重构
+📄 许可证
+
+本项目采用 MIT License 开源协议。
+
+text
+MIT License
+
+Copyright (c) 2026 搭把手
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+...
+👥 团队
+
+角色	姓名	联系方式
+产品经理	—	—
+前端开发	—	—
+后端开发	—	—
+UI/UX 设计	—	—
+📞 联系与支持
+
+项目地址：https://github.com/yourusername/dabashou
+问题反馈：Issues
+产品文档：/docs
+⭐ 如果这个项目对你有帮助
+
+如果这个项目对你有帮助，请给我们一个 Star ⭐ 支持我们！
+
+「搭把手」—— 一个社区，应该有一张地图。
