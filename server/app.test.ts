@@ -97,3 +97,37 @@ test('conversation membership protects message writes', async () => {
   }, strangerToken);
   assert.equal(denied.response.status, 403);
 });
+
+test('government workspace persists and publishes core data to the resident app', async () => {
+  const adminToken = await login('admin_1');
+  const residentToken = await login('user_xiaoya');
+  const bootstrap = await request('/api/government/bootstrap', {}, adminToken);
+  assert.equal(bootstrap.response.status, 200);
+
+  const activity = {
+    id: 'act-government-api-test',
+    name: 'G端数据库联调活动',
+    time: '2026-07-20 14:00',
+    location: '西红门社区服务中心',
+    description: '验证G端写入后居民端可见。',
+    limit: 30,
+    registered: 0,
+    signedIn: 0,
+    organizer: '西红门社区居委会',
+    status: '报名中',
+    registrants: [],
+  };
+  const state = bootstrap.body.state;
+  state.activities = [activity, ...state.activities];
+
+  const saved = await request('/api/government/state', {
+    method: 'PUT',
+    body: JSON.stringify({ state }),
+  }, adminToken);
+  assert.equal(saved.response.status, 200);
+
+  const reloaded = await request('/api/government/bootstrap', {}, adminToken);
+  assert.equal(reloaded.body.state.activities[0].id, activity.id);
+  const resident = await request('/api/resident/bootstrap', {}, residentToken);
+  assert.ok(resident.body.events.some((item: { id: string }) => item.id === activity.id));
+});

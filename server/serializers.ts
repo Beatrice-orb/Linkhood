@@ -46,7 +46,7 @@ export function listLocalServices(communityId: string) {
 }
 
 export function listActivities(communityId: string, userId: string) {
-  const rows = db.prepare('SELECT id, data_json FROM activities WHERE community_id = ?').all(communityId) as Array<{ id: string; data_json: string }>;
+  const rows = db.prepare("SELECT id, data_json FROM activities WHERE community_id = ? AND status = 'published'").all(communityId) as Array<{ id: string; data_json: string }>;
   const registrations = db.prepare("SELECT activity_id, user_id FROM activity_registrations WHERE status = 'registered'").all() as Array<{ activity_id: string; user_id: string }>;
   return rows.map((row) => {
     const data = json<Record<string, any>>(row.data_json, {});

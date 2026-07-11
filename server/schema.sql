@@ -53,6 +53,14 @@ CREATE TABLE IF NOT EXISTS public_services (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS public_service_sources (
+  id TEXT PRIMARY KEY,
+  data_json TEXT NOT NULL,
+  active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS service_review_fields (
   service_id TEXT NOT NULL REFERENCES public_services(id) ON DELETE CASCADE,
   field_key TEXT NOT NULL,
@@ -307,6 +315,13 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   entity_id TEXT,
   detail_json TEXT NOT NULL DEFAULT '{}',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS government_workspaces (
+  community_id TEXT PRIMARY KEY REFERENCES communities(id),
+  data_json TEXT NOT NULL,
+  updated_by TEXT REFERENCES users(id),
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_actions_service ON resident_service_actions(service_id, action_type, created_at);

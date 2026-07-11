@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   HandHeart,
+  Landmark,
   Monitor,
   RotateCcw,
   Smartphone,
@@ -10,6 +11,13 @@ import { useDemoStore } from './DemoStore';
 import { routeTo } from './navigation';
 
 const entries = [
+  {
+    route: '/government',
+    icon: Landmark,
+    eyebrow: '新增 · G端治理驾驶舱',
+    title: '镇街与社区治理端',
+    description: '全域指标、内容运营、居民反馈、关怀预警与角色权限演示。',
+  },
   {
     route: '/tog/desktop/services',
     icon: Monitor,
@@ -56,8 +64,8 @@ export function DemoLaunchpad() {
       </header>
 
       <section className="demo-launchpad__intro">
-        <p className="demo-kicker">双端联动 Demo · v0.1</p>
-        <h1>让公共服务更容易抵达居民</h1>
+        <p className="demo-kicker">居民 · 社区 · 社工 · G端联动 Demo</p>
+        <h1>让社区服务更容易抵达，也更容易被治理看见</h1>
         <p>
           一条真实公共服务，从来源接入、AI 草稿、人工发布，到居民行动与脱敏回流，
           在同一个浏览器状态里完整演示。

@@ -12,6 +12,7 @@ import {
   mockUsers,
 } from '../src/mockData.ts';
 import { primaryService, secondaryServices } from '../src/demo/fixtures.ts';
+import { importRealPublicServiceData } from './public-service-seed.ts';
 
 fs.mkdirSync(path.dirname(DATABASE_PATH), { recursive: true });
 
@@ -161,6 +162,7 @@ function seedConversations() {
 }
 
 seed();
+export const publicServiceImportResult = importRealPublicServiceData(db, ROOT_DIR);
 
 export function getUser(userId: string) {
   const row = db.prepare(`

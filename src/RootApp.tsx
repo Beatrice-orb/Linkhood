@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { DemoLaunchpad } from './demo/DemoLaunchpad';
 import { DemoProvider } from './demo/DemoStore';
 import { useHashRoute } from './demo/navigation';
@@ -7,6 +7,8 @@ import { TogDesktopApp } from './tog/TogDesktopApp';
 import { TogMobileApp } from './tog/TogMobileApp';
 import App from './App';
 import './demo/demo.css';
+
+const GovernmentApp = lazy(() => import('./government/App').then((module) => ({ default: module.GovernmentApp })));
 
 const titles: Record<string, string> = {
   '/demo': '搭把手 · 双端联动 Demo',
@@ -25,6 +27,7 @@ const titles: Record<string, string> = {
   '/tog/mobile/followup': '搭把手 · 居民跟进',
   '/tog/mobile/me': '搭把手 · 社工账号',
   '/tog/mobile/visit': '搭把手 · 走访记录核对',
+  '/government': '搭把手 · G端社区治理驾驶舱',
 };
 
 function RoutedApp() {
@@ -38,6 +41,13 @@ function RoutedApp() {
   if (route === '/resident/services') return <ResidentServicesApp />;
   if (route.startsWith('/tog/desktop/')) return <TogDesktopApp route={route} />;
   if (route.startsWith('/tog/mobile/')) return <TogMobileApp route={route} />;
+  if (route.startsWith('/government')) {
+    return (
+      <Suspense fallback={<main className="government-loading" role="status">正在加载 G 端治理驾驶舱…</main>}>
+        <GovernmentApp />
+      </Suspense>
+    );
+  }
   return <DemoLaunchpad />;
 }
 

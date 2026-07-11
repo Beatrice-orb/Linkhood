@@ -17,6 +17,7 @@
 - `#/tog/mobile/followup`：社工居民跟进任务。
 - `#/tog/mobile/me`：社工账号与权限说明。
 - `#/tog/mobile/visit`：社工走访记录与审核提交。
+- `#/government`：G端社区治理驾驶舱，包括全域总览、活动公告、空间服务、居民社工、防诈骗与需求反馈。
 - `#/demo`：三端演示启动页。
 
 ## 技术架构
@@ -32,6 +33,8 @@ Express + TypeScript + RBAC
 ```
 
 SQLite 使用 Node.js 内置 `node:sqlite`，无需额外数据库驱动。开发环境由 Express 同时启动 API 与 Vite 中间件，生产环境由 Express 提供 API 并托管 `dist`。
+
+G端通过 `/api/government/bootstrap` 读取治理工作区，通过 `/api/government/state` 持久化页面操作。活动、公告、社区空间和便民服务会同步写入居民端使用的业务表；居民与社工扩展档案、反馈、反诈提醒、热线和待办保存在 `government_workspaces`，并记录操作审计。
 
 ## 本地运行
 
@@ -53,7 +56,10 @@ npm run build      # 前端生产构建
 npm start          # 运行生产服务，需先 build
 npm run db:reset   # 重建本地开发数据库
 npm run db:backup  # 创建 SQLite 在线备份
+npm run data:import # 幂等导入西红门真实公共服务与活动素材
 ```
+
+启动服务时也会自动执行同一套幂等导入。真实供给数据会写入 `public_service_sources`、`public_services` 和 `activities`；活动表中的记录标记为来源素材，不会直接变成居民端可报名活动。公开来源仅用于信息核验和活动策划，不代表项目已与来源机构建立合作。
 
 ## MVP 业务闭环
 
@@ -92,6 +98,7 @@ src/api/                 # 前端 API 客户端与仓储适配
 src/demo/                # PR4 共享契约和离线演示状态
 src/resident/            # 公共服务居民端
 src/tog/                 # 社区电脑端与社工手机端
+src/government/          # 镇街、居委会、党群中心与妇联使用的 G 端治理 UI
 src/App.tsx              # 原居民社区生活端
 src/components/          # 共享组件与关怀版
 data/public-service/     # 公共服务来源数据集

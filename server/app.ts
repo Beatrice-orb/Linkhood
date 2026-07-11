@@ -5,6 +5,172 @@ import { db, getUser } from './db.ts';
 import { audit, changeCredit, changePoints, ensurePrivateConversation, mapPublicService, notify, publicServiceState } from './domain.ts';
 import { listActivities, listConversations, listFeed, listSpaces, residentBootstrap, weeklyReport } from './serializers.ts';
 import { id, json, now } from './utils.ts';
+import {
+  INITIAL_ACTIVITIES,
+  INITIAL_ANNOUNCEMENTS,
+  INITIAL_FRAUD_ALERTS,
+  INITIAL_FEEDBACKS,
+  INITIAL_HOTLINES,
+  INITIAL_RESIDENTS,
+  INITIAL_SERVICES,
+  INITIAL_SOCIAL_WORKERS,
+  INITIAL_SPACES,
+  INITIAL_TODOS,
+} from '../src/government/mockData.ts';
+
+const GOVERNMENT_STATE_KEYS = [
+  'todos', 'activities', 'announcements', 'spaces', 'services', 'workers',
+  'residents', 'alerts', 'feedbacks', 'hotlines',
+] as const;
+
+type GovernmentState = Record<(typeof GOVERNMENT_STATE_KEYS)[number], Array<Record<string, any>>>;
+
+function defaultGovernmentState(): GovernmentState {
+  return {
+    todos: INITIAL_TODOS,
+    activities: INITIAL_ACTIVITIES,
+    announcements: INITIAL_ANNOUNCEMENTS,
+    spaces: INITIAL_SPACES,
+    services: INITIAL_SERVICES,
+    workers: INITIAL_SOCIAL_WORKERS,
+    residents: INITIAL_RESIDENTS,
+    alerts: INITIAL_FRAUD_ALERTS,
+    feedbacks: INITIAL_FEEDBACKS,
+    hotlines: INITIAL_HOTLINES,
+  };
+}
+
+function readGovernmentState(communityId: string) {
+  const row = db.prepare('SELECT data_json, updated_at FROM government_workspaces WHERE community_id = ?')
+    .get(communityId) as { data_json: string; updated_at: string } | undefined;
+  if (row) return { state: json<GovernmentState>(row.data_json, defaultGovernmentState()), updatedAt: row.updated_at };
+  const state = defaultGovernmentState();
+  db.prepare('INSERT INTO government_workspaces (community_id, data_json) VALUES (?, ?)')
+    .run(communityId, JSON.stringify(state));
+  return { state, updatedAt: now() };
+}
+
+function validateGovernmentState(value: unknown): GovernmentState {
+  if (!value || typeof value !== 'object') throw new Error('INVALID_STATE');
+  const candidate = value as Record<string, unknown>;
+  for (const key of GOVERNMENT_STATE_KEYS) {
+    if (!Array.isArray(candidate[key])) throw new Error(`INVALID_${key.toUpperCase()}`);
+    if (candidate[key].length > 5000) throw new Error(`INVALID_${key.toUpperCase()}`);
+  }
+  return Object.fromEntries(GOVERNMENT_STATE_KEYS.map((key) => [key, candidate[key]])) as GovernmentState;
+}
+
+function syncGovernmentCoreData(communityId: string, actorId: string, previous: GovernmentState, state: GovernmentState) {
+  const removedIds = (before: Array<Record<string, any>>, after: Array<Record<string, any>>) => {
+    const active = new Set(after.map((item) => String(item.id)));
+    return before.map((item) => String(item.id)).filter((itemId) => !active.has(itemId));
+  };
+
+  for (const activityId of removedIds(previous.activities, state.activities)) {
+    db.prepare("UPDATE activities SET status = 'withdrawn' WHERE id = ? AND community_id = ?").run(activityId, communityId);
+  }
+  const upsertActivity = db.prepare(`
+    INSERT INTO activities (id, community_id, data_json, status, created_by) VALUES (?, ?, ?, 'published', ?)
+    ON CONFLICT(id) DO UPDATE SET data_json = excluded.data_json, status = 'published'
+    WHERE activities.community_id = excluded.community_id
+  `);
+  for (const activity of state.activities) {
+    const residentActivity = {
+      id: activity.id,
+      name: activity.name,
+      type: '社区活动',
+      time: activity.time,
+      location: activity.location,
+      organizer: activity.organizer,
+      signedUp: Number(activity.registered || 0),
+      capacity: Number(activity.limit || 20),
+      status: activity.status === '报名中' ? '报名中' : activity.status === '进行中' ? '长期有效' : '已截止',
+      fee: '免费',
+      introduction: activity.description || '',
+      activeMembers: Array.isArray(activity.registrants) ? activity.registrants.map((item: any) => item.name) : [],
+      joinedByMe: false,
+    };
+    upsertActivity.run(activity.id, communityId, JSON.stringify(residentActivity), actorId);
+  }
+
+  for (const announcementId of removedIds(previous.announcements, state.announcements)) {
+    db.prepare('DELETE FROM announcements WHERE id = ? AND community_id = ?').run(announcementId, communityId);
+  }
+  const upsertAnnouncement = db.prepare(`
+    INSERT INTO announcements (id, community_id, data_json, published_by) VALUES (?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET data_json = excluded.data_json, published_by = excluded.published_by
+    WHERE announcements.community_id = excluded.community_id
+  `);
+  for (const announcement of state.announcements) {
+    const residentAnnouncement = {
+      id: announcement.id,
+      type: announcement.category === '停水停电' ? '停水通知' : announcement.category,
+      title: announcement.title,
+      content: announcement.content,
+      time: announcement.publishTime,
+      importance: announcement.isImportant ? '🔴重要' : '🟡一般',
+      ...announcement,
+    };
+    upsertAnnouncement.run(announcement.id, communityId, JSON.stringify(residentAnnouncement), actorId);
+  }
+
+  for (const spaceId of removedIds(previous.spaces, state.spaces)) {
+    db.prepare('UPDATE spaces SET active = 0 WHERE id = ? AND community_id = ?').run(spaceId, communityId);
+  }
+  const upsertSpace = db.prepare(`
+    INSERT INTO spaces (id, community_id, data_json, active) VALUES (?, ?, ?, 1)
+    ON CONFLICT(id) DO UPDATE SET data_json = excluded.data_json, active = 1
+    WHERE spaces.community_id = excluded.community_id
+  `);
+  for (const space of state.spaces) {
+    const residentSpace = {
+      id: space.id,
+      name: space.name,
+      location: space.location,
+      time: space.openHours,
+      bookingMethod: space.bookingType || '线上预约',
+      capacity: `${space.capacity || 20}人`,
+      facilities: space.facilities || [],
+      status: space.status === '开放中' ? '开放中' : space.status === '已满' ? '使用中' : '认领中',
+      rating: 0,
+      reviewsCount: 0,
+      reviews: [],
+      bookings: [],
+      description: `${space.name}社区公共空间`,
+      notices: [],
+      image: space.photo || '🏠',
+      governmentStatus: space.status,
+    };
+    upsertSpace.run(space.id, communityId, JSON.stringify(residentSpace));
+  }
+
+  for (const serviceId of removedIds(previous.services, state.services)) {
+    db.prepare('UPDATE local_services SET active = 0 WHERE id = ? AND community_id = ?').run(serviceId, communityId);
+  }
+  const upsertService = db.prepare(`
+    INSERT INTO local_services (id, community_id, data_json, active) VALUES (?, ?, ?, 1)
+    ON CONFLICT(id) DO UPDATE SET data_json = excluded.data_json, active = 1
+    WHERE local_services.community_id = excluded.community_id
+  `);
+  for (const service of state.services) {
+    const residentService = {
+      id: service.id,
+      name: service.name,
+      type: service.category,
+      location: service.location,
+      hours: service.hours,
+      phone: service.phone,
+      rating: 0,
+      tags: service.tags || [],
+      reviews: [],
+      hasDiscount: Boolean(service.discount),
+      discountText: service.discount || '',
+      image: service.category === '健康医疗' ? '🏥' : service.category === '餐饮美食' ? '🍱' : '🏪',
+      isRecommended: Boolean(service.isRecommended),
+    };
+    upsertService.run(service.id, communityId, JSON.stringify(residentService));
+  }
+}
 
 function requiredString(value: unknown, field: string) {
   if (typeof value !== 'string' || !value.trim()) throw new Error(`INVALID_${field.toUpperCase()}`);
@@ -61,6 +227,41 @@ export function createApp() {
   });
 
   app.get('/api/auth/me', authenticate, (req, res) => res.json({ user: req.authUser }));
+
+  app.get('/api/government/bootstrap', authenticate, requireRoles('community_operator', 'admin'), (req, res) => {
+    const workspace = readGovernmentState(req.authUser!.communityId);
+    audit(req.authUser!.id, req.authUser!.communityId, 'government.bootstrap.view', 'government_workspace');
+    res.json({ ...workspace, user: req.authUser });
+  });
+
+  app.put('/api/government/state', authenticate, requireRoles('community_operator', 'admin'), (req, res) => {
+    try {
+      const state = validateGovernmentState(req.body?.state);
+      const previous = readGovernmentState(req.authUser!.communityId).state;
+      db.exec('BEGIN IMMEDIATE');
+      try {
+        syncGovernmentCoreData(req.authUser!.communityId, req.authUser!.id, previous, state);
+        db.prepare(`
+          INSERT INTO government_workspaces (community_id, data_json, updated_by, updated_at)
+          VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+          ON CONFLICT(community_id) DO UPDATE SET
+            data_json = excluded.data_json,
+            updated_by = excluded.updated_by,
+            updated_at = CURRENT_TIMESTAMP
+        `).run(req.authUser!.communityId, JSON.stringify(state), req.authUser!.id);
+        audit(req.authUser!.id, req.authUser!.communityId, 'government.state.update', 'government_workspace', req.authUser!.communityId);
+        db.exec('COMMIT');
+      } catch (error) {
+        db.exec('ROLLBACK');
+        throw error;
+      }
+      const updatedAt = (db.prepare('SELECT updated_at FROM government_workspaces WHERE community_id = ?')
+        .get(req.authUser!.communityId) as { updated_at: string }).updated_at;
+      res.json({ ok: true, updatedAt });
+    } catch (error) {
+      sendDomainError(res, error);
+    }
+  });
 
   app.post('/api/auth/logout', authenticate, (req, res) => {
     const token = req.header('authorization')?.slice(7);
@@ -374,7 +575,7 @@ export function createApp() {
   });
 
   app.post('/api/activities/:activityId/registration', authenticate, requireRoles('resident', 'admin'), (req, res) => {
-    const activity = db.prepare('SELECT data_json FROM activities WHERE id = ? AND community_id = ?').get(req.params.activityId, req.authUser!.communityId) as { data_json: string } | undefined;
+    const activity = db.prepare("SELECT data_json FROM activities WHERE id = ? AND community_id = ? AND status = 'published'").get(req.params.activityId, req.authUser!.communityId) as { data_json: string } | undefined;
     if (!activity) return res.status(404).json({ error: 'ACTIVITY_NOT_FOUND' });
     const current = db.prepare('SELECT status FROM activity_registrations WHERE activity_id = ? AND user_id = ?').get(req.params.activityId, req.authUser!.id) as { status: string } | undefined;
     if (current?.status === 'registered') {
