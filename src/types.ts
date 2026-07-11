@@ -109,6 +109,9 @@ export interface FeedItem {
   actionText?: string;
   actionStatus?: 'idle' | 'success' | 'claimed'; // claimed means helped by me
   tags?: string[];
+  authorId?: string;
+  helperId?: string;
+  helpStatus?: 'active' | 'claimed' | 'completed' | 'cancelled' | 'expired' | 'hidden';
 }
 
 export interface Announcement {

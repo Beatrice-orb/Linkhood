@@ -1,499 +1,245 @@
 {
-  "spaces": [
+  "schema_version": "0.1",
+  "generated_at": "2026-07-11T14:30:00+08:00",
+  "scope": "北京市大兴区西红门镇优先，大兴区级与相邻公共服务补充",
+  "verification_note": "wechat_verified 表示 2026-07-11 通过微信公众号内部搜索识别到认证账号，不代表与项目存在合作关系。",
+  "sources": [
     {
-      "id": "space_kitchen",
-      "name": "社区共享厨房",
-      "location": "3号楼B1层",
-      "time": "07:00-22:00",
-      "bookingMethod": "小程序预约（提前1天）",
-      "capacity": "8人",
-      "facilities": [
-        "电磁炉 × 2",
-        "微波炉 × 1",
-        "冰箱 × 1",
-        "电饭煲 × 1",
-        "锅具套装",
-        "餐具套装（8人份）",
-        "调味料基础包（油盐酱醋）",
-        "餐桌 × 1",
-        "吧台椅 × 4"
-      ],
-      "status": "开放预约",
-      "rating": 4.8,
-      "reviewsCount": 46,
-      "description": "住户免费使用，需提前预约。电梯直达B1层，出电梯右转即到。",
-      "notices": [
-        "每次预约限2小时，如需延长请重新预约",
-        "使用后请自行清洁，恢复原状",
-        "损坏物品照价赔偿",
-        "使用后请拍照上传“使用后状态”"
-      ],
-      "image": "🍳"
+      "source_id": "xhm_government_web",
+      "name": "北京市大兴区西红门镇人民政府",
+      "org_level": "xihongmen_town",
+      "channel_type": "official_website",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/jgzq/zj/xhmz/index.html",
+      "wechat_name": null,
+      "wechat_alias": null,
+      "wechat_verified": null,
+      "domains": ["政务服务", "民生保障", "社区建设", "诉求处置", "市民活动"],
+      "ingestion_priority": "P0",
+      "collection_mode": "official_web"
     },
     {
-      "id": "space_activity",
-      "name": "邻里活动室",
-      "location": "3号楼B1层",
-      "time": "08:00-21:00",
-      "bookingMethod": "小程序预约（提前2小时）",
-      "capacity": "15人",
-      "facilities": [
-        "投影仪",
-        "音响",
-        "白板",
-        "折叠桌椅",
-        "饮水机",
-        "桌球台"
-      ],
-      "status": "开放预约",
-      "rating": 4.6,
-      "reviewsCount": 32,
-      "description": "提供多功能会议、桌游、放映、瑜伽及桌球活动空间，支持邻里社交与聚会。",
-      "notices": [
-        "保持室内安静，不打扰其他邻居",
-        "爱护投影与音响等电子设备",
-        "带走个人垃圾，保持场地整洁"
-      ],
-      "image": "🎯"
+      "source_id": "xhm_online_wechat",
+      "name": "西红门在线",
+      "org_level": "xihongmen_town",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/zfxxgk/dxqzf69/2291822/2291824/2292918/index.html",
+      "wechat_name": "西红门在线",
+      "wechat_alias": null,
+      "wechat_verified": true,
+      "domains": ["社区活动", "民生服务", "安全治理", "文明实践", "政策提醒"],
+      "ingestion_priority": "P0",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "space_gym",
-      "name": "24小时健身房",
-      "location": "1号楼1层",
-      "time": "24小时",
-      "bookingMethod": "门禁刷卡（住户免费）",
-      "capacity": "20人",
-      "facilities": [
-        "跑步机 × 3",
-        "椭圆机 × 2",
-        "哑铃架",
-        "瑜伽垫 × 5",
-        "动感单车 × 2"
-      ],
-      "status": "开放中",
-      "rating": 4.7,
-      "reviewsCount": 88,
-      "description": "24小时面向所有公寓住户免费开放，刷脸或门禁卡即可进入。配备基础有氧与力量器械。",
-      "notices": [
-        "运动前请做好热身，注意人身安全",
-        "使用器械后请用酒精棉片擦拭汗水",
-        "哑铃使用后请物归原位"
-      ],
-      "image": "🏃"
+      "source_id": "xhm_hospital_wechat",
+      "name": "大兴区西红门医院",
+      "org_level": "xihongmen_public_institution",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/jgzq/qzfjg/wsjkw/ssjg2360/1898158/index.html",
+      "wechat_name": "大兴区西红门医院",
+      "wechat_alias": null,
+      "wechat_verified": true,
+      "domains": ["医疗", "预防保健", "中医", "康复", "社区卫生服务站"],
+      "ingestion_priority": "P0",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "space_garden",
-      "name": "楼顶花园",
-      "location": "每栋楼顶",
-      "time": "06:00-22:00",
-      "bookingMethod": "无需预约",
-      "capacity": "30人",
-      "facilities": [
-        "休闲座椅",
-        "绿植景观",
-        "遮阳伞",
-        "小型烧烤区（需报备）"
-      ],
-      "status": "开放中",
-      "rating": 4.9,
-      "reviewsCount": 74,
-      "description": "每栋楼顶均设有空中花园，白天可享受阳光与绿植，晚上是吹风看星星的绝佳去处。",
-      "notices": [
-        "禁止高空抛物，违者追究法律责任",
-        "烧烤区需要提前向物业进行安全报备",
-        "21:30后请降低音量，避免影响顶层住户"
-      ],
-      "image": "🌸"
+      "source_id": "volunteer_beijing",
+      "name": "志愿北京",
+      "org_level": "beijing_platform",
+      "channel_type": "website_and_wechat",
+      "source_url": "https://www.bv2008.cn/",
+      "wechat_name": "志愿北京",
+      "wechat_alias": "bv2008cn",
+      "wechat_verified": true,
+      "domains": ["志愿招募", "社区服务", "环保", "助老助残", "文化文艺"],
+      "ingestion_priority": "P0",
+      "collection_mode": "structured_web_with_status_check"
     },
     {
-      "id": "space_book",
-      "name": "共享书吧",
-      "location": "2号楼1层",
-      "time": "09:00-21:00",
-      "bookingMethod": "无需预约",
-      "capacity": "12人",
-      "facilities": [
-        "藏书约800本",
-        "阅读桌",
-        "充电插座",
-        "自助咖啡机"
-      ],
-      "status": "开放中",
-      "rating": 4.9,
-      "reviewsCount": 52,
-      "description": "静谧的阅读与办公空间，提供丰富的图书和无限量自助低价咖啡。",
-      "notices": [
-        "请保持安静，接听电话请至书吧外",
-        "书籍阅读后请放回原分类架",
-        "咖啡机属于自助，请保持咖啡台面清洁"
-      ],
-      "image": "📚"
+      "source_id": "daxing_government_web",
+      "name": "北京市大兴区人民政府",
+      "org_level": "daxing_district",
+      "channel_type": "official_website",
+      "source_url": "https://www.bjdx.gov.cn/",
+      "wechat_name": null,
+      "wechat_alias": null,
+      "wechat_verified": null,
+      "domains": ["政务公开", "通知公告", "政务服务", "意见征集", "部门机构"],
+      "ingestion_priority": "P1",
+      "collection_mode": "official_web"
     },
     {
-      "id": "space_meeting",
-      "name": "社区会议室",
-      "location": "物业中心旁",
-      "time": "09:00-18:00",
-      "bookingMethod": "小程序预约（提前3天）",
-      "capacity": "30人",
-      "facilities": [
-        "大型会议桌",
-        "超清投影仪",
-        "无线麦克风",
-        "白板"
-      ],
-      "status": "可预约",
-      "rating": 4.5,
-      "reviewsCount": 12,
-      "description": "适合社区事务商议、中型讲座、自发学术沙龙等，可向物业预约使用。",
-      "notices": [
-        "仅限非商用、利于社区建设的会议使用",
-        "请提前3天提出申请，说明会议主题"
-      ],
-      "image": "💼"
+      "source_id": "daxing_zhengshu_wechat",
+      "name": "大兴政数",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/ztlm/dxqzwxmtjz/index.html",
+      "wechat_name": "大兴政数",
+      "wechat_alias": null,
+      "wechat_verified": true,
+      "domains": ["办事指南", "公共服务", "业务电话"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review",
+      "notes": "公众号内部检索未发现名为“大兴政务”的精确账号。"
     },
     {
-      "id": "space_play",
-      "name": "儿童游乐区",
-      "location": "小区中心广场",
-      "time": "08:00-20:00",
-      "bookingMethod": "无需预约",
-      "capacity": "—",
-      "facilities": [
-        "滑梯",
-        "秋千",
-        "沙池",
-        "家长休息椅"
-      ],
-      "status": "开放中",
-      "rating": 4.6,
-      "reviewsCount": 29,
-      "description": "小区中央的安全无障碍儿童乐园，铺设了防摔塑胶地垫。",
-      "notices": [
-        "儿童游玩须有家长全程陪同监护",
-        "请勿带宠物进入沙池区"
-      ],
-      "image": "🎈"
+      "source_id": "daxing_media_wechat",
+      "name": "这里是大兴",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/ztlm/dxqzwxmtjz/index.html",
+      "wechat_name": "这里是大兴",
+      "wechat_alias": "DTV_NEWS",
+      "wechat_verified": true,
+      "domains": ["区域资讯", "政策资讯", "文化惠民", "活动传播"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "space_garden_plot",
-      "name": "社区菜园",
-      "location": "小区东侧",
-      "time": "全天",
-      "bookingMethod": "小程序认领（每季度开放）",
-      "capacity": "—",
-      "facilities": [
-        "种植箱 × 12",
-        "共享农具",
-        "自动浇水设施"
-      ],
-      "status": "认领中",
-      "rating": 4.7,
-      "reviewsCount": 18,
-      "description": "每季度提供12个共享种植箱供居民认领，自己动手体验播种、耕耘与收获的喜悦。",
-      "notices": [
-        "认领期为一季度，如需续期请重新参与抽签认领",
-        "请勿采摘他人种植箱内的果蔬"
-      ],
-      "image": "👩‍🌾"
+      "source_id": "daxing_civil_affairs_wechat",
+      "name": "民生正事儿",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/zfxxgk/zfxxgkzn/qzfbm80/723978/index.html",
+      "wechat_name": "民生正事儿",
+      "wechat_alias": "bjdxmz",
+      "wechat_verified": true,
+      "domains": ["养老", "社会救助", "社会组织", "民政政策"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "space_pet",
-      "name": "宠物活动区",
-      "location": "小区西侧",
-      "time": "06:00-22:00",
-      "bookingMethod": "无需预约",
-      "capacity": "—",
-      "facilities": [
-        "围栏安全防护",
-        "宠物便便箱",
-        "饮水点",
-        "基础跨栏设施"
-      ],
-      "status": "开放中",
-      "rating": 4.8,
-      "reviewsCount": 40,
-      "description": "宠物们的快乐社交场所，设有防逃跑双层围栏，在这里狗狗可以自由奔跑。",
-      "notices": [
-        "携犬出户必须栓绳，进入区内解开围栏前请先观察",
-        "必须及时清理自家宠物的排泄物"
-      ],
-      "image": "🐶"
+      "source_id": "daxing_health_wechat",
+      "name": "健康大兴",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/jgzq/index.html",
+      "wechat_name": "健康大兴",
+      "wechat_alias": "jiankangdaxing",
+      "wechat_verified": true,
+      "domains": ["卫生健康", "医院服务", "预约", "健康科普"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "space_laundry",
-      "name": "共享洗衣房",
-      "location": "每栋楼1层",
-      "time": "06:00-23:00",
-      "bookingMethod": "扫码使用",
-      "capacity": "—",
-      "facilities": [
-        "商用洗衣机 × 3",
-        "商用烘干机 × 2",
-        "蒸汽熨烫台"
-      ],
-      "status": "使用中",
-      "rating": 4.4,
-      "reviewsCount": 65,
-      "description": "每栋楼大堂1层均设有共享洗烘中心，适合清洗大件被褥与多阴雨天快速烘干。",
-      "notices": [
-        "清洗宠物用品请使用专门的宠物隔离洗衣机",
-        "衣物洗完后请及时取出，避免占用他人时间"
-      ],
-      "image": "🧺"
-    }
-  ],
-  "services": [
-    {
-      "id": "service_convenience",
-      "name": "邻里便利店",
-      "type": "超市便利",
-      "location": "小区南门入口",
-      "hours": "24小时",
-      "phone": "13812345678",
-      "rating": 4.6,
-      "tags": [
-        "可代收快递",
-        "关东煮好吃",
-        "24h营业"
-      ],
-      "reviews": [
-        "深夜下班回来能喝到热乎乎的关东煮，太治愈了。",
-        "老板人很热情，平时还能寄存个小东西。"
-      ],
-      "hasDiscount": true,
-      "discountText": "凭“搭把手”认证住户享自营零食 9.5 折",
-      "image": "🏪"
+      "source_id": "daxing_culture_wechat",
+      "name": "文旅大兴",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/zfxxgk/zfxxgkzn/qzfbm80/723926/index.html",
+      "wechat_name": "文旅大兴",
+      "wechat_alias": null,
+      "wechat_verified": true,
+      "domains": ["文化馆", "公共文化", "旅游", "美育课程", "演出"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "service_supermarket",
-      "name": "鲜生优选超市",
-      "type": "生鲜超市",
-      "location": "小区南门对面100米",
-      "hours": "07:00-22:00",
-      "phone": "13823456789",
-      "rating": 4.8,
-      "tags": [
-        "蔬菜新鲜",
-        "晚上8点后打折",
-        "种类齐全"
-      ],
-      "reviews": [
-        "每天晚上的折扣力度很大，非常划算！",
-        "生鲜食品确实新鲜，离得近很方便。"
-      ],
-      "hasDiscount": true,
-      "discountText": "晚 8:30 后熟食及生鲜菜品全场 7 折起",
-      "image": "🥦"
+      "source_id": "daxing_library_wechat",
+      "name": "北京市大兴区图书馆",
+      "org_level": "daxing_public_institution",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/jgzq/qzfjg/ww69/ssjg22/704694/index.html",
+      "wechat_name": "北京市大兴区图书馆",
+      "wechat_alias": "daxinglib",
+      "wechat_verified": true,
+      "domains": ["阅读活动", "公益课程", "志愿者", "图书馆服务"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "service_sf",
-      "name": "顺丰快递站",
-      "type": "快递服务",
-      "location": "小区东门旁",
-      "hours": "09:00-21:00",
-      "phone": "95338",
-      "rating": 4.5,
-      "tags": [
-        "可寄件",
-        "可暂存",
-        "速度快"
-      ],
-      "reviews": [
-        "小哥态度好，寄大件还给搭把手。",
-        "存件很安全，凭取件码拿。"
-      ],
-      "hasDiscount": false,
-      "discountText": "",
-      "image": "📦"
+      "source_id": "daxing_sports_wechat",
+      "name": "体育大兴",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/ztlm/dxqzwxmtjz/index.html",
+      "wechat_name": "体育大兴",
+      "wechat_alias": "TYDX69252294",
+      "wechat_verified": true,
+      "domains": ["场馆开放", "全民健身", "体育赛事", "公益体验"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "service_cainiao",
-      "name": "菜鸟驿站",
-      "type": "快递服务",
-      "location": "小区西门内",
-      "hours": "09:00-20:00",
-      "phone": "13834567890",
-      "rating": 4.3,
-      "tags": [
-        "小区内最方便",
-        "自助取件"
-      ],
-      "reviews": [
-        "就在小区西门里面，下班顺路取走，最方便。",
-        "高峰期排队人有点多，希望能多开几个扫码枪。"
-      ],
-      "hasDiscount": false,
-      "discountText": "",
-      "image": "📮"
+      "source_id": "daxing_women_wechat",
+      "name": "大兴女性",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/",
+      "wechat_name": "大兴女性",
+      "wechat_alias": "dxwomen",
+      "wechat_verified": true,
+      "domains": ["妇女儿童", "家庭教育", "研学", "权益服务"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "service_pharmacy",
-      "name": "仁心药房",
-      "type": "药店",
-      "location": "南门对面50米",
-      "hours": "08:00-22:30",
-      "phone": "13845678901",
-      "rating": 4.7,
-      "tags": [
-        "24小时售药窗口",
-        "支持医保"
-      ],
-      "reviews": [
-        "半夜孩子发烧，通过24小时小窗买到了退烧药，救了急。",
-        "药师很专业，还详细交代了吃药注意事项。"
-      ],
-      "hasDiscount": true,
-      "discountText": "常备家用药箱套餐享 8.8 折优惠",
-      "image": "💊"
+      "source_id": "daxing_youth_wechat",
+      "name": "青年大兴",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjyouth.gov.cn/",
+      "wechat_name": "青年大兴",
+      "wechat_alias": "qingniandaxing",
+      "wechat_verified": true,
+      "domains": ["社区青年汇", "假期托管", "青年活动", "志愿公益"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review",
+      "notes": "检索“青春大兴”返回该账号，当前规范名使用“青年大兴”。"
     },
     {
-      "id": "service_laundry_service",
-      "name": "洁衣洗衣",
-      "type": "洗衣服务",
-      "location": "2号楼B1层",
-      "hours": "07:00-21:00",
-      "phone": "13856789012",
-      "rating": 4.4,
-      "tags": [
-        "自助+人工",
-        "皮具护理",
-        "洗鞋"
-      ],
-      "reviews": [
-        "鞋子洗得很干净，和新的一样。",
-        "大衣干洗速度挺快，还有上门取送服务。"
-      ],
-      "hasDiscount": true,
-      "discountText": "季度干洗充值 200 送 30 元",
-      "image": "🧼"
+      "source_id": "daxing_jobs_wechat",
+      "name": "大兴就业平台",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_and_platform",
+      "source_url": "https://jy.daxing.net/",
+      "wechat_name": "大兴就业平台",
+      "wechat_alias": null,
+      "wechat_verified": true,
+      "domains": ["招聘会", "就业岗位", "就业服务"],
+      "ingestion_priority": "P1",
+      "collection_mode": "platform_and_wechat_status_check"
     },
     {
-      "id": "service_canteen",
-      "name": "邻里食堂",
-      "type": "餐饮",
-      "location": "2号楼1层",
-      "hours": "07:00-20:00",
-      "phone": "13867890123",
-      "rating": 4.2,
-      "tags": [
-        "便宜",
-        "干净",
-        "老年优惠"
-      ],
-      "reviews": [
-        "两荤一素只要15块，真便宜！",
-        "偶尔不想做饭就去食堂解决，干净放心。"
-      ],
-      "hasDiscount": true,
-      "discountText": "“搭把手”住户早餐享 9 折，60岁以上老人 8 折",
-      "image": "🍱"
+      "source_id": "daxing_emergency_wechat",
+      "name": "大兴应急",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://www.bjdx.gov.cn/bjsdxqrmzf/zwfw/ztlm/dxqzwxmtjz/index.html",
+      "wechat_name": "大兴应急",
+      "wechat_alias": "DX_safety",
+      "wechat_verified": true,
+      "domains": ["应急", "安全教育", "风险提醒", "培训"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "service_cafe",
-      "name": "转角咖啡",
-      "type": "咖啡/简餐",
-      "location": "1号楼1层",
-      "hours": "08:00-20:00",
-      "phone": "13878901234",
-      "rating": 4.9,
-      "tags": [
-        "环境好",
-        "适合办公",
-        "老板人超好"
-      ],
-      "reviews": [
-        "拿铁很好喝，豆子很香 —— 小雅",
-        "环境超好，适合周末带电脑来办公 —— 阿栋",
-        "老板人很好，偶尔会送小饼干 —— 小鱼"
-      ],
-      "hasDiscount": true,
-      "discountText": "凭“搭把手”小程序住户认证，所有饮品 9 折",
-      "image": "☕"
+      "source_id": "daxing_civilization_wechat",
+      "name": "文明大兴",
+      "org_level": "daxing_district",
+      "channel_type": "wechat_official",
+      "source_url": "https://bj.wenming.cn/dx/",
+      "wechat_name": "文明大兴",
+      "wechat_alias": null,
+      "wechat_verified": true,
+      "domains": ["新时代文明实践", "公益课程", "社区活动", "志愿服务"],
+      "ingestion_priority": "P1",
+      "collection_mode": "wechat_whitelist_human_review"
     },
     {
-      "id": "service_haircut",
-      "name": "小区理发店",
-      "type": "理发",
-      "location": "南门旁",
-      "hours": "09:00-21:00",
-      "phone": "13889012345",
-      "rating": 4.1,
-      "tags": [
-        "便宜",
-        "快剪30元",
-        "不推销"
-      ],
-      "reviews": [
-        "师傅手艺很麻利，快剪30元不推销，太省心了。",
-        "洗剪吹一套很实惠。"
-      ],
-      "hasDiscount": true,
-      "discountText": "新店试营业期间，所有剪发套餐住户享 8 折",
-      "image": "✂️"
-    },
-    {
-      "id": "service_clinic",
-      "name": "社区诊所",
-      "type": "医疗服务",
-      "location": "东门旁",
-      "hours": "08:00-18:00",
-      "phone": "120xxxxxxxx",
-      "rating": 4.5,
-      "tags": [
-        "常见病诊疗",
-        "打疫苗",
-        "医生和蔼"
-      ],
-      "reviews": [
-        "平时感冒发烧拿药很方便，医生护士都很温柔。",
-        "带宝宝来打流感疫苗。"
-      ],
-      "hasDiscount": false,
-      "discountText": "",
-      "image": "🏥"
-    },
-    {
-      "id": "service_pet_hospital",
-      "name": "宠物医院",
-      "type": "宠物服务",
-      "location": "南门对面200米",
-      "hours": "09:00-20:00",
-      "phone": "13890123456",
-      "rating": 4.6,
-      "tags": [
-        "疫苗体检",
-        "寄养服务",
-        "设备先进"
-      ],
-      "reviews": [
-        "带我家橘猫来打疫苗，医生很轻柔。",
-        "寄养环境干净，每天发视频，很放心。"
-      ],
-      "hasDiscount": true,
-      "discountText": "住户专享：宠物洗澡美容年卡 8.5 折",
-      "image": "🐱"
-    },
-    {
-      "id": "service_fruit",
-      "name": "水果摊",
-      "type": "生鲜",
-      "location": "小区西门流动",
-      "hours": "16:00-21:00",
-      "phone": "—",
-      "rating": 4.3,
-      "tags": [
-        "价格便宜",
-        "应季水果",
-        "甜度高"
-      ],
-      "reviews": [
-        "水果特别甜，大叔人好，每次都给抹零。",
-        "西瓜便宜又红，夏天经常去买。"
-      ],
-      "hasDiscount": false,
-      "discountText": "",
-      "image": "🍉"
+      "source_id": "lianyi_social_work",
+      "name": "北京市大兴区观音寺街道联燚社会工作服务中心",
+      "org_level": "social_organization",
+      "channel_type": "volunteer_beijing_org",
+      "source_url": "https://www.bv2008.cn/app/opp/view.php?id=WyE4Wvl0BPJIq",
+      "wechat_name": null,
+      "wechat_alias": null,
+      "wechat_verified": null,
+      "domains": ["社区活动执行", "志愿者组织", "邻里节"],
+      "ingestion_priority": "P2",
+      "collection_mode": "partner_record_manual_review",
+      "notes": "有在西红门执行 2026 邻里节项目的公开记录，不代表已与本项目合作。"
     }
   ]
 }

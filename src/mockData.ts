@@ -1,4 +1,4 @@
-import { UserProfile, Space, Service, Event, FeedItem, Announcement, WeeklyReport } from './types';
+import type { UserProfile, Space, Service, Event, FeedItem, Announcement, WeeklyReport } from './types.ts';
 
 export const mockUsers: UserProfile[] = [
   {

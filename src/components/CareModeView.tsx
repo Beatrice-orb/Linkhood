@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ChevronRight, 
-  Clock, 
-  MapPin, 
-  Calendar, 
-  Phone, 
-  MessageSquare, 
-  Plus, 
-  Trash2, 
-  Bell, 
+import {
+  ChevronRight,
+  Clock,
+  MapPin,
+  Calendar,
+  Phone,
+  MessageSquare,
+  Plus,
+  Trash2,
+  Bell,
   FileText
 } from 'lucide-react';
 import { UserProfile, Space, Event, Service, FeedItem } from '../types';
@@ -50,6 +50,7 @@ interface CareModeViewProps {
   feedItems: FeedItem[];
   setFeedItems: React.Dispatch<React.SetStateAction<FeedItem[]>>;
   handleHelpAction: (id: string) => void;
+  handleLikePost: (id: string) => void;
   setSelectedSpace: (space: Space | null) => void;
   setSelectedEvent: (event: Event | null) => void;
   setShowAnnouncementsModal: (show: boolean) => void;
@@ -57,6 +58,7 @@ interface CareModeViewProps {
   showToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
   triggerToggleCareMode: (target: boolean) => void;
   handleStartPrivateChat: (name: string, type: string) => void;
+  persistPost: (body: { type: 'help' | 'moment' | 'rally'; category?: string; content: string; meetingTime?: string; bountyPoints?: number }) => Promise<FeedItem | null>;
 }
 
 // 2.2 Elders Users Data (10 elder users)
@@ -161,6 +163,7 @@ export default function CareModeView({
   feedItems,
   setFeedItems,
   handleHelpAction,
+  handleLikePost,
   setSelectedSpace,
   setSelectedEvent,
   setShowAnnouncementsModal,
@@ -168,10 +171,20 @@ export default function CareModeView({
   showToast,
   triggerToggleCareMode,
   handleStartPrivateChat,
+  persistPost,
 }: CareModeViewProps) {
 
   // Local state controllers for elder-friendly reactive data
   const [localFeeds, setLocalFeeds] = useState<FeedItem[]>(initialElderFeed);
+
+  useEffect(() => {
+    const ownPersistedPosts = feedItems.filter((item) => item.authorId === currentUser.id);
+    if (ownPersistedPosts.length === 0) return;
+    setLocalFeeds((current) => [
+      ...ownPersistedPosts,
+      ...current.filter((item) => !ownPersistedPosts.some((persisted) => persisted.id === item.id)),
+    ]);
+  }, [currentUser.id, feedItems]);
   const [localRegisteredEvents, setLocalRegisteredEvents] = useState<string[]>([]);
   const [localBookedSpaces, setLocalBookedSpaces] = useState<string[]>([]);
   const [localGuardians, setLocalGuardians] = useState([
@@ -211,7 +224,7 @@ export default function CareModeView({
   const [careHelpWhen, setCareHelpWhen] = useState('');
   const [careHelpWhere, setCareHelpWhere] = useState('');
   const [careMomentContent, setCareMomentContent] = useState('');
-  
+
   // Start Activity simplified form
   const [careActivityWhat, setCareActivityWhat] = useState('');
   const [careActivityWhen, setCareActivityWhen] = useState('');
@@ -350,39 +363,40 @@ export default function CareModeView({
     showToast(`已成功套用【${type}】活动快捷模板！`, 'info');
   };
 
-  // Submit generic Care Publisher
-  const handleCarePublishSubmit = (e: React.FormEvent) => {
+  // Submit the elder-friendly publisher through the shared backend.
+  const handleCarePublishSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     let contentStr = '';
     let imageStr: string | undefined = undefined;
 
     if (carePublishType === 'help') {
-      contentStr = `🙋【生活求助】我想求助：“${careHelpWhat}”；想要在【${careHelpWhen || '尽快'}】送到【${careHelpWhere || '我家房门内'}】。有能帮帮忙的邻居吗？`;
+      if (!careHelpWhat.trim()) return;
+      contentStr = `🙋【生活求助】我想求助：“${careHelpWhat}”；希望在【${careHelpWhen || '尽快'}】送到【${careHelpWhere || '本楼栋公共区域'}】。有能帮忙的邻居吗？`;
     } else if (carePublishType === 'moment') {
+      if (!careMomentContent.trim()) return;
       contentStr = `📸 【长者分享】“${careMomentContent}”`;
       imageStr = '☀️';
     } else {
-      // Activity
+      if (!careActivityWhat.trim() || !careActivityWhen.trim() || !careActivityWhere.trim()) return;
       contentStr = `🎉【邻里聚会召集】“${careActivityWhat}”。时间：${careActivityWhen}，地点：${careActivityWhere}。${careActivityPhone ? `联系电话：${careActivityPhone}` : ''}。想玩的一起报名接龙呀！`;
     }
 
-    const newPost: FeedItem = {
-      id: `fd-user-${Date.now()}`,
-      type: carePublishType === 'help' ? 'help' : carePublishType === 'activity' ? 'rally' as any : 'moment',
-      authorName: currentUser.name,
-      authorRoom: currentUser.room,
-      distance: 0,
-      time: '刚刚',
+    const savedPost = await persistPost({
+      type: carePublishType === 'activity' ? 'rally' : carePublishType,
+      category: carePublishType === 'help' ? '代取' : undefined,
       content: contentStr,
-      likes: 0,
-      comments: [],
-      image: imageStr,
-      actionStatus: carePublishType === 'help' ? 'idle' : undefined
-    };
+      meetingTime: carePublishType === 'help'
+        ? careHelpWhen || '尽快'
+        : carePublishType === 'activity'
+          ? `${careActivityWhen} · ${careActivityWhere}`
+          : undefined,
+      bountyPoints: carePublishType === 'help' ? 5 : undefined,
+    });
+    if (!savedPost) return;
 
-    setLocalFeeds([newPost, ...localFeeds]);
+    setLocalFeeds((current) => [{ ...savedPost, image: savedPost.image || imageStr }, ...current.filter((item) => item.id !== savedPost.id)]);
     showToast(carePublishType === 'activity' ? '🎉 活动发起成功！已广播展示在邻里圈。' : '发布成功！感谢您的分享！', 'success');
-    
+
     // Clear forms
     setCareHelpWhat(''); setCareHelpWhen(''); setCareHelpWhere('');
     setCareMomentContent('');
@@ -398,7 +412,7 @@ export default function CareModeView({
       return item;
     }));
     showToast(`您已成功认领帮助【${authorName}】！已为您自动开启零打字对话窗。`, 'success');
-    
+
     // Open sim chat
     setActiveSimChat({
       id: itemId,
@@ -430,7 +444,7 @@ export default function CareModeView({
 
   return (
     <div className="px-3.5 py-1 space-y-6 animate-fade-in text-lg leading-relaxed selection:bg-coral/20 pb-24">
-      
+
       {/* ======================================================== */}
       {/*              SOS FLOATING EMERGENCY TRIGGER              */}
       {/* ======================================================== */}
@@ -455,7 +469,7 @@ export default function CareModeView({
             <div className="space-y-3">
               <h3 className="font-black text-2xl text-ink">确认发出紧急求救？</h3>
               <p className="text-sm font-extrabold text-coral">系统将呼叫紧急联络人并定位到您家！</p>
-              
+
               <div className="bg-canvas p-4.5 rounded-2xl text-left text-xs space-y-2.5 border-2 border-hairline font-black text-ink-muted">
                 <p>📍 呼救定位：<span className="text-coral">泊寓A区 3号楼 {currentUser.room}室</span></p>
                 <p>📞 紧急通知：<span className="text-ink">女儿小雅、楼栋管家小王</span></p>
@@ -532,11 +546,11 @@ export default function CareModeView({
       {/* ======================================================== */}
       {activeTab === 'home' && (
         <div className="space-y-5 animate-fade-in text-left">
-          
+
           {/* ANTI-FRAUD BANNER (CAROUSEL) */}
           <div className="bg-amber-light p-4 rounded-[28px] border-2 border-amber/30 flex items-center gap-3 shadow-xs">
             <span className="text-2xl animate-bounce shrink-0">🛡️</span>
-            <button 
+            <button
               onClick={() => setShowFraudKnowledge(true)}
               className="flex-1 text-left active:scale-99 transition-all"
             >
@@ -556,7 +570,7 @@ export default function CareModeView({
               onClick={handleReportSafe}
               disabled={todayReportedSafe}
               className={`py-3.5 px-3 rounded-2xl shadow-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${
-                todayReportedSafe 
+                todayReportedSafe
                   ? 'bg-jade-light text-jade border-jade/20 opacity-90 cursor-not-allowed'
                   : 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700'
               }`}
@@ -685,7 +699,7 @@ export default function CareModeView({
                           已接龙 <strong className="text-coral text-sm">{ev.signedUp + (isSigned ? 1 : 0)}</strong>/{ev.capacity}人
                         </span>
                       </div>
-                      
+
                       <div className="space-y-1 text-xs text-ink-muted font-black">
                         <p>🕒 举办时间：{ev.time}</p>
                         <p>📍 活动地点：{ev.location}</p>
@@ -783,7 +797,7 @@ export default function CareModeView({
                       </span>
                       <div>
                         <h4 className="font-black text-lg text-ink flex items-center gap-2">
-                          {sw.name} 
+                          {sw.name}
                           <span className="text-xs bg-jade text-white px-2 py-0.5 rounded font-black">{sw.role}</span>
                         </h4>
                         <p className="text-xs text-ink-muted font-bold mt-1">🕒 值班时间：{sw.dutyTime}</p>
@@ -869,7 +883,7 @@ export default function CareModeView({
       {/* ======================================================== */}
       {activeTab === 'circle' && (
         <div className="space-y-5 animate-fade-in text-left">
-          
+
           <div className="flex justify-between items-center">
             <h2 className="font-black text-xl text-ink">👥 邻里圈 · 关怀版</h2>
             <span className="text-xs font-black text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
@@ -889,8 +903,8 @@ export default function CareModeView({
                 key={f.key}
                 onClick={() => setFeedFilter(f.key)}
                 className={`text-sm px-5 py-3 rounded-full border-2 shrink-0 font-black transition-all ${
-                  feedFilter === f.key 
-                    ? 'bg-jade text-white border-transparent shadow-md' 
+                  feedFilter === f.key
+                    ? 'bg-jade text-white border-transparent shadow-md'
                     : 'bg-surface text-ink-muted border-hairline'
                 }`}
               >
@@ -913,7 +927,7 @@ export default function CareModeView({
                 ].map((tip, idx) => (
                   <div key={idx} className="bg-white p-3.5 rounded-2xl text-xs text-indigo-900 border border-indigo-100 flex justify-between items-center gap-2">
                     <p className="font-black leading-relaxed flex-1">{tip.text}</p>
-                    <button 
+                    <button
                       onClick={() => showToast(`已为您自动预约提交“${tip.action}”！`, 'success')}
                       className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shrink-0"
                     >
@@ -940,7 +954,7 @@ export default function CareModeView({
                 const isActivity = item.type === 'activity' || item.type === 'rally' as any;
                 return (
                   <div key={item.id} className="bg-surface p-5 rounded-[32px] border-2 border-hairline space-y-4 shadow-sm animate-fade-in">
-                    
+
                     {/* User profile */}
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3">
@@ -983,10 +997,14 @@ export default function CareModeView({
                     <div className="flex justify-between items-center pt-3 border-t border-hairline">
                       <button
                         onClick={() => {
-                          item.hasLiked = !item.hasLiked;
-                          item.likes = item.hasLiked ? item.likes + 1 : item.likes - 1;
-                          setLocalFeeds([...localFeeds]);
-                          showToast(item.hasLiked ? '点赞鼓励成功！感谢大爱！' : '取消点赞');
+                          if (item.authorId) {
+                            handleLikePost(item.id);
+                          } else {
+                            item.hasLiked = !item.hasLiked;
+                            item.likes = item.hasLiked ? item.likes + 1 : item.likes - 1;
+                            setLocalFeeds([...localFeeds]);
+                            showToast(item.hasLiked ? '点赞鼓励成功！感谢大爱！' : '取消点赞');
+                          }
                         }}
                         className={`flex items-center gap-1.5 text-xs font-black ${item.hasLiked ? 'text-coral' : 'text-ink-muted'}`}
                       >
@@ -995,10 +1013,10 @@ export default function CareModeView({
 
                       {isHelp && item.actionStatus !== 'claimed' && (
                         <button
-                          onClick={() => handleClaimHelpLocal(item.id, item.authorName)}
+                          onClick={() => item.authorId ? handleHelpAction(item.id) : handleClaimHelpLocal(item.id, item.authorName)}
                           className="py-2.5 px-4 bg-coral hover:bg-coral-hover text-white font-black text-xs rounded-xl shadow-sm transition-all active:scale-95"
                         >
-                          🙌 我来帮他
+                          {item.authorId === currentUser.id ? (item.helpStatus === 'claimed' ? '✅ 确认完成' : '取消需求') : '🙌 我来帮他'}
                         </button>
                       )}
                       {isHelp && item.actionStatus === 'claimed' && (
@@ -1063,7 +1081,7 @@ export default function CareModeView({
       {/* ======================================================== */}
       {activeTab === 'me' && (
         <div className="space-y-5 animate-fade-in text-left">
-          
+
           {/* User profile card */}
           <div className="bg-surface p-5 rounded-[32px] border-2 border-hairline space-y-4 shadow-xs">
             <div className="flex items-center gap-4">
@@ -1072,7 +1090,7 @@ export default function CareModeView({
               </div>
               <div>
                 <h3 className="font-black text-base text-ink flex items-center gap-2">
-                  {currentUser.name} 
+                  {currentUser.name}
                   <span className="text-xs bg-jade-light text-jade border border-jade/15 px-2 py-0.5 rounded font-bold">已认证长辈</span>
                 </h3>
                 <p className="text-xs text-jade font-black mt-1.5">🚪 我的常住：泊寓A区 · 3号楼 {currentUser.room}室</p>
@@ -1339,7 +1357,7 @@ export default function CareModeView({
       {careActiveMenuModal && (
         <div className="fixed inset-0 bg-ink/80 flex flex-col justify-end" style={{ zIndex: 99999 }}>
           <div className="bg-canvas border-t-4 border-jade rounded-t-[36px] max-h-[90%] overflow-y-auto flex flex-col p-6 space-y-4 text-left">
-            
+
             <div className="flex justify-between items-center pb-2.5 border-b-2 border-hairline">
               <h3 className="font-extrabold text-lg text-ink">
                 {careActiveMenuModal === 'health_safety' && '🏥 我的安全与健康药盒'}
@@ -1351,7 +1369,7 @@ export default function CareModeView({
             </div>
 
             <div className="flex-1 overflow-y-auto max-h-[70vh] space-y-4">
-              
+
               {/* 1. HEALTH AND SAFETY */}
               {careActiveMenuModal === 'health_safety' && (
                 <div className="space-y-4">
@@ -1498,13 +1516,13 @@ export default function CareModeView({
                               <span className="font-mono">{f.time}</span>
                             </div>
                             <p className="text-sm text-ink leading-relaxed font-black">{f.content}</p>
-                            
+
                             {f.type === ('rally' as any) && (
                               <div className="bg-canvas p-2.5 rounded-xl mt-1 border border-hairline">
                                 <p className="text-[10px] text-jade font-black">🟢 报名接龙名单：张德明、李桂芳、王秀兰 已报名接龙！</p>
                               </div>
                             )}
-                            
+
                             <button
                               onClick={() => {
                                 setLocalFeeds(prev => prev.filter(item => item.id !== f.id));
@@ -1676,7 +1694,7 @@ export default function CareModeView({
               )}
 
             </div>
-            
+
             <button
               onClick={() => setCareActiveMenuModal(null)}
               className="w-full py-4.5 bg-jade text-white font-black text-sm rounded-2xl shadow-md mt-4"
@@ -1691,7 +1709,7 @@ export default function CareModeView({
   );
 }
 
-// Micro Helper to protect spacing behavior during typing 
+// Micro Helper to protect spacing behavior during typing
 function setKeepSpacesAndVal(val: string, setter: (s: string) => void) {
   setter(val);
 }

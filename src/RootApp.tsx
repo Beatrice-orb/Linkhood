@@ -1,89 +1,60 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
-import { MonitorCog, RefreshCcw, Smartphone } from 'lucide-react';
-import ResidentApp from './App';
-import { clearAnonymousDemandSignals } from './features/resident-agent/demandRepository';
+import { lazy, Suspense, useEffect } from 'react';
+import { DemoLaunchpad } from './demo/DemoLaunchpad';
+import { DemoProvider } from './demo/DemoStore';
+import { useHashRoute } from './demo/navigation';
+import { ResidentServicesApp } from './resident/ResidentServicesApp';
+import { TogDesktopApp } from './tog/TogDesktopApp';
+import { TogMobileApp } from './tog/TogMobileApp';
+import App from './App';
+import './demo/demo.css';
 
-const CommunitySurface = lazy(() => import('./integration/CommunitySurface'));
+const GovernmentApp = lazy(() => import('./government/App').then((module) => ({ default: module.GovernmentApp })));
 
-type Surface = 'resident' | 'community';
+const titles: Record<string, string> = {
+  '/demo': '搭把手 · 双端联动 Demo',
+  '/resident': '搭把手 · 居民社区生活端',
+  '/resident/services': '搭把手 · 居民端身边服务',
+  '/tog/desktop/services': '搭把手 · 公共服务接入台',
+  '/tog/desktop/workbench': '搭把手 · 社区今日工作台',
+  '/tog/desktop/residents': '搭把手 · 居民服务档案',
+  '/tog/desktop/permissions': '搭把手 · 数据与权限',
+  '/tog/desktop/services/new': '搭把手 · 新增公共服务',
+  '/tog/desktop/activities': '搭把手 · 活动运营台',
+  '/tog/desktop/activities/new': '搭把手 · 新建活动',
+  '/tog/desktop/insights': '搭把手 · 需求与反馈',
+  '/tog/mobile/workbench': '搭把手 · 社区工作台',
+  '/tog/mobile/activities': '搭把手 · 社工服务活动',
+  '/tog/mobile/followup': '搭把手 · 居民跟进',
+  '/tog/mobile/me': '搭把手 · 社工账号',
+  '/tog/mobile/visit': '搭把手 · 走访记录核对',
+  '/government': '搭把手 · G端社区治理驾驶舱',
+};
 
-function readSurface(): Surface {
-  return window.location.hash.startsWith('#/community') ? 'community' : 'resident';
+function RoutedApp() {
+  const route = useHashRoute();
+
+  useEffect(() => {
+    document.title = titles[route] ?? titles['/demo'];
+  }, [route]);
+
+  if (route === '/resident') return <App />;
+  if (route === '/resident/services') return <ResidentServicesApp />;
+  if (route.startsWith('/tog/desktop/')) return <TogDesktopApp route={route} />;
+  if (route.startsWith('/tog/mobile/')) return <TogMobileApp route={route} />;
+  if (route.startsWith('/government')) {
+    return (
+      <Suspense fallback={<main className="government-loading" role="status">正在加载 G 端治理驾驶舱…</main>}>
+        <GovernmentApp />
+      </Suspense>
+    );
+  }
+  return <DemoLaunchpad />;
 }
 
 export default function RootApp() {
-  const [surface, setSurface] = useState<Surface>(readSurface);
-
-  useEffect(() => {
-    const handleHashChange = () => setSurface(readSurface());
-    window.addEventListener('hashchange', handleHashChange);
-    if (!window.location.hash) window.location.hash = '#/resident';
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const navigate = (nextSurface: Surface) => {
-    window.location.hash = nextSurface === 'community' ? '#/community' : '#/resident';
-  };
-
   return (
-    <div className="min-h-screen bg-canvas text-ink">
-      <nav className="sticky top-0 z-[100] flex h-12 items-center justify-between border-b border-hairline bg-surface px-3 shadow-xs sm:px-5">
-        <div className="flex items-center gap-2 text-xs font-bold text-ink">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-jade text-white">搭</span>
-          <span className="hidden sm:inline">双端演示 · v0.2</span>
-        </div>
-
-        <div className="flex items-center gap-1 rounded-xl bg-canvas p-1">
-          <button
-            type="button"
-            onClick={() => navigate('resident')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${
-              surface === 'resident' ? 'bg-surface text-jade shadow-xs' : 'text-ink-muted'
-            }`}
-          >
-            <Smartphone className="h-3.5 w-3.5" />
-            居民端
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('community')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors ${
-              surface === 'community' ? 'bg-surface text-jade shadow-xs' : 'text-ink-muted'
-            }`}
-          >
-            <MonitorCog className="h-3.5 w-3.5" />
-            社区驾驶舱
-          </button>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            clearAnonymousDemandSignals();
-            window.location.hash = '#/resident';
-            window.location.reload();
-          }}
-          className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-medium text-ink-muted hover:bg-canvas hover:text-ink"
-          title="清空本地匿名需求信号"
-        >
-          <RefreshCcw className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">重置演示</span>
-        </button>
-      </nav>
-
-      {surface === 'community' ? (
-        <Suspense
-          fallback={
-            <div className="flex min-h-[calc(100svh-48px)] items-center justify-center bg-[#1F4A3A] text-sm text-[#F5F0EB]">
-              正在载入社区驾驶舱…
-            </div>
-          }
-        >
-          <CommunitySurface />
-        </Suspense>
-      ) : (
-        <ResidentApp embeddedDemo />
-      )}
-    </div>
+    <DemoProvider>
+      <RoutedApp />
+    </DemoProvider>
   );
 }
