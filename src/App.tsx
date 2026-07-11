@@ -10,6 +10,15 @@ import {
 } from './mockData';
 import { UserProfile, Space, Service, Event, FeedItem, Announcement, WeeklyReport } from './types';
 import { 
+  DabashouMap, 
+  DabashouCircle, 
+  DabashouMe, 
+  DabashouPublish, 
+  DabashouCredit, 
+  DabashouPoints, 
+  DabashouBadge 
+} from './components/Icons';
+import { 
   MapPin, 
   Phone, 
   Clock, 
@@ -40,6 +49,7 @@ import {
   FileText,
   Sparkles
 } from 'lucide-react';
+import CareModeView from './components/CareModeView';
 
 export default function App() {
   // Current logged in user (starts with 小雅)
@@ -50,6 +60,103 @@ export default function App() {
   // App tabs
   type Tab = 'home' | 'circle' | 'chat' | 'me';
   const [activeTab, setActiveTab] = useState<Tab>('home');
+
+  // Care Mode State (Persisted in localStorage)
+  const [careMode, setCareMode] = useState<boolean>(() => {
+    return localStorage.getItem('careMode') === 'true';
+  });
+
+  // Custom Confirmation Dialog for Care Mode
+  const [showCareModeConfirm, setShowCareModeConfirm] = useState<{
+    visible: boolean;
+    targetMode: boolean;
+  }>({ visible: false, targetMode: false });
+
+  // Helper to trigger Care Mode changes
+  const triggerToggleCareMode = (target: boolean) => {
+    setShowCareModeConfirm({ visible: true, targetMode: target });
+  };
+
+  const handleConfirmToggleCareMode = () => {
+    const newVal = showCareModeConfirm.targetMode;
+    setCareMode(newVal);
+    localStorage.setItem('careMode', String(newVal));
+    if (newVal) {
+      if (activeTab === 'chat') {
+        setActiveTab('home');
+      }
+    }
+    setShowCareModeConfirm({ visible: false, targetMode: false });
+    showToast(newVal ? '已成功切换至关怀版！' : '已返回普通版本！', 'info');
+  };
+
+  // Care-Mode Specific States
+  const [showCareNotices, setShowCareNotices] = useState(false);
+  const [showCarePublish, setShowCarePublish] = useState(false);
+  const [carePublishType, setCarePublishType] = useState<'help' | 'moment'>('help');
+  const [careHelpWhat, setCareHelpWhat] = useState('');
+  const [careHelpWhen, setCareHelpWhen] = useState('');
+  const [careHelpWhere, setCareHelpWhere] = useState('');
+  const [careMomentContent, setCareMomentContent] = useState('');
+  const [careActiveMenuModal, setCareActiveMenuModal] = useState<string | null>(null);
+  const [careNotificationUnread, setCareNotificationUnread] = useState(2);
+
+  // Submit caretaker publish form
+  const handleCarePublishSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (carePublishType === 'help') {
+      if (!careHelpWhat.trim()) return;
+      const content = `【求助】需要帮：${careHelpWhat}。时间：${careHelpWhen || '随时'}。地点：${careHelpWhere || '本楼栋/附近'}`;
+      const newItem: FeedItem = {
+        id: `care_help_${Date.now()}`,
+        type: 'help',
+        category: '代取',
+        authorName: currentUser.name,
+        authorRoom: currentUser.room,
+        distance: 12,
+        time: '刚刚',
+        content: content,
+        likes: 0,
+        hasLiked: false,
+        comments: [],
+        meetingTime: careHelpWhen || '随时',
+        bountyPoints: 5,
+        creditScore: currentUser.creditScore,
+        helpCount: currentUser.helpCount,
+        actionText: '我来帮',
+        actionStatus: 'idle',
+        tags: ['长辈求助']
+      };
+      setFeedItems([newItem, ...feedItems]);
+      showToast('求助信息发布成功！邻居们会尽快看到！', 'success');
+    } else {
+      if (!careMomentContent.trim()) return;
+      const newItem: FeedItem = {
+        id: `care_moment_${Date.now()}`,
+        type: 'moment',
+        authorName: currentUser.name,
+        authorRoom: currentUser.room,
+        distance: 15,
+        time: '刚刚',
+        content: careMomentContent,
+        likes: 0,
+        hasLiked: false,
+        comments: [],
+        creditScore: currentUser.creditScore,
+        helpCount: currentUser.helpCount,
+        tags: ['日常分享']
+      };
+      setFeedItems([newItem, ...feedItems]);
+      showToast('动态发布成功！', 'success');
+    }
+
+    // Reset fields
+    setCareHelpWhat('');
+    setCareHelpWhen('');
+    setCareHelpWhere('');
+    setCareMomentContent('');
+    setShowCarePublish(false);
+  };
 
   // Sub tab inside Home (社区地图)
   type HomeSubTab = 'spaces' | 'events' | 'services' | 'social';
@@ -712,21 +819,21 @@ export default function App() {
   const totalHelpCountToday = feedItems.filter(i => i.type === 'help' && i.actionStatus !== 'claimed').length;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col lg:flex-row font-sans">
+    <div className="min-h-screen bg-canvas text-ink flex flex-col lg:flex-row font-sans">
       
       {/* LEFT SIDE: Active User Switcher Panel */}
-      <div className="w-full lg:w-72 bg-slate-950 p-6 border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col gap-4">
+      <div className="w-full lg:w-72 bg-surface p-6 border-b lg:border-b-0 lg:border-r border-hairline flex flex-col gap-4">
         <div className="flex items-center gap-3 mb-2">
-          <div className="bg-indigo-600/20 p-2.5 rounded-xl border border-indigo-500/30">
-            <Users className="w-6 h-6 text-indigo-400" />
+          <div className="bg-jade-light p-2.5 rounded-xl border border-jade/20">
+            <Users className="w-6 h-6 text-jade" />
           </div>
           <div>
-            <h2 className="font-bold text-lg text-white font-display">住户视角切换</h2>
-            <p className="text-xs text-slate-400">选择不同角色体验个性化主页</p>
+            <h2 className="font-bold text-lg text-ink font-display">住户视角切换</h2>
+            <p className="text-xs text-ink-muted">选择不同角色体验个性化主页</p>
           </div>
         </div>
 
-        <p className="text-xs text-slate-500 bg-slate-900/50 p-3 rounded-lg border border-slate-800/40">
+        <p className="text-xs text-ink-muted bg-canvas p-3 rounded-lg border border-hairline">
           💡 <strong>搭把手</strong> 是社区高度互信、温情互助的核心纽带。切换住户可看其对应房号、信用积分与个性标签，并以其身份参与空间预约、活动报名或发布互助。
         </p>
 
@@ -739,33 +846,33 @@ export default function App() {
                 onClick={() => handleUserChange(user.id)}
                 className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                   isMe 
-                    ? 'bg-gradient-to-r from-indigo-900/60 to-slate-900 border-indigo-500 text-white shadow-lg shadow-indigo-950/40' 
-                    : 'bg-slate-900/50 hover:bg-slate-900 border-slate-800/80 hover:border-slate-700 text-slate-300'
+                    ? 'bg-jade-light border-jade text-ink shadow-sm' 
+                    : 'bg-surface hover:bg-canvas border-hairline text-ink-muted'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${
-                    isMe ? 'bg-indigo-500 text-white animate-pulse' : 'bg-slate-800 text-slate-300'
+                    isMe ? 'bg-jade text-white' : 'bg-canvas text-ink-muted'
                   }`}>
                     {user.name.charAt(0)}
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-medium text-sm">{user.name}</span>
-                      <span className="text-[10px] px-1.5 py-0.2 bg-slate-800 text-slate-400 rounded">
+                      <span className="font-medium text-sm text-ink">{user.name}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 bg-canvas text-ink-muted border border-hairline rounded">
                         {user.room}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 truncate max-w-[120px]">{user.profession}</p>
+                    <p className="text-[11px] text-ink-muted truncate max-w-[120px]">{user.profession}</p>
                   </div>
                 </div>
                 
                 <div className="flex flex-col items-end gap-1">
-                  <div className="flex items-center gap-0.5 text-[10px] text-emerald-400 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-900/40">
-                    <Zap className="w-2.5 h-2.5" />
+                  <div className="flex items-center gap-0.5 text-[10px] text-amber bg-amber-light px-1.5 py-0.5 rounded border border-amber/20 font-number font-bold">
+                    <DabashouCredit className="w-2.5 h-2.5" />
                     <span>信用{user.creditScore}</span>
                   </div>
-                  <span className="text-[10px] text-indigo-400 font-mono">帮{user.helpCount}次</span>
+                  <span className="text-[10px] text-jade font-number font-bold">帮{user.helpCount}次</span>
                 </div>
               </button>
             );
@@ -774,178 +881,100 @@ export default function App() {
       </div>
 
       {/* CENTER: Simulated WeChat Mini-Program Smartphone View */}
-      <div className="flex-1 flex items-center justify-center p-4 lg:p-8 bg-slate-900">
+      <div className="flex-1 flex items-center justify-center p-4 lg:p-8 bg-canvas">
         
         {/* Toast Notification Widget */}
         {toast && (
-          <div className="fixed top-6 z-50 transform -translate-x-1/2 left-1/2 max-w-sm w-[90%] bg-slate-950 border border-indigo-500/50 shadow-2xl shadow-indigo-950 text-white rounded-2xl p-4 flex items-start gap-3 animate-fade-in">
-            <div className={`p-1.5 rounded-lg ${toast.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+          <div className="fixed top-6 z-50 transform -translate-x-1/2 left-1/2 max-w-sm w-[90%] bg-surface border border-hairline shadow-lg text-ink rounded-2xl p-4 flex items-start gap-3 animate-fade-in">
+            <div className={`p-1.5 rounded-lg ${toast.type === 'success' ? 'bg-jade-light text-jade' : 'bg-amber-light text-amber'}`}>
               {toast.type === 'success' ? <Check className="w-5 h-5" /> : <Info className="w-5 h-5" />}
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-200">系统通知</p>
-              <p className="text-xs text-slate-400 mt-0.5">{toast.message}</p>
+              <p className="text-xs font-semibold text-ink">系统通知</p>
+              <p className="text-xs text-ink-muted mt-0.5">{toast.message}</p>
             </div>
           </div>
         )}
 
         {/* Smartphone Container Mockup */}
-        <div id="smartphone-container" className="w-full max-w-[412px] h-[820px] bg-slate-950 rounded-[48px] border-[12px] border-slate-850 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col relative ring-1 ring-white/10">
+        <div id="smartphone-container" className="w-full max-w-[412px] h-[820px] bg-surface rounded-[48px] border-[12px] border-ink shadow-lg overflow-hidden flex flex-col relative">
           
           {/* Top Notch / Camera & Speaker */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-6 w-36 bg-slate-850 rounded-b-2xl z-40 flex items-center justify-center gap-2">
-            <div className="w-12 h-1 bg-slate-900 rounded-full"></div>
-            <div className="w-2 h-2 bg-slate-900 rounded-full"></div>
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-6 w-36 bg-ink rounded-b-2xl z-40 flex items-center justify-center gap-2">
+            <div className="w-12 h-1 bg-ink rounded-full"></div>
+            <div className="w-2 h-2 bg-ink rounded-full"></div>
           </div>
 
           {/* Simulated Status Bar */}
-          <div className="pt-7 px-6 pb-2 bg-slate-950 text-slate-300 flex justify-between items-center text-xs z-30 select-none">
-            <span className="font-semibold font-mono">21:50</span>
+          <div className="pt-7 px-6 pb-2 bg-surface text-ink flex justify-between items-center text-xs z-30 select-none border-b border-hairline/30">
+            <span className="font-semibold font-number">21:50</span>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] bg-indigo-900/40 text-indigo-400 border border-indigo-900/80 px-1.5 py-0.2 rounded font-mono">
+              <span className="text-[10px] bg-canvas text-ink-muted border border-hairline px-1.5 py-0.2 rounded font-number font-bold">
                 5G
               </span>
-              <div className="w-5 h-2.5 border border-slate-700 rounded-sm p-0.5 flex items-center">
-                <div className="bg-indigo-400 h-full w-[85%] rounded-2xs"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Mini-Program Title Header */}
-          <div className="px-4 py-3 bg-slate-950 border-b border-slate-900 flex justify-between items-center z-30">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-950/50">
-                <span className="text-white font-bold text-xs">搭</span>
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <h1 className="font-bold text-sm text-white font-display">搭把手</h1>
-                  <span className="text-[9px] bg-slate-900 text-slate-400 border border-slate-800 px-1 rounded-sm">
-                    泊寓A区
-                  </span>
-                </div>
-                <p className="text-[9px] text-slate-500 truncate max-w-[150px]">青年邻里互助共享生态</p>
-              </div>
-            </div>
-
-            {/* WeChat Mini Program Menu Buttons capsule */}
-            <div className="flex items-center gap-2.5 bg-slate-900 border border-slate-800/60 rounded-full px-2.5 py-1 text-slate-300">
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-              <div className="w-1 h-1 rounded-full bg-slate-400"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-              <div className="w-px h-3.5 bg-slate-800"></div>
-              <div className="w-3.5 h-3.5 rounded-full border border-slate-400 flex items-center justify-center p-0.2">
-                <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+              <div className="w-5 h-2.5 border border-hairline rounded-sm p-0.5 flex items-center">
+                <div className="bg-jade h-full w-[85%] rounded-2xs"></div>
               </div>
             </div>
           </div>
 
           {/* MAIN CONTENT PORT (Scrollable) */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-950/90 pb-20 relative">
+          <div className="flex-1 overflow-y-auto custom-scrollbar bg-canvas pb-20 relative pt-2">
 
-            {/* HOME TAB CONTENT */}
-            {activeTab === 'home' && (
+            {careMode ? (
+              <CareModeView
+                currentUser={currentUser}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                homeSubTab={homeSubTab}
+                setHomeSubTab={setHomeSubTab}
+                spaces={spaces}
+                events={events}
+                services={services}
+                socialWorkerServices={socialWorkerServices}
+                activeSpaceFilter={activeSpaceFilter}
+                setActiveSpaceFilter={setActiveSpaceFilter}
+                filteredSpaces={filteredSpaces}
+                activeEventFilter={activeEventFilter}
+                setActiveEventFilter={setActiveEventFilter}
+                filteredEvents={filteredEvents}
+                activeServiceFilter={activeServiceFilter}
+                setActiveServiceFilter={setActiveServiceFilter}
+                filteredServices={filteredServices}
+                feedFilter={feedFilter}
+                setFeedFilter={setFeedFilter}
+                filteredFeedItems={filteredFeedItems}
+                feedItems={feedItems}
+                setFeedItems={setFeedItems}
+                handleHelpAction={handleHelpAction}
+                setSelectedSpace={setSelectedSpace}
+                setSelectedEvent={setSelectedEvent}
+                setShowAnnouncementsModal={setShowAnnouncementsModal}
+                setShowOnboardingModal={setShowOnboardingModal}
+                showToast={showToast}
+                triggerToggleCareMode={triggerToggleCareMode}
+                handleStartPrivateChat={handleStartPrivateChat}
+              />
+            ) : (
+              <>
+                {/* HOME TAB CONTENT */}
+                {activeTab === 'home' && (
               <div className="p-4 space-y-5 animate-fade-in">
-                
-                {/* FLOATING QUICK-ACCESS WIDGETS */}
-                <div className="grid grid-cols-3 gap-2 px-0.5">
-                  {/* Widget 1: 当前居住 */}
-                  <button 
-                    onClick={() => setShowResidentModal(true)}
-                    className="bg-gradient-to-b from-indigo-950/50 to-slate-900/60 p-3 rounded-2xl border border-indigo-500/15 shadow-md flex flex-col items-center justify-center text-center hover:border-indigo-400/40 transition-all cursor-pointer group active:scale-95"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-indigo-900/30 flex items-center justify-center mb-1.5 group-hover:bg-indigo-600/30 transition-colors">
-                      <MapPin className="w-4 h-4 text-indigo-400 animate-pulse" />
-                    </div>
-                    <span className="text-[9px] text-slate-400 block font-medium">当前居住</span>
-                    <span className="text-[11px] font-bold text-white mt-0.5 truncate max-w-full">
-                      {currentUser.room} 室
-                    </span>
-                  </button>
-
-                  {/* Widget 2: 最新公告 */}
-                  <button 
-                    onClick={() => setShowAnnouncementsModal(true)}
-                    className="bg-gradient-to-b from-indigo-950/50 to-slate-900/60 p-3 rounded-2xl border border-indigo-500/15 shadow-md flex flex-col items-center justify-center text-center hover:border-indigo-400/40 transition-all cursor-pointer group active:scale-95 relative"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-indigo-900/30 flex items-center justify-center mb-1.5 group-hover:bg-indigo-600/30 transition-colors relative">
-                      <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
-                      <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                      <AlertTriangle className="w-4 h-4 text-indigo-400" />
-                    </div>
-                    <span className="text-[9px] text-slate-400 block font-medium">最新公告</span>
-                    <span className="text-[11px] font-bold text-white mt-0.5 truncate max-w-full">
-                      {announcements[0]?.title || '查看公告'}
-                    </span>
-                  </button>
-
-                  {/* Widget 3: 社区新手指南 */}
-                  <button 
-                    onClick={() => setShowOnboardingModal(true)}
-                    className="bg-gradient-to-b from-indigo-950/50 to-slate-900/60 p-3 rounded-2xl border border-indigo-500/15 shadow-md flex flex-col items-center justify-center text-center hover:border-indigo-400/40 transition-all cursor-pointer group active:scale-95"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-indigo-900/30 flex items-center justify-center mb-1.5 group-hover:bg-indigo-600/30 transition-colors">
-                      <BookOpen className="w-4 h-4 text-indigo-400" />
-                    </div>
-                    <span className="text-[9px] text-slate-400 block font-medium">新手指南</span>
-                    <span className="text-[11px] font-bold text-white mt-0.5 truncate max-w-full">
-                      {completedSteps.length === 8 ? '🎉 已通关' : `${completedSteps.length}/8 解锁`}
-                    </span>
-                  </button>
-                </div>
-
-                {/* Community Fast Stats Banner */}
-                <div className="bg-gradient-to-br from-indigo-950/60 via-slate-950 to-indigo-950/30 p-4 rounded-2xl border border-indigo-500/20 shadow-md">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[10px] text-slate-400 tracking-wider">我的社区身份</p>
-                      <h3 className="font-bold text-base text-white mt-0.5 flex items-center gap-1.5">
-                        <User className="w-4 h-4 text-indigo-400" />
-                        {currentUser.name} ({currentUser.room}室)
-                      </h3>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-slate-400">我的积分</p>
-                      <span className="text-base font-bold text-indigo-400 font-mono">
-                        {currentUser.points} <span className="text-xs text-slate-500 font-normal">分</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-2 mt-4 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/40 text-center">
-                    <div>
-                      <span className="block font-bold text-sm text-indigo-300 font-mono">8 处</span>
-                      <span className="text-[9px] text-slate-500">公共空间</span>
-                    </div>
-                    <div className="border-l border-slate-800">
-                      <span className="block font-bold text-sm text-indigo-300 font-mono">12 家</span>
-                      <span className="text-[9px] text-slate-500">周边服务</span>
-                    </div>
-                    <div className="border-l border-slate-800">
-                      <span className="block font-bold text-sm text-indigo-300 font-mono">5 场</span>
-                      <span className="text-[9px] text-slate-500">本周活动</span>
-                    </div>
-                    <div className="border-l border-slate-800">
-                      <span className="block font-bold text-sm text-emerald-400 font-mono">{totalHelpCountToday} 条</span>
-                      <span className="text-[9px] text-slate-500">今日互助</span>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Quick Search Bar */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-ink-subtle" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="输入关键词，搜索空间、活动、周边服务..."
-                    className="w-full bg-slate-900 hover:bg-slate-900/80 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 outline-none transition-all"
+                    className="w-full bg-surface border border-hairline focus:border-jade focus:ring-1 focus:ring-jade rounded-xl pl-9 pr-4 py-2 text-xs text-ink placeholder-ink-subtle outline-none transition-all"
                   />
                   {searchQuery && (
                     <button 
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-slate-500 hover:text-slate-300"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-ink-muted hover:text-ink"
                     >
                       清除
                     </button>
@@ -955,9 +984,9 @@ export default function App() {
                 {/* Announcement Swiper Area */}
                 <div 
                   onClick={() => setShowAnnouncementsModal(true)}
-                  className="bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 rounded-xl p-3 flex items-start gap-2.5 cursor-pointer transition-colors group"
+                  className="bg-surface border border-hairline hover:border-coral/20 rounded-xl p-3 flex items-start gap-2.5 cursor-pointer transition-colors group animate-fade-in"
                 >
-                  <div className="bg-indigo-900/30 text-indigo-400 group-hover:bg-indigo-800/40 group-hover:text-indigo-300 px-1.5 py-0.5 rounded text-[9px] font-bold mt-0.5 shrink-0 flex items-center gap-0.5 border border-indigo-900 transition-colors">
+                  <div className="bg-coral-hover/10 text-coral px-1.5 py-0.5 rounded text-[9px] font-bold mt-0.5 shrink-0 flex items-center gap-0.5 border border-coral/20">
                     <AlertTriangle className="w-2.5 h-2.5" />
                     最新公告
                   </div>
@@ -965,77 +994,118 @@ export default function App() {
                     {announcements.slice(0, 3).map((ann, i) => (
                       <div key={ann.id} className={`${i > 0 ? 'hidden' : 'block'} animate-fade-in`}>
                         <div className="flex justify-between items-center gap-1">
-                          <span className="font-semibold text-xs text-slate-200 truncate group-hover:text-white transition-colors">{ann.title}</span>
+                          <span className="font-semibold text-xs text-ink truncate group-hover:text-jade transition-colors">{ann.title}</span>
                           <span className={`text-[8px] font-medium px-1.5 py-0.2 rounded shrink-0 ${
                             ann.importance.includes('重要') || ann.importance.includes('紧急') 
-                              ? 'bg-red-950 text-red-400 border border-red-900/30' 
-                              : 'bg-slate-800 text-slate-400'
+                              ? 'bg-coral-hover/10 text-coral border border-coral/20' 
+                              : 'bg-canvas text-ink-muted border border-hairline'
                           }`}>
                             {ann.importance}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{ann.content}</p>
+                        <p className="text-[10px] text-ink-muted line-clamp-1 mt-0.5">{ann.content}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Hot Recommends Scroll list */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                    📌 热门推荐 / 住户特权
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2 hover:border-slate-700 transition-colors cursor-pointer" onClick={() => setHomeSubTab('spaces')}>
-                      <div className="text-xl">🍳</div>
-                      <div className="min-w-0">
-                        <span className="block text-[10px] font-bold text-white truncate">共享厨房预约</span>
-                        <span className="text-[8px] text-emerald-400">本周剩余5个时段</span>
-                      </div>
-                    </div>
-                    <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2 hover:border-slate-700 transition-colors cursor-pointer" onClick={() => setHomeSubTab('services')}>
-                      <div className="text-xl">☕</div>
-                      <div className="min-w-0">
-                        <span className="block text-[10px] font-bold text-white truncate">转角咖啡专享优惠</span>
-                        <span className="text-[8px] text-indigo-400">出示小程序打9折</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Horizontal Category Tab Selectors */}
-                <div className="grid grid-cols-4 bg-slate-900 border border-slate-800/80 p-1 rounded-xl shadow-sm gap-1">
+                {/* Four Core Functional Tabs (Bento-Grid Control Panel) */}
+                <div className="grid grid-cols-2 gap-3 animate-fade-in">
                   {[
-                    { key: 'spaces', label: '公共空间', icon: '🏠' },
-                    { key: 'events', label: '本周活动', icon: '🗓️' },
-                    { key: 'services', label: '周边服务', icon: '🏪' },
-                    { key: 'social', label: '社工服务', icon: '🤝' }
-                  ].map(sub => (
-                    <button
-                      key={sub.key}
-                      onClick={() => setHomeSubTab(sub.key as any)}
-                      className={`flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-lg text-[9px] font-bold transition-all ${
-                        homeSubTab === sub.key 
-                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50 scale-102 border border-indigo-500/30' 
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 border border-transparent'
-                      }`}
-                    >
-                      <span className="text-sm">{sub.icon}</span>
-                      <span className="truncate">{sub.label}</span>
-                    </button>
-                  ))}
+                    { 
+                      key: 'spaces', 
+                      label: '公共空间', 
+                      desc: '共享自建健身书吧', 
+                      icon: '🏠', 
+                      activeClass: 'bg-jade text-white border-transparent shadow-md shadow-jade/20 scale-[1.02]',
+                      inactiveClass: 'bg-surface border-hairline hover:border-jade/30 text-ink'
+                    },
+                    { 
+                      key: 'events', 
+                      label: '本周活动', 
+                      desc: '兴趣社交闲置交换', 
+                      icon: '🗓️', 
+                      activeClass: 'bg-coral text-white border-transparent shadow-md shadow-coral/20 scale-[1.02]',
+                      inactiveClass: 'bg-surface border-hairline hover:border-coral/30 text-ink'
+                    },
+                    { 
+                      key: 'services', 
+                      label: '周边服务', 
+                      desc: '周边服务商户', 
+                      icon: '🏪', 
+                      activeClass: 'bg-ink text-white border-transparent shadow-md shadow-ink/20 scale-[1.02]',
+                      inactiveClass: 'bg-surface border-hairline hover:border-ink/30 text-ink'
+                    },
+                    { 
+                      key: 'social', 
+                      label: '社工服务', 
+                      desc: '暖心扶助邻里共治', 
+                      icon: '🤝', 
+                      isCore: true,
+                      activeClass: 'bg-amber text-white border-transparent shadow-md shadow-amber/20 scale-[1.02] ring-2 ring-amber/50',
+                      inactiveClass: 'bg-amber-light/80 border-amber/30 text-ink ring-1 ring-amber/15 hover:border-amber/50'
+                    }
+                  ].map(sub => {
+                    const isActive = homeSubTab === sub.key;
+                    return (
+                      <button
+                        key={sub.key}
+                        onClick={() => setHomeSubTab(sub.key as any)}
+                        className={`p-3 rounded-2xl text-left transition-all relative border overflow-hidden flex flex-col justify-between h-24 group cursor-pointer ${
+                          isActive ? sub.activeClass : sub.inactiveClass
+                        }`}
+                      >
+                        {/* Background giant icon */}
+                        <span className={`absolute right-1.5 bottom-1 text-4xl opacity-10 select-none pointer-events-none group-hover:scale-110 transition-transform ${
+                          isActive ? 'text-white' : ''
+                        }`}>
+                          {sub.icon}
+                        </span>
+
+                        {/* Top Line with Icon & Badge */}
+                        <div className="flex justify-between items-center w-full">
+                          <span className={`text-base p-1.5 rounded-xl ${
+                            isActive ? 'bg-white/20 text-white' : 'bg-canvas border border-hairline'
+                          }`}>
+                            {sub.icon}
+                          </span>
+                          
+                          {sub.isCore && (
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${
+                              isActive 
+                                ? 'bg-white text-amber border border-white' 
+                                : 'bg-coral text-white shadow-xs animate-pulse'
+                            }`}>
+                              核心功能
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Bottom Labels */}
+                        <div className="mt-1.5 min-w-0">
+                          <span className="block font-bold text-sm tracking-tight">
+                            {sub.label}
+                          </span>
+                          <span className={`block text-[10px] mt-0.5 truncate ${
+                            isActive ? 'text-white/80' : 'text-ink-muted'
+                          }`}>
+                            {sub.desc}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {/* TAB SUB-FUNCTION RENDER ZONE */}
                 {homeSubTab === 'spaces' && (
                   <div className="space-y-3 animate-fade-in">
                     <div className="flex justify-between items-center">
-                      <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+                      <h3 className="font-bold text-sm text-ink flex items-center gap-1.5">
                         <span className="text-lg">🏠</span>
                         公共空间 ({filteredSpaces.length})
                       </h3>
-                      <span className="text-[10px] text-slate-400">住户自建与共享</span>
+                      <span className="text-[10px] text-ink-muted">住户自建与共享</span>
                     </div>
 
                     {/* Filter tags */}
@@ -1046,8 +1116,8 @@ export default function App() {
                           onClick={() => setActiveSpaceFilter(tag)}
                           className={`text-[9px] px-2 py-0.8 rounded-full border shrink-0 transition-all ${
                             activeSpaceFilter === tag 
-                              ? 'bg-indigo-600 text-white border-indigo-500' 
-                              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                              ? 'bg-jade text-white border-transparent' 
+                              : 'bg-surface text-ink-muted border-hairline hover:text-ink hover:bg-canvas'
                           }`}
                         >
                           {tag}
@@ -1060,22 +1130,22 @@ export default function App() {
                         <button
                           key={sp.id}
                           onClick={() => setSelectedSpace(sp)}
-                          className="w-full bg-gradient-to-r from-slate-900 to-slate-900/80 p-3 rounded-xl border border-slate-800/80 hover:border-slate-700 text-left transition-all flex items-center justify-between group"
+                          className="w-full bg-surface p-3 rounded-xl border border-hairline hover:border-jade/20 text-left transition-all flex items-center justify-between group"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl shadow">
+                            <div className="w-10 h-10 rounded-lg bg-canvas border border-hairline flex items-center justify-center text-xl shadow-xs">
                               {sp.image}
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-xs text-white group-hover:text-indigo-400 transition-colors">
+                                <span className="font-bold text-xs text-ink group-hover:text-jade transition-colors">
                                   {sp.name}
                                 </span>
-                                <span className="text-[9px] px-1.5 py-0.2 bg-indigo-950/40 text-indigo-400 border border-indigo-900/30 rounded font-medium">
+                                <span className="text-[9px] px-1.5 py-0.2 bg-jade-light text-jade border border-jade/10 rounded font-medium">
                                   {sp.status}
                                 </span>
                               </div>
-                              <p className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
+                              <p className="text-[10px] text-ink-muted mt-0.5 flex items-center gap-1">
                                 <span>📍 {sp.location}</span>
                                 <span>•</span>
                                 <span>👥 容纳{sp.capacity}</span>
@@ -1084,16 +1154,16 @@ export default function App() {
                           </div>
 
                           <div className="flex flex-col items-end shrink-0 pl-2">
-                            <div className="flex items-center text-amber-400 font-semibold text-xs gap-0.5">
+                            <div className="flex items-center text-amber font-semibold text-xs gap-0.5">
                               <span>★</span>
-                              <span className="font-mono">{sp.rating}</span>
+                              <span className="font-number">{sp.rating}</span>
                             </div>
-                            <span className="text-[9px] text-slate-500 mt-0.5 font-mono">{sp.reviewsCount} 评价</span>
+                            <span className="text-[9px] text-ink-muted mt-0.5 font-number">{sp.reviewsCount} 评价</span>
                           </div>
                         </button>
                       ))}
                       {filteredSpaces.length === 0 && (
-                        <p className="text-center py-6 text-xs text-slate-500">没有符合筛选的空间</p>
+                        <p className="text-center py-6 text-xs text-ink-muted">没有符合筛选的空间</p>
                       )}
                     </div>
                   </div>
@@ -1102,11 +1172,11 @@ export default function App() {
                 {homeSubTab === 'events' && (
                   <div className="space-y-3 animate-fade-in">
                     <div className="flex justify-between items-center">
-                      <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+                      <h3 className="font-bold text-sm text-ink flex items-center gap-1.5">
                         <span className="text-lg">🗓️</span>
                         本周活动 ({filteredEvents.length})
                       </h3>
-                      <span className="text-[10px] text-slate-400">发起聚会</span>
+                      <span className="text-[10px] text-ink-muted">发起聚会</span>
                     </div>
 
                     <div className="flex gap-1 overflow-x-auto pb-1 custom-scrollbar">
@@ -1116,8 +1186,8 @@ export default function App() {
                           onClick={() => setActiveEventFilter(tag)}
                           className={`text-[9px] px-2 py-0.8 rounded-full border shrink-0 transition-all ${
                             activeEventFilter === tag 
-                              ? 'bg-indigo-600 text-white border-indigo-500' 
-                              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                              ? 'bg-jade text-white border-transparent' 
+                              : 'bg-surface text-ink-muted border-hairline hover:text-ink hover:bg-canvas'
                           }`}
                         >
                           {tag}
@@ -1130,40 +1200,40 @@ export default function App() {
                         <button
                           key={ev.id}
                           onClick={() => setSelectedEvent(ev)}
-                          className="w-full bg-gradient-to-r from-slate-900 to-slate-900/80 p-3 rounded-xl border border-slate-800/80 hover:border-slate-700 text-left transition-all flex items-center justify-between group"
+                          className="w-full bg-surface p-3 rounded-xl border border-hairline hover:border-jade/20 text-left transition-all flex items-center justify-between group"
                         >
                           <div className="min-w-0 pr-2">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[8px] px-1.5 py-0.2 bg-indigo-950/40 text-indigo-400 border border-indigo-900/30 rounded font-medium shrink-0">
+                              <span className="text-[8px] px-1.5 py-0.2 bg-jade-light text-jade border border-jade/10 rounded font-medium shrink-0">
                                 {ev.type}
                               </span>
-                              <span className="font-bold text-xs text-white group-hover:text-indigo-400 transition-colors truncate">
+                              <span className="font-bold text-xs text-ink group-hover:text-jade transition-colors truncate">
                                 {ev.name}
                               </span>
                             </div>
                             
-                            <p className="text-[9px] text-slate-400 mt-1 truncate">
+                            <p className="text-[9px] text-ink-muted mt-1 truncate">
                               ⏰ {ev.time}
                             </p>
-                            <p className="text-[9px] text-slate-400 mt-0.5 truncate">
-                              📍 {ev.location} • 发起方: <span className="text-slate-300">{ev.organizer}</span>
+                            <p className="text-[9px] text-ink-muted mt-0.5 truncate">
+                              📍 {ev.location} • 发起方: <span className="text-ink font-medium">{ev.organizer}</span>
                             </p>
                           </div>
 
                           <div className="flex flex-col items-end shrink-0">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono ${
-                              ev.signedUp >= ev.capacity ? 'bg-red-950 text-red-400' : 'bg-emerald-950 text-emerald-400'
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-number ${
+                              ev.signedUp >= ev.capacity ? 'bg-coral-hover/10 text-coral' : 'bg-jade-light text-jade'
                             }`}>
                               {ev.signedUp}/{ev.capacity}人
                             </span>
-                            <span className="text-[8px] text-slate-500 mt-1 font-mono">
+                            <span className="text-[8px] text-ink-subtle mt-1 font-number">
                               {ev.status}
                             </span>
                           </div>
                         </button>
                       ))}
                       {filteredEvents.length === 0 && (
-                        <p className="text-center py-6 text-xs text-slate-500">没有符合条件的活动</p>
+                        <p className="text-center py-6 text-xs text-ink-muted">没有符合条件的活动</p>
                       )}
                     </div>
                   </div>
@@ -1172,11 +1242,11 @@ export default function App() {
                 {homeSubTab === 'services' && (
                   <div className="space-y-3 animate-fade-in">
                     <div className="flex justify-between items-center">
-                      <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+                      <h3 className="font-bold text-sm text-ink flex items-center gap-1.5">
                         <span className="text-lg">🏪</span>
                         周边服务 ({filteredServices.length}家)
                       </h3>
-                      <span className="text-[10px] text-slate-400">住户专属打折推荐</span>
+                      <span className="text-[10px] text-ink-muted">住户专属打折推荐</span>
                     </div>
 
                     <div className="flex gap-1 overflow-x-auto pb-1 custom-scrollbar">
@@ -1186,8 +1256,8 @@ export default function App() {
                           onClick={() => setActiveServiceFilter(tag)}
                           className={`text-[9px] px-2 py-0.8 rounded-full border shrink-0 transition-all ${
                             activeServiceFilter === tag 
-                              ? 'bg-indigo-600 text-white border-indigo-500' 
-                              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                              ? 'bg-jade text-white border-transparent' 
+                              : 'bg-surface text-ink-muted border-hairline hover:text-ink hover:bg-canvas'
                           }`}
                         >
                           {tag}
@@ -1200,30 +1270,30 @@ export default function App() {
                         <button
                           key={ser.id}
                           onClick={() => setSelectedService(ser)}
-                          className="bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 hover:border-slate-700 text-left transition-all flex flex-col justify-between group"
+                          className="bg-surface p-3 rounded-xl border border-hairline hover:border-jade/30 text-left transition-all flex flex-col justify-between group"
                         >
                           <div>
                             <div className="flex justify-between items-start gap-1">
                               <span className="text-xl">{ser.image}</span>
-                              <div className="flex items-center text-amber-400 text-[10px] font-semibold gap-0.5">
+                              <div className="flex items-center text-amber text-[10px] font-semibold gap-0.5">
                                 <span>★</span>
-                                <span className="font-mono">{ser.rating}</span>
+                                <span className="font-number">{ser.rating}</span>
                               </div>
                             </div>
                             
-                            <h4 className="font-bold text-xs text-white group-hover:text-indigo-400 mt-2 truncate">
+                            <h4 className="font-bold text-xs text-ink group-hover:text-jade mt-2 truncate">
                               {ser.name}
                             </h4>
-                            <p className="text-[9px] text-slate-400 mt-0.5 truncate">{ser.location}</p>
+                            <p className="text-[9px] text-ink-muted mt-0.5 truncate">{ser.location}</p>
                           </div>
 
-                          <div className="mt-2.5 pt-2 border-t border-slate-800/60">
+                          <div className="mt-2.5 pt-2 border-t border-hairline">
                             {ser.hasDiscount ? (
-                              <span className="text-[8px] text-red-400 font-medium bg-red-950/40 border border-red-900/30 px-1 rounded block truncate">
+                              <span className="text-[8px] text-coral font-medium bg-coral-hover/10 border border-coral/20 px-1 rounded block truncate">
                                 🉐 {ser.discountText || '住户特惠折扣'}
                               </span>
                             ) : (
-                              <span className="text-[8px] text-slate-500 block truncate font-mono">
+                              <span className="text-[8px] text-ink-muted block truncate font-number">
                                 ⏰ {ser.hours}
                               </span>
                             )}
@@ -1231,7 +1301,7 @@ export default function App() {
                         </button>
                       ))}
                       {filteredServices.length === 0 && (
-                        <div className="col-span-2 text-center py-6 text-xs text-slate-500">没有匹配的服务商户</div>
+                        <div className="col-span-2 text-center py-6 text-xs text-ink-muted">没有匹配的服务商户</div>
                       )}
                     </div>
                   </div>
@@ -1240,14 +1310,14 @@ export default function App() {
                 {homeSubTab === 'social' && (
                   <div className="space-y-3 animate-fade-in">
                     <div className="flex justify-between items-center">
-                      <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+                      <h3 className="font-bold text-sm text-ink flex items-center gap-1.5">
                         <span className="text-lg">🤝</span>
                         社工服务 ({socialWorkerServices.length})
                       </h3>
-                      <span className="text-[10px] text-slate-400">专业常驻 • 暖心援助</span>
+                      <span className="text-[10px] text-ink-muted">专业常驻 • 暖心援助</span>
                     </div>
 
-                    <div className="bg-gradient-to-br from-indigo-950/40 to-slate-900/40 p-3 rounded-xl border border-indigo-950/40 text-[10px] text-slate-400 leading-relaxed">
+                    <div className="bg-jade-light/50 p-3 rounded-xl border border-jade/15 text-[10px] text-ink-muted leading-relaxed">
                       💡 泊寓青年社区共治中心联合街道社工站，在此特设在线咨询专区。你可以一键联系专业社工，咨询政策补贴、办理事务，或获取心理咨询与就业辅导。
                     </div>
 
@@ -1255,45 +1325,45 @@ export default function App() {
                       {socialWorkerServices.map(service => (
                         <div 
                           key={service.id}
-                          className="bg-slate-900 border border-slate-800/80 p-3 rounded-xl space-y-2.5 hover:border-slate-700 transition-all"
+                          className="bg-surface border border-hairline p-3 rounded-xl space-y-2.5 hover:border-jade/30 transition-all"
                         >
                           <div className="flex justify-between items-start gap-1.5">
                             <div className="flex gap-2 min-w-0">
-                              <span className="text-2xl shrink-0 p-1 bg-slate-950 rounded-lg border border-slate-850">{service.image}</span>
+                              <span className="text-2xl shrink-0 p-1 bg-canvas rounded-lg border border-hairline text-ink">{service.image}</span>
                               <div className="min-w-0">
-                                <h4 className="font-bold text-xs text-white truncate">{service.name}</h4>
+                                <h4 className="font-bold text-xs text-ink truncate">{service.name}</h4>
                                 <div className="flex flex-wrap gap-1 mt-1">
-                                  <span className="text-[8px] bg-indigo-950 text-indigo-400 border border-indigo-900/30 px-1.5 py-0.2 rounded">
+                                  <span className="text-[8px] bg-jade-light text-jade border border-jade/15 px-1.5 py-0.2 rounded">
                                     {service.type}
                                   </span>
-                                  <span className="text-[8px] bg-slate-950 text-slate-400 px-1.5 py-0.2 rounded truncate">
+                                  <span className="text-[8px] bg-canvas text-ink-muted border border-hairline px-1.5 py-0.2 rounded truncate">
                                     举办方: {service.organizer}
                                   </span>
                                 </div>
                               </div>
                             </div>
-                            <span className="text-[8px] bg-emerald-950 text-emerald-400 border border-emerald-900/30 px-1.5 py-0.2 rounded shrink-0">
+                            <span className="text-[8px] bg-jade text-white border border-transparent px-1.5 py-0.2 rounded shrink-0 font-bold">
                               {service.status}
                             </span>
                           </div>
 
-                          <p className="text-[10px] text-slate-400 leading-relaxed">{service.description}</p>
+                          <p className="text-[10px] text-ink-muted leading-relaxed">{service.description}</p>
 
-                          <div className="bg-slate-950 p-2 rounded-lg text-[8px] font-mono text-slate-500 space-y-0.5">
-                            <p>⏰ 服务时间: <span className="text-slate-300">{service.hours}</span></p>
-                            <p>📞 电话方式: <span className="text-slate-300">{service.contact}</span></p>
+                          <div className="bg-canvas p-2 rounded-lg text-[8px] font-number text-ink-muted space-y-0.5">
+                            <p>⏰ 服务时间: <span className="text-ink">{service.hours}</span></p>
+                            <p>📞 电话方式: <span className="text-ink">{service.contact}</span></p>
                           </div>
 
                           <div className="grid grid-cols-2 gap-2 pt-1">
                             <button
                               onClick={() => showToast(`正在模拟拨打电话: ${service.contact.split(' ')[0]}`, 'info')}
-                              className="py-1.5 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-850 hover:border-slate-800 rounded-lg text-[9px] font-bold flex items-center justify-center gap-1 transition-all"
+                              className="py-1.5 bg-canvas hover:bg-hairline text-ink border border-hairline rounded-lg text-[9px] font-bold flex items-center justify-center gap-1 transition-all"
                             >
                               <span>📞 电话联系</span>
                             </button>
                             <button
                               onClick={() => handleStartPrivateChat(service.name, '社工专区')}
-                              className="py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[9px] font-bold flex items-center justify-center gap-1 transition-all"
+                              className="py-1.5 bg-jade hover:bg-jade-hover text-white rounded-lg text-[9px] font-bold flex items-center justify-center gap-1 transition-all"
                             >
                               <span>💬 在线咨询</span>
                             </button>
@@ -1310,7 +1380,6 @@ export default function App() {
             {/* NEIGHBORHOOD CIRCLE TAB CONTENT */}
             {activeTab === 'circle' && (
               <div className="p-4 space-y-4 animate-fade-in">
-                
                 {/* Dynamic Circle Filter bar */}
                 <div className="flex gap-1 overflow-x-auto pb-1.5 custom-scrollbar">
                   {['全部', '互助需求', '居民动态', '小活动召集', '话题讨论'].map(f => (
@@ -1319,8 +1388,8 @@ export default function App() {
                       onClick={() => setFeedFilter(f)}
                       className={`text-[10px] px-3 py-1 rounded-full border shrink-0 font-medium transition-all ${
                         feedFilter === f 
-                          ? 'bg-indigo-600 text-white border-indigo-500 shadow' 
-                          : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                          ? 'bg-jade text-white border-transparent shadow-xs' 
+                          : 'bg-surface text-ink-muted border-hairline hover:text-ink hover:bg-canvas'
                       }`}
                     >
                       {f}
@@ -1331,18 +1400,18 @@ export default function App() {
                 {/* Trigger to Write a Dynamic Post */}
                 <button
                   onClick={() => setShowCreatePost(true)}
-                  className="w-full bg-gradient-to-r from-indigo-900/50 to-slate-900 border border-indigo-500/20 hover:border-indigo-500/40 p-3 rounded-2xl flex items-center justify-between text-left transition-all"
+                  className="w-full bg-jade-light/60 border border-jade/25 hover:border-jade/40 p-3 rounded-2xl flex items-center justify-between text-left transition-all"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
-                      <Plus className="w-5 h-5" />
+                    <div className="w-8 h-8 rounded-full bg-jade flex items-center justify-center text-white">
+                      <DabashouPublish className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">发布我的互助或动态</p>
-                      <p className="text-[10px] text-slate-400">求代取、拼单凑数、二手置换或分享日常</p>
+                      <p className="text-xs font-bold text-ink">发布我的互助或动态</p>
+                      <p className="text-[10px] text-ink-muted">求代取、拼单凑数、二手置换 or 分享日常</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                  <ChevronRight className="w-4 h-4 text-ink-muted" />
                 </button>
 
                 {/* POST FEED ITEMS */}
@@ -1357,22 +1426,22 @@ export default function App() {
                         key={item.id} 
                         className={`p-4 rounded-2xl border transition-all ${
                           isTopic 
-                            ? 'bg-gradient-to-b from-indigo-950/40 to-slate-950 border-indigo-500/30 shadow-md shadow-indigo-950/20' 
-                            : 'bg-slate-900/80 border-slate-800 hover:border-slate-800/80'
+                            ? 'bg-jade-light/40 border border-jade/25 shadow-xs animate-fade-in' 
+                            : 'bg-surface border border-hairline hover:border-hairline/80'
                         }`}
                       >
                         {/* Header information */}
                         <div className="flex justify-between items-start">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-indigo-300">
+                            <div className="w-8 h-8 rounded-full bg-canvas border border-hairline flex items-center justify-center font-bold text-xs text-jade">
                               {item.authorName.charAt(0)}
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-xs text-slate-200">{item.authorName}</span>
-                                <span className="text-[9px] text-slate-500 font-mono">{item.authorRoom}</span>
+                                <span className="font-bold text-xs text-ink">{item.authorName}</span>
+                                <span className="text-[9px] text-ink-muted font-number font-bold">{item.authorRoom}</span>
                               </div>
-                              <p className="text-[9px] text-slate-400 flex items-center gap-1">
+                              <p className="text-[9px] text-ink-subtle flex items-center gap-1 font-number">
                                 <span>📍 距您 {item.distance}米</span>
                                 <span>•</span>
                                 <span>{item.time}</span>
@@ -1383,17 +1452,17 @@ export default function App() {
                           {/* Category Badge or bounty */}
                           <div className="flex items-center gap-1.5">
                             {isHelp && item.category && (
-                              <span className="text-[9px] px-1.5 py-0.5 bg-rose-950 text-rose-400 border border-rose-900/30 rounded-md font-medium">
+                              <span className="text-[9px] px-1.5 py-0.5 bg-coral-hover/10 text-coral border border-coral/20 rounded-md font-medium">
                                 🤝 {item.category}
                               </span>
                             )}
                             {isRally && (
-                              <span className="text-[9px] px-1.5 py-0.5 bg-indigo-950 text-indigo-400 border border-indigo-900/30 rounded-md font-medium">
+                              <span className="text-[9px] px-1.5 py-0.5 bg-jade-light text-jade border border-jade/10 rounded-md font-medium">
                                 🏸 活动招集
                               </span>
                             )}
                             {item.bountyPoints ? (
-                              <span className="text-[9px] px-1.5 py-0.5 bg-amber-950 text-amber-400 border border-amber-900/30 rounded-md font-bold font-mono">
+                              <span className="text-[9px] px-1.5 py-0.5 bg-amber-light text-amber border border-amber/20 rounded-md font-bold font-number">
                                 🪙 {item.bountyPoints}积分
                               </span>
                             ) : null}
@@ -1401,52 +1470,52 @@ export default function App() {
                         </div>
 
                         {/* Body Content */}
-                        <div className="mt-3 text-xs text-slate-300 leading-relaxed break-all">
+                        <div className="mt-3 text-xs text-ink leading-relaxed break-all">
                           {item.content}
                         </div>
 
                         {/* Attached Image/Icon Representation */}
                         {item.image && (
-                          <div className="mt-3 p-4 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center text-4xl select-none">
+                          <div className="mt-3 p-4 bg-canvas rounded-xl border border-hairline flex items-center justify-center text-4xl select-none">
                             {item.image}
                           </div>
                         )}
 
                         {/* Event specific details if help / rally */}
                         {(isHelp || isRally) && item.meetingTime && (
-                          <div className="mt-3 bg-slate-950 p-2.5 rounded-xl border border-slate-800/60 space-y-1">
+                          <div className="mt-3 bg-canvas p-2.5 rounded-xl border border-hairline space-y-1">
                             {isHelp && (
                               <div className="flex justify-between items-center text-[10px]">
-                                <span className="text-slate-400">🕒 截止时间:</span>
-                                <span className="text-indigo-400 font-medium truncate max-w-[200px]">{item.meetingTime}</span>
+                                <span className="text-ink-muted">🕒 截止时间:</span>
+                                <span className="text-jade font-medium truncate max-w-[200px]">{item.meetingTime}</span>
                               </div>
                             )}
                             {isRally && (
                               <div className="flex justify-between items-center text-[10px]">
-                                <span className="text-slate-400">🏸 集合时间:</span>
-                                <span className="text-indigo-400 font-medium truncate max-w-[200px]">{item.meetingTime}</span>
+                                <span className="text-ink-muted">🏸 集合时间:</span>
+                                <span className="text-jade font-medium truncate max-w-[200px]">{item.meetingTime}</span>
                               </div>
                             )}
-                            <div className="flex justify-between items-center text-[10px] pt-1 border-t border-slate-900">
-                              <span className="text-slate-400">🛡️ 邻里信任分:</span>
-                              <span className="text-emerald-400 font-mono font-bold">★ {item.creditScore || 90}</span>
+                            <div className="flex justify-between items-center text-[10px] pt-1 border-t border-hairline">
+                              <span className="text-ink-muted">🛡️ 邻里信任分:</span>
+                              <span className="text-jade font-number font-bold">★ {item.creditScore || 90}</span>
                             </div>
                           </div>
                         )}
 
                         {/* Action buttons (Like, Help, Comments Count) */}
-                        <div className="mt-4 flex items-center justify-between border-t border-slate-800/40 pt-3">
-                          <div className="flex items-center gap-4 text-slate-400">
+                        <div className="mt-4 flex items-center justify-between border-t border-hairline pt-3">
+                          <div className="flex items-center gap-4 text-ink-muted">
                             <button 
                               onClick={() => handleLikePost(item.id)}
-                              className={`flex items-center gap-1 hover:text-rose-400 transition-colors ${item.hasLiked ? 'text-rose-500' : ''}`}
+                              className={`flex items-center gap-1 hover:text-coral transition-colors ${item.hasLiked ? 'text-coral' : ''}`}
                             >
-                              <Heart className={`w-4 h-4 ${item.hasLiked ? 'fill-rose-500' : ''}`} />
-                              <span className="text-xs font-mono">{item.likes}</span>
+                              <Heart className={`w-4 h-4 ${item.hasLiked ? 'fill-coral text-coral' : ''}`} />
+                              <span className="text-xs font-number">{item.likes}</span>
                             </button>
                             <span className="flex items-center gap-1 text-xs">
-                              <MessageSquare className="w-4 h-4 text-slate-500" />
-                              <span className="font-mono">{item.comments.length}</span>
+                              <MessageSquare className="w-4 h-4 text-ink-muted" />
+                              <span className="font-number">{item.comments.length}</span>
                             </span>
                           </div>
 
@@ -1468,8 +1537,8 @@ export default function App() {
                               }}
                               className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all shrink-0 flex items-center gap-1 ${
                                 item.actionStatus === 'claimed'
-                                  ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
-                                  : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow shadow-indigo-950/40 active:scale-95'
+                                  ? 'bg-canvas text-ink-muted border border-hairline cursor-not-allowed'
+                                  : 'bg-jade hover:bg-jade-hover text-white active:scale-95 shadow-sm'
                               }`}
                             >
                               {item.actionStatus === 'claimed' ? (
@@ -1486,10 +1555,10 @@ export default function App() {
 
                         {/* Embedded Comments Thread */}
                         {item.comments.length > 0 && (
-                          <div className="mt-3 bg-slate-950 p-2.5 rounded-xl border border-slate-800/40 space-y-2 text-[11px]">
+                          <div className="mt-3 bg-canvas p-2.5 rounded-xl border border-hairline space-y-2 text-[11px]">
                             {item.comments.map(comment => (
-                              <div key={comment.id} className="text-slate-400">
-                                <span className="font-bold text-slate-200">
+                              <div key={comment.id} className="text-ink-muted">
+                                <span className="font-bold text-ink">
                                   {comment.authorName} 
                                   {comment.authorRoom ? ` (${comment.authorRoom})` : ''}: 
                                 </span>{' '}
@@ -1509,11 +1578,11 @@ export default function App() {
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') handleAddFeedComment(item.id);
                             }}
-                            className="flex-1 bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-lg text-[10px] px-2.5 py-1 text-white placeholder-slate-600 outline-none focus:border-indigo-500 transition-colors"
+                            className="flex-1 bg-canvas border border-hairline hover:border-jade/30 rounded-lg text-[10px] px-2.5 py-1 text-ink placeholder-ink-muted outline-none focus:border-jade transition-colors"
                           />
                           <button
                             onClick={() => handleAddFeedComment(item.id)}
-                            className="bg-slate-800 hover:bg-indigo-900 hover:text-indigo-200 text-slate-400 p-1.5 rounded-lg transition-colors shrink-0"
+                            className="bg-canvas border border-hairline text-ink-muted hover:bg-jade-light hover:text-jade p-1.5 rounded-lg transition-colors shrink-0"
                           >
                             <Send className="w-3.5 h-3.5" />
                           </button>
@@ -1529,24 +1598,24 @@ export default function App() {
 
             {/* MY CHAT TAB CONTENT */}
             {activeTab === 'chat' && (
-              <div className="flex flex-col h-full bg-slate-950 text-white animate-fade-in">
+              <div className="flex flex-col h-full bg-canvas text-ink animate-fade-in">
                 {selectedChatSession ? (
                   /* ACTIVE CHAT SESSION VIEW */
-                  <div className="flex-1 flex flex-col h-full bg-slate-900">
+                  <div className="flex-1 flex flex-col h-full bg-canvas">
                     {/* Header */}
-                    <div className="px-4 py-3 bg-slate-950 border-b border-slate-900 flex items-center justify-between sticky top-0 z-10">
+                    <div className="px-4 py-3 bg-surface border-b border-hairline flex items-center justify-between sticky top-0 z-10">
                       <button 
                         onClick={() => setSelectedChatSession(null)}
-                        className="text-slate-400 hover:text-white flex items-center gap-1 text-xs font-bold"
+                        className="text-ink-muted hover:text-ink flex items-center gap-1 text-xs font-bold"
                       >
                         <span>← 返回</span>
                       </button>
                       <div className="text-center">
-                        <h3 className="font-bold text-xs text-white flex items-center justify-center gap-1">
+                        <h3 className="font-bold text-xs text-ink flex items-center justify-center gap-1">
                           <span>{selectedChatSession.avatar}</span>
                           <span>{selectedChatSession.name}</span>
                         </h3>
-                        <p className="text-[9px] text-slate-500 font-mono">{selectedChatSession.subLabel}</p>
+                        <p className="text-[9px] text-ink-subtle font-number font-bold">{selectedChatSession.subLabel}</p>
                       </div>
                       <div className="w-8"></div> {/* Spacer */}
                     </div>
@@ -1558,7 +1627,7 @@ export default function App() {
                         if (isSystem) {
                           return (
                             <div key={msg.id || i} className="text-center my-2 animate-fade-in">
-                              <span className="inline-block bg-slate-950/60 text-slate-500 text-[9px] px-3 py-1 rounded-lg border border-slate-850">
+                              <span className="inline-block bg-canvas text-ink-muted text-[9px] px-3 py-1 rounded-lg border border-hairline font-number font-bold">
                                 📢 {msg.content}
                               </span>
                             </div>
@@ -1571,17 +1640,17 @@ export default function App() {
                             key={msg.id || i} 
                             className={`flex gap-2 max-w-[85%] ${isMe ? 'self-end flex-row-reverse' : 'self-start'}`}
                           >
-                            <div className="w-7 h-7 rounded-full bg-slate-850 flex items-center justify-center text-xs shrink-0 select-none font-bold border border-slate-800">
+                            <div className="w-7 h-7 rounded-full bg-canvas border border-hairline flex items-center justify-center text-xs shrink-0 select-none font-bold">
                               {isMe ? currentUser.name.charAt(0) : selectedChatSession.avatar}
                             </div>
                             <div className="space-y-0.5">
-                              <div className={`text-[9px] text-slate-500 ${isMe ? 'text-right' : 'text-left'}`}>
+                              <div className={`text-[9px] text-ink-subtle ${isMe ? 'text-right' : 'text-left'} font-number`}>
                                 {isMe ? '我' : msg.sender} • {msg.time}
                               </div>
-                              <div className={`p-2.5 rounded-2xl text-xs break-all shadow ${
+                              <div className={`p-2.5 rounded-2xl text-xs break-all shadow-xs ${
                                 isMe 
-                                  ? 'bg-indigo-600 text-white rounded-tr-none' 
-                                  : 'bg-slate-800 text-slate-200 rounded-tl-none'
+                                  ? 'bg-jade text-white rounded-tr-none' 
+                                  : 'bg-surface text-ink border border-hairline rounded-tl-none'
                               }`}>
                                 {msg.content}
                               </div>
@@ -1597,19 +1666,19 @@ export default function App() {
                         e.preventDefault();
                         handleSendMessage();
                       }}
-                      className="p-3 bg-slate-950 border-t border-slate-900 flex gap-2"
+                      className="p-3 bg-surface border-t border-hairline flex gap-2"
                     >
                       <input
                         type="text"
                         value={typedMessage}
                         onChange={(e) => setTypedMessage(e.target.value)}
                         placeholder="想对邻友说点什么..."
-                        className="flex-1 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 outline-none transition-colors"
+                        className="flex-1 bg-canvas border border-hairline hover:border-jade/30 focus:border-jade rounded-xl px-3 py-2 text-xs text-ink placeholder-ink-muted outline-none transition-colors"
                         required
                       />
                       <button
                         type="submit"
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-xl transition-colors shrink-0 shadow-md"
+                        className="bg-jade hover:bg-jade-hover text-white p-2.5 rounded-xl transition-colors shrink-0 shadow-xs"
                       >
                         <Send className="w-3.5 h-3.5" />
                       </button>
@@ -1619,11 +1688,11 @@ export default function App() {
                   /* CHAT SESSIONS LIST VIEW */
                   <div className="p-4 space-y-4 animate-fade-in flex-1 overflow-y-auto custom-scrollbar">
                     <div className="flex justify-between items-center">
-                      <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
-                        <MessageSquare className="w-4 h-4 text-indigo-400" />
+                      <h3 className="font-bold text-sm text-ink flex items-center gap-1.5">
+                        <MessageSquare className="w-4 h-4 text-jade" />
                         我的消息列表 ({chatSessions.length})
                       </h3>
-                      <span className="text-[10px] text-slate-400">实时沟通 • 互助信任</span>
+                      <span className="text-[10px] text-ink-muted">实时沟通 • 互助信任</span>
                     </div>
 
                     <div className="space-y-2">
@@ -1631,31 +1700,31 @@ export default function App() {
                         <button
                           key={session.id}
                           onClick={() => setSelectedChatSession(session)}
-                          className="w-full bg-slate-900 hover:bg-slate-900/80 p-3 rounded-xl border border-slate-800/80 hover:border-slate-750 text-left transition-all flex items-center justify-between group"
+                          className="w-full bg-surface hover:bg-canvas p-3 rounded-xl border border-hairline hover:border-jade/30 text-left transition-all flex items-center justify-between group"
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-xl shadow shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-canvas border border-hairline flex items-center justify-center text-xl shadow-xs shrink-0">
                               {session.avatar}
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-xs text-white group-hover:text-indigo-400 transition-colors">
+                                <span className="font-bold text-xs text-ink group-hover:text-jade transition-colors">
                                   {session.name}
                                 </span>
-                                <span className="text-[8px] bg-slate-950 text-slate-400 px-1.5 py-0.2 rounded font-medium">
+                                <span className="text-[8px] bg-canvas border border-hairline text-ink-muted px-1.5 py-0.2 rounded font-medium">
                                   {session.subLabel}
                                 </span>
                               </div>
-                              <p className="text-[10px] text-slate-400 mt-1 truncate max-w-[200px]">
+                              <p className="text-[10px] text-ink-muted mt-1 truncate max-w-[200px]">
                                 {session.lastMessage}
                               </p>
                             </div>
                           </div>
 
                           <div className="flex flex-col items-end shrink-0 pl-2">
-                            <span className="text-[9px] text-slate-500 font-mono">{session.lastTime}</span>
+                            <span className="text-[9px] text-ink-subtle font-number">{session.lastTime}</span>
                             {session.unreadCount > 0 && (
-                              <span className="w-4 h-4 rounded-full bg-indigo-500 text-white font-bold text-[9px] flex items-center justify-center mt-1 shadow shadow-indigo-950">
+                              <span className="w-4 h-4 rounded-full bg-coral text-white font-bold text-[9px] flex items-center justify-center mt-1 shadow-xs font-number">
                                 {session.unreadCount}
                               </span>
                             )}
@@ -1665,8 +1734,8 @@ export default function App() {
                       {chatSessions.length === 0 && (
                         <div className="text-center py-12 space-y-2">
                           <p className="text-xl">💬</p>
-                          <p className="text-xs text-slate-500">暂无聊天会话</p>
-                          <p className="text-[10px] text-slate-600">加入社区活动或在邻里圈点击私聊，即可开始私信！</p>
+                          <p className="text-xs text-ink-muted">暂无聊天会话</p>
+                          <p className="text-[10px] text-ink-subtle">加入社区活动或在邻里圈点击私聊，即可开始私信！</p>
                         </div>
                       )}
                     </div>
@@ -1680,40 +1749,49 @@ export default function App() {
               <div className="p-4 space-y-4 animate-fade-in">
                 
                 {/* Profile header block */}
-                <div className="bg-gradient-to-br from-indigo-950 via-slate-950 to-slate-950 p-4 rounded-2xl border border-indigo-500/20 shadow">
+                <div className="bg-jade-light/40 p-4 rounded-2xl border border-jade/25 shadow-xs">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-md">
+                    <div className="w-12 h-12 rounded-full bg-jade flex items-center justify-center font-bold text-lg text-white shadow-sm">
                       {currentUser.name.charAt(0)}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <h3 className="font-bold text-base text-white">{currentUser.name}</h3>
-                        <span className="text-[10px] bg-slate-900 text-indigo-400 border border-indigo-950 px-2 py-0.2 rounded">
+                        <h3 className="font-bold text-base text-ink">{currentUser.name}</h3>
+                        <span className="text-[10px] bg-canvas text-jade border border-jade/10 px-2 py-0.2 rounded font-number font-bold">
                           {currentUser.room} 室
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{currentUser.profession}</p>
+                      <p className="text-[10px] text-ink-muted mt-0.5">{currentUser.profession}</p>
                     </div>
                   </div>
 
                   {/* Multi stats block */}
                   <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-                    <div className="bg-slate-900/40 p-2 rounded-xl border border-slate-800/40">
-                      <span className="block text-[10px] text-slate-500">信用评分</span>
-                      <span className="text-sm font-bold text-emerald-400 font-mono">
-                        {currentUser.creditScore} <span className="text-[8px] font-normal text-slate-500">信用分</span>
+                    <div className="bg-surface p-2 rounded-xl border border-hairline">
+                      <span className="block text-[10px] text-ink-subtle font-medium flex items-center justify-center gap-1">
+                        <DabashouCredit className="w-3.5 h-3.5 text-jade shrink-0" />
+                        信用评分
+                      </span>
+                      <span className="text-sm font-bold text-jade font-number mt-1 block">
+                        {currentUser.creditScore} <span className="text-[8px] font-normal text-ink-muted">分</span>
                       </span>
                     </div>
-                    <div className="bg-slate-900/40 p-2 rounded-xl border border-slate-800/40">
-                      <span className="block text-[10px] text-slate-500">当前积分</span>
-                      <span className="text-sm font-bold text-amber-400 font-mono">
-                        {currentUser.points} <span className="text-[8px] font-normal text-slate-500">积分</span>
+                    <div className="bg-surface p-2 rounded-xl border border-hairline">
+                      <span className="block text-[10px] text-ink-subtle font-medium flex items-center justify-center gap-1">
+                        <DabashouPoints className="w-3.5 h-3.5 text-amber shrink-0" />
+                        当前积分
+                      </span>
+                      <span className="text-sm font-bold text-amber font-number mt-1 block">
+                        {currentUser.points} <span className="text-[8px] font-normal text-ink-muted">分</span>
                       </span>
                     </div>
-                    <div className="bg-slate-900/40 p-2 rounded-xl border border-slate-800/40">
-                      <span className="block text-[10px] text-slate-500">累计帮扶</span>
-                      <span className="text-sm font-bold text-indigo-400 font-mono">
-                        {currentUser.helpCount} <span className="text-[8px] font-normal text-slate-500">次</span>
+                    <div className="bg-surface p-2 rounded-xl border border-hairline">
+                      <span className="block text-[10px] text-ink-subtle font-medium flex items-center justify-center gap-1">
+                        <DabashouPublish className="w-3.5 h-3.5 text-coral shrink-0" />
+                        累计帮扶
+                      </span>
+                      <span className="text-sm font-bold text-coral font-number mt-1 block">
+                        {currentUser.helpCount} <span className="text-[8px] font-normal text-ink-muted">次</span>
                       </span>
                     </div>
                   </div>
@@ -1721,68 +1799,79 @@ export default function App() {
                   {/* Personal Tags */}
                   <div className="mt-3 flex flex-wrap gap-1">
                     {currentUser.tags.map(tag => (
-                      <span key={tag} className="text-[9px] px-2 py-0.5 bg-slate-900 text-slate-400 rounded-md border border-slate-800">
+                      <span key={tag} className="text-[9px] px-2 py-0.5 bg-canvas text-ink-muted rounded-md border border-hairline">
                         #{tag}
                       </span>
                     ))}
                   </div>
+
+                  {/* 关怀版一键切换按钮 */}
+                  <div className="mt-4 pt-4 border-t border-hairline">
+                    <button
+                      type="button"
+                      onClick={() => triggerToggleCareMode(true)}
+                      className="w-full py-3 bg-jade/10 hover:bg-jade/15 border border-jade/30 text-jade rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-98"
+                    >
+                      <span>🌺 一键切换至：关怀版（适老化版本）</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Achievements List */}
-                <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2.5">
-                  <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1">
-                    <Award className="w-4 h-4 text-indigo-400" />
+                <div className="bg-surface p-4 rounded-xl border border-hairline space-y-2.5">
+                  <h4 className="text-xs font-bold text-ink flex items-center gap-1.5">
+                    <DabashouBadge className="w-4 h-4 text-jade" />
                     🏅 我的社区勋章
                   </h4>
                   <div className="grid grid-cols-3 gap-2 pt-1 text-center">
                     {currentUser.badges?.map((badge, i) => (
-                      <div key={badge} className="p-2 bg-slate-950 rounded-xl border border-slate-850 flex flex-col items-center justify-center gap-1">
+                      <div key={badge} className="p-2 bg-canvas rounded-xl border border-hairline flex flex-col items-center justify-center gap-1">
                         <span className="text-lg">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
-                        <span className="text-[9px] text-slate-300 font-medium truncate w-full">{badge}</span>
+                        <span className="text-[9px] text-ink font-medium truncate w-full">{badge}</span>
                       </div>
                     )) || (
-                      <p className="text-[10px] text-slate-500 col-span-3">尚未获得勋章</p>
+                      <p className="text-[10px] text-ink-muted col-span-3">尚未获得勋章</p>
                     )}
                   </div>
                 </div>
 
                 {/* Account info items */}
-                <div className="bg-slate-900 rounded-xl border border-slate-800 divide-y divide-slate-850 text-xs">
-                  <div className="p-3 flex justify-between items-center text-slate-300">
+                <div className="bg-surface rounded-xl border border-hairline divide-y divide-hairline text-xs">
+                  <div className="p-3 flex justify-between items-center text-ink">
                     <span className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-indigo-400" />
+                      <Clock className="w-4 h-4 text-jade" />
                       已经入驻社区
                     </span>
-                    <span className="font-mono text-slate-400">{currentUser.joinedDays || 120} 天</span>
+                    <span className="font-number font-bold text-ink-muted">{currentUser.joinedDays || 120} 天</span>
                   </div>
-                  <div className="p-3 flex justify-between items-center text-slate-300">
+                  <div className="p-3 flex justify-between items-center text-ink">
                     <span className="flex items-center gap-1.5">
-                      <Zap className="w-4 h-4 text-indigo-400" />
+                      <DabashouCredit className="w-4 h-4 text-jade" />
                       当前活跃频率
                     </span>
-                    <span className="font-medium text-slate-400">{currentUser.frequency || '每日'}</span>
+                    <span className="font-medium text-ink-muted">{currentUser.frequency || '每日'}</span>
                   </div>
                 </div>
 
                 {/* History actions list (Mock dynamically based on feeds) */}
                 <div className="space-y-2">
-                  <h4 className="text-xs font-bold text-slate-200">📋 我的近期社区动态</h4>
+                  <h4 className="text-xs font-bold text-ink">📋 我的近期社区动态</h4>
                   <div className="space-y-2">
                     {feedItems.filter(f => f.authorName === currentUser.name).slice(0, 3).map(item => (
-                      <div key={item.id} className="p-3 bg-slate-900/50 rounded-xl border border-slate-800/60 text-xs flex justify-between items-start gap-2">
+                      <div key={item.id} className="p-3 bg-surface rounded-xl border border-hairline text-xs flex justify-between items-start gap-2">
                         <div className="min-w-0">
-                          <p className="text-[10px] text-slate-500 font-mono">
+                          <p className="text-[10px] text-ink-subtle font-number font-bold">
                             {item.type === 'help' ? '🤝 互助求助' : '日常分享'} • {item.time}
                           </p>
-                          <p className="text-slate-300 truncate mt-1">{item.content}</p>
+                          <p className="text-ink truncate mt-1">{item.content}</p>
                         </div>
-                        <span className="text-[10px] text-slate-500 shrink-0 font-mono">
+                        <span className="text-[10px] text-ink-muted shrink-0 font-number">
                           ❤️ {item.likes}
                         </span>
                       </div>
                     ))}
                     {feedItems.filter(f => f.authorName === currentUser.name).length === 0 && (
-                      <p className="text-center py-6 text-[10px] text-slate-500 bg-slate-900/20 rounded-xl border border-slate-800/40">
+                      <p className="text-center py-6 text-[10px] text-ink-muted bg-canvas rounded-xl border border-hairline">
                         暂无发布记录，快去邻里圈发一条吧
                       </p>
                     )}
@@ -1792,38 +1881,41 @@ export default function App() {
               </div>
             )}
 
+              </>
+            )}
+
           </div>
 
           {/* SIMULATED BOTTOM TAB BAR */}
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-slate-950 border-t border-slate-900 flex justify-around items-center px-2 z-40">
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-surface border-t border-hairline flex justify-around items-center px-2 z-40 shadow-md">
             <button
               onClick={() => { setActiveTab('home'); setSearchQuery(''); }}
               className={`flex flex-col items-center gap-1 transition-all ${
-                activeTab === 'home' ? 'text-indigo-400 scale-105' : 'text-slate-500 hover:text-slate-300'
+                activeTab === 'home' ? 'text-jade scale-105 font-bold' : 'text-ink-muted hover:text-ink'
               }`}
             >
-              <Compass className="w-5 h-5" />
+              <DabashouMap className="w-5 h-5" />
               <span className="text-[9px] font-medium">社区地图</span>
             </button>
 
             <button
               onClick={() => setActiveTab('circle')}
               className={`flex flex-col items-center gap-1 transition-all ${
-                activeTab === 'circle' ? 'text-indigo-400 scale-105' : 'text-slate-500 hover:text-slate-300'
+                activeTab === 'circle' ? 'text-jade scale-105 font-bold' : 'text-ink-muted hover:text-ink'
               }`}
             >
-              <Users className="w-5 h-5" />
+              <DabashouCircle className="w-5 h-5" />
               <span className="text-[9px] font-medium">邻里圈</span>
             </button>
 
             <button
               onClick={() => setActiveTab('chat')}
               className={`flex flex-col items-center gap-1 transition-all relative ${
-                activeTab === 'chat' ? 'text-indigo-400 scale-105' : 'text-slate-500 hover:text-slate-300'
+                activeTab === 'chat' ? 'text-jade scale-105 font-bold' : 'text-ink-muted hover:text-ink'
               }`}
             >
               {chatSessions.some(c => c.unreadCount > 0) && (
-                <span className="absolute top-0 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></span>
+                <span className="absolute top-0 right-1.5 w-1.5 h-1.5 rounded-full bg-coral animate-ping"></span>
               )}
               <MessageSquare className="w-5 h-5" />
               <span className="text-[9px] font-medium">我的聊天</span>
@@ -1832,29 +1924,29 @@ export default function App() {
             <button
               onClick={() => setActiveTab('me')}
               className={`flex flex-col items-center gap-1 transition-all ${
-                activeTab === 'me' ? 'text-indigo-400 scale-105' : 'text-slate-500 hover:text-slate-300'
+                activeTab === 'me' ? 'text-jade scale-105 font-bold' : 'text-ink-muted hover:text-ink'
               }`}
             >
-              <User className="w-5 h-5" />
+              <DabashouMe className="w-5 h-5" />
               <span className="text-[9px] font-medium">我的</span>
             </button>
           </div>
 
           {/* OVERLAY MODAL: 1. SPACE DETAILS (BOOKING & REVIEWS) */}
           {selectedSpace && (
-            <div className="absolute inset-0 bg-slate-950/90 z-50 animate-fade-in flex flex-col justify-end">
-              <div className="bg-slate-900 border-t border-slate-800 rounded-t-[32px] max-h-[85%] overflow-y-auto custom-scrollbar flex flex-col">
+            <div className="absolute inset-0 bg-ink/75 z-50 animate-fade-in flex flex-col justify-end">
+              <div className="bg-canvas border-t border-hairline rounded-t-[32px] max-h-[85%] overflow-y-auto custom-scrollbar flex flex-col">
                 
                 {/* Header image placeholder */}
-                <div className="p-6 bg-gradient-to-br from-indigo-950 to-slate-900 flex justify-between items-start border-b border-slate-800/60 sticky top-0 z-10 backdrop-blur-md bg-opacity-95">
+                <div className="p-6 bg-jade-light/40 flex justify-between items-start border-b border-hairline sticky top-0 z-10 backdrop-blur-md bg-opacity-95">
                   <div>
                     <span className="text-3xl">{selectedSpace.image}</span>
-                    <h2 className="font-bold text-base text-white mt-1">{selectedSpace.name}</h2>
-                    <p className="text-[10px] text-slate-400 mt-1">⭐ {selectedSpace.rating}分 • 已有{selectedSpace.reviewsCount}人评价</p>
+                    <h2 className="font-bold text-base text-ink mt-1">{selectedSpace.name}</h2>
+                    <p className="text-[10px] text-ink-muted mt-1 font-number">⭐ {selectedSpace.rating}分 • 已有{selectedSpace.reviewsCount}人评价</p>
                   </div>
                   <button 
                     onClick={() => setSelectedSpace(null)}
-                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm border border-slate-750"
+                    className="w-8 h-8 rounded-full bg-surface hover:bg-canvas text-ink flex items-center justify-center font-bold text-sm border border-hairline shadow-xs"
                   >
                     ✕
                   </button>
@@ -1863,26 +1955,26 @@ export default function App() {
                 <div className="p-4 space-y-4 text-xs">
                   
                   {/* Space stats & details list */}
-                  <div className="space-y-2 bg-slate-950 p-3.5 rounded-xl border border-slate-800/80">
-                    <p className="text-slate-300"><strong className="text-indigo-400">📍 物理位置:</strong> {selectedSpace.location}</p>
-                    <p className="text-slate-300"><strong className="text-indigo-400">🕐 开放时间:</strong> {selectedSpace.time}</p>
-                    <p className="text-slate-300"><strong className="text-indigo-400">👥 容纳人数:</strong> {selectedSpace.capacity}</p>
-                    <p className="text-slate-300"><strong className="text-indigo-400">💰 预约费用:</strong> 住户完全免费</p>
-                    <p className="text-slate-300"><strong className="text-indigo-400">🔗 预约规则:</strong> {selectedSpace.bookingMethod}</p>
+                  <div className="space-y-2 bg-surface p-3.5 rounded-xl border border-hairline">
+                    <p className="text-ink"><strong className="text-jade">📍 物理位置:</strong> {selectedSpace.location}</p>
+                    <p className="text-ink"><strong className="text-jade">🕐 开放时间:</strong> {selectedSpace.time}</p>
+                    <p className="text-ink"><strong className="text-jade">👥 容纳人数:</strong> {selectedSpace.capacity}</p>
+                    <p className="text-ink"><strong className="text-jade">💰 预约费用:</strong> 住户完全免费</p>
+                    <p className="text-ink"><strong className="text-jade">🔗 预约规则:</strong> {selectedSpace.bookingMethod}</p>
                   </div>
 
                   {/* Intro */}
                   <div className="space-y-1">
-                    <h4 className="font-bold text-slate-200">📝 空间描述</h4>
-                    <p className="text-slate-400 leading-relaxed text-[11px]">{selectedSpace.description}</p>
+                    <h4 className="font-bold text-ink">📝 空间描述</h4>
+                    <p className="text-ink-muted leading-relaxed text-[11px]">{selectedSpace.description}</p>
                   </div>
 
                   {/* Facilities list */}
                   <div className="space-y-1.5">
-                    <h4 className="font-bold text-slate-200">🛠️ 配套设施 ({selectedSpace.facilities.length}项)</h4>
+                    <h4 className="font-bold text-ink">🛠️ 配套设施 ({selectedSpace.facilities.length}项)</h4>
                     <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                       {selectedSpace.facilities.map(fac => (
-                        <span key={fac} className="bg-slate-950 p-2 border border-slate-850 text-slate-400 rounded-lg">
+                        <span key={fac} className="bg-surface p-2 border border-hairline text-ink-muted rounded-lg">
                           • {fac}
                         </span>
                       ))}
@@ -1890,12 +1982,12 @@ export default function App() {
                   </div>
 
                   {/* Notices and warnings */}
-                  <div className="space-y-1.5 bg-indigo-950/20 border border-indigo-900/30 rounded-xl p-3">
-                    <h4 className="font-bold text-indigo-400 flex items-center gap-1">
+                  <div className="space-y-1.5 bg-jade-light/30 border border-jade/10 rounded-xl p-3">
+                    <h4 className="font-bold text-jade flex items-center gap-1">
                       <Info className="w-3.5 h-3.5" />
                       预约使用须知
                     </h4>
-                    <ul className="space-y-1 text-[10px] text-slate-400">
+                    <ul className="space-y-1 text-[10px] text-ink-muted">
                       {selectedSpace.notices.map((no, i) => (
                         <li key={i} className="flex gap-1.5">
                           <span>{i+1}.</span>
@@ -1908,7 +2000,7 @@ export default function App() {
                   {/* Bookings slot grid (if bookingMethod mentions booking) */}
                   {selectedSpace.bookings.length > 0 && (
                     <div className="space-y-2">
-                      <h4 className="font-bold text-slate-200">📅 本周预约情况 (本周五)</h4>
+                      <h4 className="font-bold text-ink">📅 本周预约情况 (本周五)</h4>
                       <div className="grid grid-cols-2 gap-1.5">
                         {selectedSpace.bookings.map(book => {
                           const isBookedByMe = book.isBooked && book.bookerName === currentUser.name;
@@ -1919,25 +2011,25 @@ export default function App() {
                               className={`p-2.5 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between h-14 ${
                                 book.isBooked 
                                   ? isBookedByMe 
-                                    ? 'bg-gradient-to-r from-emerald-950 to-slate-900 border-emerald-500 text-emerald-400' 
-                                    : 'bg-slate-950 border-slate-850 text-slate-500 cursor-not-allowed'
-                                  : 'bg-slate-900 hover:bg-slate-850 border-slate-800 text-slate-200 hover:border-slate-700'
+                                    ? 'bg-jade border-jade text-white' 
+                                    : 'bg-canvas border-hairline text-ink-subtle cursor-not-allowed'
+                                  : 'bg-surface hover:bg-canvas border-hairline text-ink hover:border-jade/30'
                               }`}
                               disabled={book.isBooked && !isBookedByMe}
                             >
-                              <span className="text-[9px] font-mono block">{book.timeSlot}</span>
+                              <span className="text-[9px] font-number block">{book.timeSlot}</span>
                               <div className="flex justify-between items-center w-full mt-1">
                                 <span className="text-[10px] font-bold">
                                   {book.isBooked ? (isBookedByMe ? '已预定 (我)' : `${book.bookerName}`) : '可预约'}
                                 </span>
                                 {book.isBooked ? (
                                   isBookedByMe ? (
-                                    <span className="text-[8px] bg-emerald-900 text-emerald-300 px-1 rounded">点击取消</span>
+                                    <span className="text-[8px] bg-white/20 text-white px-1 rounded">点击取消</span>
                                   ) : (
-                                    <span className="text-[8px] bg-slate-900 text-slate-600 px-1 rounded">{book.bookerRoom}</span>
+                                    <span className="text-[8px] bg-canvas text-ink-subtle px-1 rounded">{book.bookerRoom}</span>
                                   )
                                 ) : (
-                                  <span className="text-[8px] text-indigo-400">点击预定</span>
+                                  <span className="text-[8px] text-jade">点击预定</span>
                                 )}
                               </div>
                             </button>
@@ -1948,22 +2040,22 @@ export default function App() {
                   )}
 
                   {/* User Reviews */}
-                  <div className="space-y-3 pt-3 border-t border-slate-850">
-                    <h4 className="font-bold text-slate-200 flex justify-between items-center">
+                  <div className="space-y-3 pt-3 border-t border-hairline">
+                    <h4 className="font-bold text-ink flex justify-between items-center">
                       <span>👤 住户评价 ({selectedSpace.reviews.length})</span>
-                      <span className="text-[10px] text-slate-500">温和友好评分</span>
+                      <span className="text-[10px] text-ink-muted">温和友好评分</span>
                     </h4>
 
                     {/* Review submit form */}
-                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-850 space-y-2">
+                    <div className="bg-surface p-3 rounded-xl border border-hairline space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-slate-400">为此公共空间打分:</span>
+                        <span className="text-[10px] text-ink-muted">为此公共空间打分:</span>
                         <div className="flex gap-1">
                           {[1, 2, 3, 4, 5].map(num => (
                             <button
                               key={num}
                               onClick={() => setNewCommentRating(num)}
-                              className={`text-sm ${num <= newCommentRating ? 'text-amber-400' : 'text-slate-600'}`}
+                              className={`text-sm ${num <= newCommentRating ? 'text-amber' : 'text-ink-subtle'}`}
                             >
                               ★
                             </button>
@@ -1976,11 +2068,11 @@ export default function App() {
                           placeholder="谈谈你的使用体验，如卫生、插座好用度..."
                           value={newCommentText}
                           onChange={(e) => setNewCommentText(e.target.value)}
-                          className="flex-1 bg-slate-900 border border-slate-800 rounded-lg text-[10px] px-2 py-1 text-white placeholder-slate-600 outline-none focus:border-indigo-500"
+                          className="flex-1 bg-canvas border border-hairline rounded-lg text-[10px] px-2 py-1 text-ink placeholder-ink-muted outline-none focus:border-jade"
                         />
                         <button
                           onClick={() => handleAddSpaceReview(selectedSpace.id)}
-                          className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] px-3 rounded-lg font-medium transition-colors"
+                          className="bg-jade hover:bg-jade-hover text-white text-[10px] px-3 rounded-lg font-medium transition-colors shadow-xs"
                         >
                           提交
                         </button>
@@ -1990,21 +2082,21 @@ export default function App() {
                     {/* Review threads */}
                     <div className="space-y-2">
                       {selectedSpace.reviews.map((rev, i) => (
-                        <div key={i} className="p-3 bg-slate-950 rounded-xl border border-slate-850/60">
+                        <div key={i} className="p-3 bg-canvas rounded-xl border border-hairline">
                           <div className="flex justify-between items-center text-[10px]">
-                            <span className="font-bold text-slate-300">{rev.authorName} <span className="text-slate-500 font-normal">{rev.authorRoom}</span></span>
-                            <span className="text-slate-500 font-mono">{rev.date}</span>
+                            <span className="font-bold text-ink">{rev.authorName} <span className="text-ink-subtle font-normal">{rev.authorRoom}</span></span>
+                            <span className="text-ink-subtle font-number">{rev.date}</span>
                           </div>
-                          <div className="flex text-amber-400 text-[8px] my-1">
+                          <div className="flex text-amber text-[8px] my-1">
                             {Array.from({ length: rev.rating }).map((_, idx) => (
                               <span key={idx}>★</span>
                             ))}
                           </div>
-                          <p className="text-slate-400 text-[10px] leading-relaxed">{rev.comment}</p>
+                          <p className="text-ink-muted text-[10px] leading-relaxed">{rev.comment}</p>
                         </div>
                       ))}
                       {selectedSpace.reviews.length === 0 && (
-                        <p className="text-center text-slate-600 py-3 text-[10px]">暂无居民评价，来做第一个反馈者吧</p>
+                        <p className="text-center text-ink-subtle py-3 text-[10px]">暂无居民评价，来做第一个反馈者吧</p>
                       )}
                     </div>
                   </div>
@@ -2012,13 +2104,13 @@ export default function App() {
                 </div>
 
                 {/* Footer submit action */}
-                <div className="p-4 bg-slate-950 border-t border-slate-850 sticky bottom-0 flex justify-between items-center">
-                  <div className="text-[10px] text-slate-500">住户守则：预约请准时，改期请提前取消。</div>
+                <div className="p-4 bg-surface border-t border-hairline sticky bottom-0 flex justify-between items-center">
+                  <div className="text-[10px] text-ink-muted">住户守则：预约请准时，改期请提前取消。</div>
                   <button 
                     onClick={() => {
                       showToast('预约通道已完全开启，可以直接在上方时间格子选择预约。');
                     }}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all"
+                    className="bg-jade hover:bg-jade-hover text-white px-5 py-2 rounded-xl font-bold text-xs shadow-xs active:scale-95 transition-all"
                   >
                     立即预约空间
                   </button>
@@ -2030,20 +2122,20 @@ export default function App() {
 
           {/* OVERLAY MODAL: 2. SERVICE DETAILS */}
           {selectedService && (
-            <div className="absolute inset-0 bg-slate-950/90 z-50 animate-fade-in flex flex-col justify-end">
-              <div className="bg-slate-900 border-t border-slate-800 rounded-t-[32px] max-h-[80%] overflow-y-auto custom-scrollbar flex flex-col">
+            <div className="absolute inset-0 bg-ink/75 z-50 animate-fade-in flex flex-col justify-end">
+              <div className="bg-canvas border-t border-hairline rounded-t-[32px] max-h-[80%] overflow-y-auto custom-scrollbar flex flex-col">
                 
-                <div className="p-6 bg-gradient-to-br from-indigo-950 to-slate-900 flex justify-between items-start border-b border-slate-800/60 sticky top-0 z-10">
+                <div className="p-6 bg-jade-light/40 flex justify-between items-start border-b border-hairline sticky top-0 z-10">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl bg-slate-800 p-2 rounded-xl">{selectedService.image}</span>
+                    <span className="text-3xl bg-surface p-2 rounded-xl border border-hairline">{selectedService.image}</span>
                     <div>
-                      <h2 className="font-bold text-base text-white">{selectedService.name}</h2>
-                      <p className="text-[10px] text-slate-400 mt-0.5">🏷️ {selectedService.type} • ⭐ {selectedService.rating}分</p>
+                      <h2 className="font-bold text-base text-ink">{selectedService.name}</h2>
+                      <p className="text-[10px] text-ink-muted mt-0.5 font-number">🏷️ {selectedService.type} • ⭐ {selectedService.rating}分</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => setSelectedService(null)}
-                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm"
+                    className="w-8 h-8 rounded-full bg-surface hover:bg-canvas text-ink flex items-center justify-center font-bold text-sm border border-hairline shadow-xs"
                   >
                     ✕
                   </button>
@@ -2052,24 +2144,24 @@ export default function App() {
                 <div className="p-4 space-y-4 text-xs">
                   
                   {/* Stats list */}
-                  <div className="space-y-2 bg-slate-950 p-3.5 rounded-xl border border-slate-800/80">
-                    <p className="text-slate-300"><strong>📍 物理位置:</strong> {selectedService.location}</p>
-                    <p className="text-slate-300"><strong>🕐 营业时间:</strong> {selectedService.hours}</p>
-                    <p className="text-slate-300"><strong>📞 咨询电话:</strong> <span className="font-mono text-indigo-400">{selectedService.phone}</span></p>
-                    <p className="text-slate-300"><strong>⭐ 居民评分:</strong> {selectedService.rating} 分 (优秀商户)</p>
+                  <div className="space-y-2 bg-surface p-3.5 rounded-xl border border-hairline">
+                    <p className="text-ink"><strong>📍 物理位置:</strong> {selectedService.location}</p>
+                    <p className="text-ink"><strong>🕐 营业时间:</strong> {selectedService.hours}</p>
+                    <p className="text-ink"><strong>📞 咨询电话:</strong> <span className="font-number text-jade font-bold">{selectedService.phone}</span></p>
+                    <p className="text-ink"><strong>⭐ 居民评分:</strong> {selectedService.rating} 分 (优秀商户)</p>
                   </div>
 
                   {/* Discount special offer */}
                   {selectedService.hasDiscount && (
-                    <div className="bg-gradient-to-r from-red-950/50 via-slate-900 to-red-950/20 border border-red-500/30 p-4 rounded-xl space-y-1">
-                      <h4 className="font-bold text-red-400 flex items-center gap-1">
+                    <div className="bg-coral-light/20 border border-coral/20 p-4 rounded-xl space-y-1">
+                      <h4 className="font-bold text-coral flex items-center gap-1">
                         <Gift className="w-4 h-4" />
                         住户专享尊享特权
                       </h4>
-                      <p className="text-xs text-slate-200 font-medium leading-relaxed mt-1">
+                      <p className="text-xs text-ink font-medium leading-relaxed mt-1">
                         {selectedService.discountText}
                       </p>
-                      <p className="text-[9px] text-slate-500 mt-1">
+                      <p className="text-[9px] text-ink-subtle mt-1">
                         * 使用时请向店员出示本小程序认证页面。
                       </p>
                     </div>
@@ -2077,12 +2169,12 @@ export default function App() {
 
                   {/* Resident reviews list */}
                   <div className="space-y-2">
-                    <h4 className="font-bold text-slate-200">👍 真实住户口碑推荐</h4>
-                    <div className="space-y-2 text-[11px] text-slate-400 leading-relaxed">
+                    <h4 className="font-bold text-ink">👍 真实住户口碑推荐</h4>
+                    <div className="space-y-2 text-[11px] text-ink-muted leading-relaxed">
                       {selectedService.reviews.map((rev, i) => (
-                        <div key={i} className="p-2.5 bg-slate-950 rounded-xl border border-slate-850 flex items-start gap-2">
-                          <span className="text-indigo-400">“</span>
-                          <p>{rev}</p>
+                        <div key={i} className="p-2.5 bg-surface rounded-xl border border-hairline flex items-start gap-2">
+                          <span className="text-jade font-bold">“</span>
+                          <p className="text-ink">{rev}</p>
                         </div>
                       ))}
                     </div>
@@ -2090,10 +2182,10 @@ export default function App() {
 
                   {/* Highlight tags */}
                   <div className="space-y-1.5">
-                    <h4 className="font-bold text-slate-200">特色体验标签</h4>
+                    <h4 className="font-bold text-ink">特色体验标签</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedService.tags.map(t => (
-                        <span key={t} className="bg-slate-950 px-2 py-1 border border-slate-850 rounded-md text-[10px] text-slate-300">
+                        <span key={t} className="bg-canvas px-2 py-1 border border-hairline rounded-md text-[10px] text-ink-muted">
                           #{t}
                         </span>
                       ))}
@@ -2102,16 +2194,16 @@ export default function App() {
 
                 </div>
 
-                <div className="p-4 bg-slate-950 border-t border-slate-850 flex gap-2">
+                <div className="p-4 bg-surface border-t border-hairline flex gap-2">
                   <button 
                     onClick={() => showToast(`收藏 ${selectedService.name} 成功！可在“我的”快捷调用。`)}
-                    className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl font-bold text-xs"
+                    className="flex-1 py-2.5 bg-canvas hover:bg-surface text-ink-muted border border-hairline rounded-xl font-bold text-xs"
                   >
                     👍 收藏商户
                   </button>
                   <button 
                     onClick={() => showToast(`正在拨打电话: ${selectedService.phone}...`)}
-                    className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1 shadow"
+                    className="flex-1 py-2.5 bg-jade hover:bg-jade-hover text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1 shadow-xs"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>一键打电话</span>
@@ -2124,20 +2216,20 @@ export default function App() {
 
           {/* OVERLAY MODAL: 3. EVENT DETAILS */}
           {selectedEvent && (
-            <div className="absolute inset-0 bg-slate-950/90 z-50 animate-fade-in flex flex-col justify-end">
-              <div className="bg-slate-900 border-t border-slate-800 rounded-t-[32px] max-h-[85%] overflow-y-auto custom-scrollbar flex flex-col">
+            <div className="absolute inset-0 bg-ink/75 z-50 animate-fade-in flex flex-col justify-end">
+              <div className="bg-canvas border-t border-hairline rounded-t-[32px] max-h-[85%] overflow-y-auto custom-scrollbar flex flex-col">
                 
-                <div className="p-6 bg-gradient-to-br from-indigo-950 to-slate-900 flex justify-between items-start border-b border-slate-800/60 sticky top-0 z-10">
+                <div className="p-6 bg-jade-light/40 flex justify-between items-start border-b border-hairline sticky top-0 z-10">
                   <div>
-                    <span className="text-[10px] bg-indigo-950 text-indigo-400 border border-indigo-900/40 px-2 py-0.2 rounded-md font-medium">
+                    <span className="text-[10px] bg-canvas text-jade border border-jade/15 px-2 py-0.2 rounded-md font-number font-bold">
                       {selectedEvent.type}
                     </span>
-                    <h2 className="font-bold text-base text-white mt-1.5">{selectedEvent.name}</h2>
-                    <p className="text-[10px] text-slate-400 mt-1">🕒 {selectedEvent.time}</p>
+                    <h2 className="font-bold text-base text-ink mt-1.5">{selectedEvent.name}</h2>
+                    <p className="text-[10px] text-ink-muted mt-1 font-number">🕒 {selectedEvent.time}</p>
                   </div>
                   <button 
                     onClick={() => setSelectedEvent(null)}
-                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm"
+                    className="w-8 h-8 rounded-full bg-surface hover:bg-canvas text-ink flex items-center justify-center font-bold text-sm border border-hairline shadow-xs"
                   >
                     ✕
                   </button>
@@ -2146,32 +2238,32 @@ export default function App() {
                 <div className="p-4 space-y-4 text-xs">
                   
                   {/* Stats card */}
-                  <div className="space-y-2 bg-slate-950 p-3.5 rounded-xl border border-slate-800/80">
-                    <p className="text-slate-300"><strong>📍 集合地点:</strong> {selectedEvent.location}</p>
-                    <p className="text-slate-300"><strong>👤 活动发起方:</strong> {selectedEvent.organizer}</p>
-                    <p className="text-slate-300"><strong>💰 材料/拼费:</strong> <span className="font-semibold text-emerald-400">{selectedEvent.fee}</span></p>
-                    <p className="text-slate-300"><strong>👥 报名限额:</strong> 当前 {selectedEvent.signedUp} 人 / 限额 {selectedEvent.capacity} 人</p>
+                  <div className="space-y-2 bg-surface p-3.5 rounded-xl border border-hairline">
+                    <p className="text-ink"><strong>📍 集合地点:</strong> {selectedEvent.location}</p>
+                    <p className="text-ink"><strong>👤 活动发起方:</strong> {selectedEvent.organizer}</p>
+                    <p className="text-ink"><strong>💰 材料/拼费:</strong> <span className="font-semibold text-jade">{selectedEvent.fee}</span></p>
+                    <p className="text-ink"><strong>👥 报名限额:</strong> 当前 {selectedEvent.signedUp} 人 / 限额 {selectedEvent.capacity} 人</p>
                   </div>
 
                   {/* Intro */}
                   <div className="space-y-1.5">
-                    <h4 className="font-bold text-slate-200">📝 详细内容介绍</h4>
-                    <p className="text-slate-400 leading-relaxed text-[11px] bg-slate-950 p-3 rounded-xl border border-slate-850/60">
+                    <h4 className="font-bold text-ink">📝 详细内容介绍</h4>
+                    <p className="text-ink-muted leading-relaxed text-[11px] bg-canvas p-3 rounded-xl border border-hairline">
                       {selectedEvent.introduction}
                     </p>
                   </div>
 
                   {/* Registered Neighbors List */}
                   <div className="space-y-2">
-                    <h4 className="font-bold text-slate-200">👥 已报名邻居名单 ({selectedEvent.activeMembers.length}人)</h4>
+                    <h4 className="font-bold text-ink">👥 已报名邻居名单 ({selectedEvent.activeMembers.length}人)</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedEvent.activeMembers.map(member => (
                         <span 
                           key={member} 
                           className={`text-[10px] px-2.5 py-1 rounded-full border ${
                             member.includes(currentUser.name)
-                              ? 'bg-emerald-950/60 text-emerald-400 border-emerald-900/40 font-bold'
-                              : 'bg-slate-950 text-slate-400 border-slate-850'
+                              ? 'bg-jade text-white border-jade font-bold'
+                              : 'bg-canvas text-ink-muted border border-hairline'
                           }`}
                         >
                           {member}
@@ -2182,18 +2274,18 @@ export default function App() {
 
                 </div>
 
-                <div className="p-4 bg-slate-950 border-t border-slate-850 flex gap-2 items-center justify-between">
-                  <div className="text-[10px] text-slate-500">
+                <div className="p-4 bg-surface border-t border-hairline flex gap-2 items-center justify-between">
+                  <div className="text-[10px] text-ink-muted">
                     * 居民自发性活动，安全第一，互助同乐。
                   </div>
                   <button 
                     onClick={() => handleRegisterEvent(selectedEvent.id)}
-                    className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all active:scale-95 ${
+                    className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs transition-all active:scale-95 ${
                       selectedEvent.joinedByMe
-                        ? 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
+                        ? 'bg-canvas text-ink-muted border border-hairline hover:bg-surface'
                         : selectedEvent.signedUp >= selectedEvent.capacity
-                          ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                          : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                          ? 'bg-canvas text-ink-subtle border border-hairline cursor-not-allowed'
+                          : 'bg-jade hover:bg-jade-hover text-white'
                     }`}
                   >
                     {selectedEvent.joinedByMe ? '✕ 取消报名' : selectedEvent.signedUp >= selectedEvent.capacity ? '名额已满' : '✅ 立即报名活动'}
@@ -2206,17 +2298,17 @@ export default function App() {
 
           {/* OVERLAY MODAL: 4. CREATE NEW POST / REQUIREMENT FORM */}
           {showCreatePost && (
-            <div className="absolute inset-0 bg-slate-950/95 z-50 animate-fade-in flex flex-col justify-end">
-              <div className="bg-slate-900 border-t border-slate-800 rounded-t-[32px] max-h-[90%] overflow-y-auto custom-scrollbar flex flex-col">
+            <div className="absolute inset-0 bg-ink/75 z-50 animate-fade-in flex flex-col justify-end">
+              <div className="bg-canvas border-t border-hairline rounded-t-[32px] max-h-[90%] overflow-y-auto custom-scrollbar flex flex-col">
                 
-                <div className="p-6 bg-gradient-to-br from-indigo-950 to-slate-900 flex justify-between items-start border-b border-slate-800/60 sticky top-0 z-10">
+                <div className="p-6 bg-jade-light/40 flex justify-between items-start border-b border-hairline sticky top-0 z-10">
                   <div>
-                    <h2 className="font-bold text-base text-white">✍️ 发布邻里圈动态</h2>
-                    <p className="text-[10px] text-slate-400 mt-0.5">将以您的当前住户角色: [ {currentUser.name} {currentUser.room} ] 署名发布</p>
+                    <h2 className="font-bold text-base text-ink">✍️ 发布邻里圈动态</h2>
+                    <p className="text-[10px] text-ink-muted mt-0.5">将以您的当前住户角色: [ {currentUser.name} {currentUser.room} ] 署名发布</p>
                   </div>
                   <button 
                     onClick={() => setShowCreatePost(false)}
-                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm"
+                    className="w-8 h-8 rounded-full bg-surface hover:bg-canvas text-ink flex items-center justify-center font-bold text-sm border border-hairline shadow-xs"
                   >
                     ✕
                   </button>
@@ -2226,15 +2318,15 @@ export default function App() {
                   
                   {/* Type toggler */}
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">选择发布内容类型</label>
+                    <label className="block text-[10px] text-ink-muted font-bold uppercase tracking-wider">选择发布内容类型</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setNewPostType('help')}
                         className={`py-2 rounded-xl font-bold border transition-all text-center ${
                           newPostType === 'help' 
-                            ? 'bg-indigo-600 text-white border-indigo-500 shadow' 
-                            : 'bg-slate-950 text-slate-400 border-slate-850 hover:text-slate-300'
+                            ? 'bg-jade text-white border-jade shadow-xs' 
+                            : 'bg-surface text-ink-muted border border-hairline hover:text-ink'
                         }`}
                       >
                         🤝 互助求助 (悬赏积分)
@@ -2244,8 +2336,8 @@ export default function App() {
                         onClick={() => setNewPostType('moment')}
                         className={`py-2 rounded-xl font-bold border transition-all text-center ${
                           newPostType === 'moment' 
-                            ? 'bg-indigo-600 text-white border-indigo-500 shadow' 
-                            : 'bg-slate-950 text-slate-400 border-slate-850 hover:text-slate-300'
+                            ? 'bg-jade text-white border-jade shadow-xs' 
+                            : 'bg-surface text-ink-muted border border-hairline hover:text-ink'
                         }`}
                       >
                         📸 居民动态 (日常分享)
@@ -2256,7 +2348,7 @@ export default function App() {
                   {/* Category toggle (if help) */}
                   {newPostType === 'help' && (
                     <div className="space-y-1.5">
-                      <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">选择互助子分类</label>
+                      <label className="block text-[10px] text-ink-muted font-bold uppercase tracking-wider">选择互助子分类</label>
                       <div className="flex flex-wrap gap-1.5">
                         {['拼单', '代取', '照看', '闲置', '交换'].map(cat => (
                           <button
@@ -2265,8 +2357,8 @@ export default function App() {
                             onClick={() => setNewPostCategory(cat)}
                             className={`px-3 py-1.5 rounded-lg border text-[10px] font-medium transition-all ${
                               newPostCategory === cat 
-                                ? 'bg-indigo-950 text-indigo-400 border-indigo-800 font-bold' 
-                                : 'bg-slate-950 text-slate-500 border-slate-850 hover:text-slate-300'
+                                ? 'bg-jade-light text-jade border-jade/30 font-bold' 
+                                : 'bg-surface text-ink-muted border border-hairline hover:text-ink'
                             }`}
                           >
                             {cat}
@@ -2280,8 +2372,8 @@ export default function App() {
                   {newPostType === 'help' && (
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">悬赏积分悬赏 (您目前拥有: {currentUser.points}分)</label>
-                        <span className="font-mono font-bold text-amber-400 text-sm">{newPostBounty} 积分</span>
+                        <label className="text-[10px] text-ink-muted font-bold uppercase tracking-wider">悬赏积分悬赏 (您目前拥有: {currentUser.points}分)</label>
+                        <span className="font-number font-bold text-amber text-sm">{newPostBounty} 积分</span>
                       </div>
                       <input
                         type="range"
@@ -2290,17 +2382,17 @@ export default function App() {
                         step="1"
                         value={newPostBounty}
                         onChange={(e) => setNewPostBounty(parseInt(e.target.value))}
-                        className="w-full accent-indigo-500"
+                        className="w-full accent-jade"
                       />
-                      <p className="text-[9px] text-slate-500">
-                        * 对方响应并完成互助后，您的积分将安全托管并转移至对方。
+                      <p className="text-[9px] text-ink-subtle">
+                        * 对方响应并完成互助后，您的积分将 safe 托管并转移至对方。
                       </p>
                     </div>
                   )}
 
                   {/* Body input text */}
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">发布内容描述</label>
+                    <label className="block text-[10px] text-ink-muted font-bold uppercase tracking-wider">发布内容描述</label>
                     <textarea
                       rows={4}
                       value={newPostContent}
@@ -2310,7 +2402,7 @@ export default function App() {
                           ? '例: 顺丰重件在东门，有没有人下班开车能帮忙捎一趟到2号楼？提供5积分。'
                           : '例: 在顶楼花园拍到了极光般的夜色！快看！'
                       }
-                      className="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-indigo-500 rounded-xl p-3 text-xs text-white placeholder-slate-600 outline-none outline-none transition-all resize-none"
+                      className="w-full bg-surface border border-hairline hover:border-jade/30 focus:border-jade rounded-xl p-3 text-xs text-ink placeholder-ink-muted outline-none transition-all resize-none"
                       required
                     />
                   </div>
@@ -2318,19 +2410,19 @@ export default function App() {
                   {/* Meeting deadline time (if help) */}
                   {newPostType === 'help' && (
                     <div className="space-y-1.5">
-                      <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">期限/要求完成时段</label>
+                      <label className="block text-[10px] text-ink-muted font-bold uppercase tracking-wider">期限/要求完成时段</label>
                       <input
                         type="text"
                         value={newPostMeeting}
                         onChange={(e) => setNewPostMeeting(e.target.value)}
                         placeholder="例: 今晚19:00前 或 随时可商议"
-                        className="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 outline-none outline-none"
+                        className="w-full bg-surface border border-hairline hover:border-jade/30 focus:border-jade rounded-xl px-3 py-2 text-xs text-ink placeholder-ink-muted outline-none transition-all"
                       />
                     </div>
                   )}
 
                   {/* Agreement */}
-                  <p className="text-[9px] text-slate-500 leading-relaxed">
+                  <p className="text-[9px] text-ink-subtle leading-relaxed">
                     * 请发布真实、友善的动态。如涉及不实交易或攻击邻居言论，居委会与楼栋管家小王将有权下架，并扣除您的信用分。
                   </p>
 
@@ -2338,7 +2430,7 @@ export default function App() {
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg active:scale-98 transition-all flex items-center justify-center gap-1"
+                      className="w-full py-3 bg-jade hover:bg-jade-hover text-white font-bold text-xs rounded-xl shadow-xs active:scale-98 transition-all flex items-center justify-center gap-1"
                     >
                       <span>确认发布到邻里圈</span>
                       <Send className="w-3.5 h-3.5" />
@@ -2353,22 +2445,22 @@ export default function App() {
 
           {/* OVERLAY MODAL: ONBOARDING EXPLORE GUIDE (8 STEPS) */}
           {showOnboardingModal && (
-            <div className="absolute inset-0 bg-slate-950/95 z-50 animate-fade-in flex flex-col justify-end">
-              <div className="bg-slate-900 border-t border-slate-800 rounded-t-[32px] h-[85%] overflow-y-auto custom-scrollbar flex flex-col animate-slide-up">
+            <div className="absolute inset-0 bg-ink/75 z-50 animate-fade-in flex flex-col justify-end">
+              <div className="bg-canvas border-t border-hairline rounded-t-[32px] h-[85%] overflow-y-auto custom-scrollbar flex flex-col animate-slide-up">
                 
-                <div className="p-6 bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 flex justify-between items-start border-b border-slate-800/60 sticky top-0 z-10">
+                <div className="p-6 bg-jade-light/40 flex justify-between items-start border-b border-hairline sticky top-0 z-10">
                   <div>
-                    <h2 className="font-bold text-base text-white flex items-center gap-2">
+                    <h2 className="font-bold text-base text-ink flex items-center gap-2">
                       <span>🎯</span>
                       <span>新人专属探索指南</span>
                     </h2>
-                    <p className="text-[10px] text-slate-400 mt-1">
+                    <p className="text-[10px] text-ink-muted mt-1">
                       探索青年互信社区，完成 8 个趣味探索步骤，立得 30 积分新手礼！
                     </p>
                   </div>
                   <button 
                     onClick={() => setShowOnboardingModal(false)}
-                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm border border-slate-750"
+                    className="w-8 h-8 rounded-full bg-surface hover:bg-canvas text-ink flex items-center justify-center font-bold text-sm border border-hairline shadow-xs"
                   >
                     ✕
                   </button>
@@ -2377,17 +2469,17 @@ export default function App() {
                 <div className="p-4 space-y-4 text-xs">
                   
                   {/* Progress Block */}
-                  <div className="bg-slate-950 p-4 rounded-xl border border-indigo-500/10 flex justify-between items-center">
+                  <div className="bg-surface p-4 rounded-xl border border-hairline flex justify-between items-center">
                     <div>
-                      <p className="text-[10px] text-slate-400">当前指南探索进度</p>
+                      <p className="text-[10px] text-ink-muted">当前指南探索进度</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <div className="w-32 bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div className="w-32 bg-canvas h-2 rounded-full overflow-hidden">
                           <div 
-                            className="bg-indigo-500 h-full transition-all duration-500" 
+                            className="bg-jade h-full transition-all duration-500" 
                             style={{ width: `${(completedSteps.length / 8) * 100}%` }}
                           ></div>
                         </div>
-                        <span className="text-xs font-bold font-mono text-indigo-400">
+                        <span className="text-xs font-bold font-number text-jade">
                           {completedSteps.length}/8
                         </span>
                       </div>
@@ -2420,10 +2512,10 @@ export default function App() {
                       disabled={completedSteps.length < 8 || onboardingClaimed}
                       className={`px-3 py-1.5 rounded-lg text-[10px] font-bold shrink-0 flex items-center gap-1 ${
                         onboardingClaimed 
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/40' 
+                          ? 'bg-jade-light text-jade border border-jade/25' 
                           : completedSteps.length === 8 
-                            ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg animate-pulse' 
-                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                            ? 'bg-amber hover:bg-amber/90 text-white shadow-xs animate-pulse' 
+                            : 'bg-canvas text-ink-subtle cursor-not-allowed'
                       }`}
                     >
                       <Gift className="w-3.5 h-3.5" />
@@ -2437,15 +2529,15 @@ export default function App() {
                     {/* Step 1 */}
                     <div className={`p-3.5 rounded-xl border transition-all flex justify-between items-start ${
                       completedSteps.includes(1) 
-                        ? 'bg-slate-950/60 border-emerald-500/20 text-slate-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-200 shadow-sm'
+                        ? 'bg-canvas border-hairline/60 text-ink-muted' 
+                        : 'bg-surface border-hairline text-ink shadow-xs'
                     }`}>
                       <div className="min-w-0 flex-1 pr-2">
                         <h4 className="text-xs font-bold flex items-center gap-1.5">
-                          <span className="text-indigo-400">【Step 1/8】</span>
+                          <span className="text-jade">【Step 1/8】</span>
                           🏠 认识你的楼栋
                         </h4>
-                        <div className="text-[10px] text-slate-400 mt-1.5 space-y-0.5">
+                        <div className="text-[10px] text-ink-muted mt-1.5 space-y-0.5">
                           <p>• 您所在的 3号楼 共18层，每层6户</p>
                           <p>• 专属楼栋管家: <strong>小王管家 (138xxxx)</strong></p>
                         </div>
@@ -2459,28 +2551,28 @@ export default function App() {
                           }}
                           className={`mt-2 px-3 py-1 rounded text-[9px] font-medium transition-all ${
                             completedSteps.includes(1) 
-                              ? 'bg-slate-950 text-emerald-400 border border-emerald-950/40' 
-                              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow shadow-indigo-950/50'
+                              ? 'bg-canvas text-jade border border-hairline/40' 
+                              : 'bg-jade hover:bg-jade-hover text-white shadow-xs'
                           }`}
                         >
                           {completedSteps.includes(1) ? '✓ 已申请加入3号楼群' : '📱 立即加入3号楼群'}
                         </button>
                       </div>
-                      {completedSteps.includes(1) && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                      {completedSteps.includes(1) && <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />}
                     </div>
 
                     {/* Step 2 */}
                     <div className={`p-3.5 rounded-xl border transition-all flex justify-between items-start ${
                       completedSteps.includes(2) 
-                        ? 'bg-slate-950/60 border-emerald-500/20 text-slate-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-200'
+                        ? 'bg-canvas border-hairline/60 text-ink-muted' 
+                        : 'bg-surface border-hairline text-ink'
                     }`}>
                       <div className="min-w-0 flex-1 pr-2">
                         <h4 className="text-xs font-bold flex items-center gap-1.5">
-                          <span className="text-indigo-400">【Step 2/8】</span>
+                          <span className="text-jade">【Step 2/8】</span>
                           📦 快递怎么取
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
+                        <p className="text-[10px] text-ink-muted mt-1.5 leading-relaxed">
                           您的快递送至 <strong>小区西门菜鸟驿站</strong>（营业时间: 09:00 - 20:00）。
                           人不在家时，可在“邻里圈”呼叫邻居顺手代取。
                         </p>
@@ -2496,28 +2588,28 @@ export default function App() {
                           }}
                           className={`mt-2.5 py-1 px-2.5 rounded border text-[9px] font-medium transition-all ${
                             completedSteps.includes(2)
-                              ? 'bg-slate-950 text-emerald-400 border-emerald-950/40'
-                              : 'bg-slate-800 hover:bg-slate-750 text-indigo-300 border-slate-700 shadow-sm'
+                              ? 'bg-canvas text-jade border border-hairline/40'
+                              : 'bg-canvas hover:bg-surface text-jade border border-hairline'
                           }`}
                         >
                           {completedSteps.includes(2) ? '✓ 已了解快递规则' : '📤 去邻里圈看一声'}
                         </button>
                       </div>
-                      {completedSteps.includes(2) && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                      {completedSteps.includes(2) && <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />}
                     </div>
 
                     {/* Step 3 */}
                     <div className={`p-3.5 rounded-xl border transition-all flex justify-between items-start ${
                       completedSteps.includes(3) 
-                        ? 'bg-slate-950/60 border-emerald-500/20 text-slate-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-200'
+                        ? 'bg-canvas border-hairline/60 text-ink-muted' 
+                        : 'bg-surface border-hairline text-ink'
                     }`}>
                       <div className="min-w-0 flex-1 pr-2">
                         <h4 className="text-xs font-bold flex items-center gap-1.5">
-                          <span className="text-indigo-400">【Step 3/8】</span>
+                          <span className="text-jade">【Step 3/8】</span>
                           🛒 买菜去哪
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-1.5">
+                        <p className="text-[10px] text-ink-muted mt-1.5">
                           小区南门对面 <strong>鲜生优选超市</strong> (走路2分钟)，每天晚上8点半后熟食和菜品疯狂打折。
                         </p>
                         <button
@@ -2532,28 +2624,28 @@ export default function App() {
                           }}
                           className={`mt-2.5 py-1 px-2.5 rounded border text-[9px] font-medium transition-all ${
                             completedSteps.includes(3)
-                              ? 'bg-slate-950 text-emerald-400 border-emerald-950/40'
-                              : 'bg-slate-800 hover:bg-slate-750 text-indigo-300 border-slate-700 shadow-sm'
+                              ? 'bg-canvas text-jade border border-hairline/40'
+                              : 'bg-canvas hover:bg-surface text-jade border border-hairline'
                           }`}
                         >
                           {completedSteps.includes(3) ? '✓ 已获悉买菜折扣信息' : '🗺️ 查看周边服务地图'}
                         </button>
                       </div>
-                      {completedSteps.includes(3) && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                      {completedSteps.includes(3) && <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />}
                     </div>
 
                     {/* Step 4 */}
                     <div className={`p-3.5 rounded-xl border transition-all flex justify-between items-start ${
                       completedSteps.includes(4) 
-                        ? 'bg-slate-950/60 border-emerald-500/20 text-slate-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-200'
+                        ? 'bg-canvas border-hairline/60 text-ink-muted' 
+                        : 'bg-surface border-hairline text-ink'
                     }`}>
                       <div className="min-w-0 flex-1 pr-2">
                         <h4 className="text-xs font-bold flex items-center gap-1.5">
-                          <span className="text-indigo-400">【Step 4/8】</span>
+                          <span className="text-jade">【Step 4/8】</span>
                           🍽️ 吃饭怎么解决
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-1.5">
+                        <p className="text-[10px] text-ink-muted mt-1.5">
                           推荐 <strong>2号楼1层邻里食堂</strong>（早7-晚8），健康便宜，出示小程序认证即享 9 折。
                         </p>
                         <button
@@ -2568,28 +2660,28 @@ export default function App() {
                           }}
                           className={`mt-2.5 py-1 px-2.5 rounded border text-[9px] font-medium transition-all ${
                             completedSteps.includes(4)
-                              ? 'bg-slate-950 text-emerald-400 border-emerald-950/40'
-                              : 'bg-slate-800 hover:bg-slate-750 text-indigo-300 border-slate-700 shadow-sm'
+                              ? 'bg-canvas text-jade border border-hairline/40'
+                              : 'bg-canvas hover:bg-surface text-jade border border-hairline'
                           }`}
                         >
                           {completedSteps.includes(4) ? '✓ 已了解邻里食堂' : '🍱 查看所有餐饮'}
                         </button>
                       </div>
-                      {completedSteps.includes(4) && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                      {completedSteps.includes(4) && <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />}
                     </div>
 
                     {/* Step 5 */}
                     <div className={`p-3.5 rounded-xl border transition-all flex justify-between items-start ${
                       completedSteps.includes(5) 
-                        ? 'bg-slate-950/60 border-emerald-500/20 text-slate-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-200'
+                        ? 'bg-canvas border-hairline/60 text-ink-muted' 
+                        : 'bg-surface border-hairline text-ink'
                     }`}>
                       <div className="min-w-0 flex-1 pr-2">
                         <h4 className="text-xs font-bold flex items-center gap-1.5">
-                          <span className="text-indigo-400">【Step 5/8】</span>
+                          <span className="text-jade">【Step 5/8】</span>
                           🏃 社区里好玩的
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-1.5">
+                        <p className="text-[10px] text-ink-muted mt-1.5">
                           <strong>1号楼1层健身房</strong> 24h开放；<strong>2号楼共享书吧</strong> 提供自助咖啡；<strong>每栋楼顶花园</strong> 都可以看夕阳。
                         </p>
                         <button
@@ -2604,28 +2696,28 @@ export default function App() {
                           }}
                           className={`mt-2.5 py-1 px-2.5 rounded border text-[9px] font-medium transition-all ${
                             completedSteps.includes(5)
-                              ? 'bg-slate-950 text-emerald-400 border-emerald-950/40'
-                              : 'bg-slate-800 hover:bg-slate-750 text-indigo-300 border-slate-700 shadow-sm'
+                              ? 'bg-canvas text-jade border border-hairline/40'
+                              : 'bg-canvas hover:bg-surface text-jade border border-hairline'
                           }`}
                         >
                           {completedSteps.includes(5) ? '✓ 已获悉娱乐配套设施' : '🏛️ 探索公共共享空间'}
                         </button>
                       </div>
-                      {completedSteps.includes(5) && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                      {completedSteps.includes(5) && <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />}
                     </div>
 
                     {/* Step 6 */}
                     <div className={`p-3.5 rounded-xl border transition-all flex justify-between items-start ${
                       completedSteps.includes(6) 
-                        ? 'bg-slate-950/60 border-emerald-500/20 text-slate-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-200'
+                        ? 'bg-canvas border-hairline/60 text-ink-muted' 
+                        : 'bg-surface border-hairline text-ink'
                     }`}>
                       <div className="min-w-0 flex-1 pr-2">
                         <h4 className="text-xs font-bold flex items-center gap-1.5">
-                          <span className="text-indigo-400">【Step 6/8】</span>
+                          <span className="text-jade">【Step 6/8】</span>
                           🆘 遇到问题找谁
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-1.5">
+                        <p className="text-[10px] text-ink-muted mt-1.5">
                           24小时物业电话 (138xxxx)。支持一键在线申报反馈漏水、维修等故障问题。
                         </p>
                         <button
@@ -2640,28 +2732,28 @@ export default function App() {
                           }}
                           className={`mt-2.5 py-1 px-2.5 rounded border text-[9px] font-medium transition-all ${
                             completedSteps.includes(6)
-                              ? 'bg-slate-950 text-emerald-400 border-emerald-950/40'
-                              : 'bg-slate-800 hover:bg-slate-750 text-indigo-300 border-slate-700 shadow-sm'
+                              ? 'bg-canvas text-jade border border-hairline/40'
+                              : 'bg-canvas hover:bg-surface text-jade border border-hairline'
                           }`}
                         >
                           {completedSteps.includes(6) ? '✓ 已获得客服反馈途径' : '🔧 在线客服保修反馈'}
                         </button>
                       </div>
-                      {completedSteps.includes(6) && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                      {completedSteps.includes(6) && <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />}
                     </div>
 
                     {/* Step 7 */}
                     <div className={`p-3.5 rounded-xl border transition-all flex justify-between items-start ${
                       completedSteps.includes(7) 
-                        ? 'bg-slate-950/60 border-emerald-500/20 text-slate-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-200'
+                        ? 'bg-canvas border-hairline/60 text-ink-muted' 
+                        : 'bg-surface border-hairline text-ink'
                     }`}>
                       <div className="min-w-0 flex-1 pr-2">
                         <h4 className="text-xs font-bold flex items-center gap-1.5">
-                          <span className="text-indigo-400">【Step 7/8】</span>
+                          <span className="text-jade">【Step 7/8】</span>
                           👋 认识有趣邻居
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-1.5">
+                        <p className="text-[10px] text-ink-muted mt-1.5">
                           同楼502 <strong>小雅</strong>、201 <strong>阿栋</strong>等高活跃住户，随时欢迎大家去邻里圈互动交流。
                         </p>
                         <button
@@ -2676,28 +2768,28 @@ export default function App() {
                           }}
                           className={`mt-2.5 py-1 px-2.5 rounded border text-[9px] font-medium transition-all ${
                             completedSteps.includes(7)
-                              ? 'bg-slate-950 text-emerald-400 border-emerald-950/40'
-                              : 'bg-slate-800 hover:bg-slate-750 text-indigo-300 border-slate-700 shadow-sm'
+                              ? 'bg-canvas text-jade border border-hairline/40'
+                              : 'bg-canvas hover:bg-surface text-jade border border-hairline'
                           }`}
                         >
                           {completedSteps.includes(7) ? '✓ 已了解部分邻友' : '💬 去邻里圈打个招呼'}
                         </button>
                       </div>
-                      {completedSteps.includes(7) && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                      {completedSteps.includes(7) && <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />}
                     </div>
 
                     {/* Step 8 */}
                     <div className={`p-3.5 rounded-xl border transition-all flex justify-between items-start ${
                       completedSteps.includes(8) 
-                        ? 'bg-slate-950/60 border-emerald-500/20 text-slate-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-200'
+                        ? 'bg-canvas border-hairline/60 text-ink-muted' 
+                        : 'bg-surface border-hairline text-ink'
                     }`}>
                       <div className="min-w-0 flex-1 pr-2">
                         <h4 className="text-xs font-bold flex items-center gap-1.5">
-                          <span className="text-indigo-400">【Step 8/8】</span>
+                          <span className="text-jade">【Step 8/8】</span>
                           ✅ 邻里契约守则
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-1.5">
+                        <p className="text-[10px] text-ink-muted mt-1.5">
                           本公寓为青年互信社区，遵守“爱护公物、饭后清洁、礼貌用词、互帮互助、及时回复”规则。
                         </p>
                         <button
@@ -2708,16 +2800,16 @@ export default function App() {
                               showToast('感谢您对青年邻里契约的支持，互助同乐，进度+1');
                             }
                           }}
-                          className={`mt-2.5 py-1 px-3 rounded text-[9px] font-semibold transition-all ${
+                          className={`mt-2.5 py-1.5 px-3 rounded text-[9px] font-semibold transition-all ${
                             completedSteps.includes(8) 
-                              ? 'bg-slate-950 text-emerald-400 border border-emerald-950/40' 
-                              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow shadow-indigo-950/50'
+                              ? 'bg-canvas text-jade border border-hairline/40' 
+                              : 'bg-jade hover:bg-jade-hover text-white shadow-xs'
                           }`}
                         >
                           {completedSteps.includes(8) ? '✓ 我已阅读并同意邻里契约' : '✍️ 阅读并同意邻里契约'}
                         </button>
                       </div>
-                      {completedSteps.includes(8) && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                      {completedSteps.includes(8) && <CheckCircle2 className="w-4 h-4 text-jade shrink-0" />}
                     </div>
 
                   </div>
@@ -2730,17 +2822,17 @@ export default function App() {
 
           {/* OVERLAY MODAL: RESIDENT DETAILS (当前居住) */}
           {showResidentModal && (
-            <div className="absolute inset-0 bg-slate-950/90 z-50 animate-fade-in flex flex-col justify-end">
-              <div className="bg-slate-900 border-t border-slate-800 rounded-t-[32px] max-h-[80%] overflow-y-auto custom-scrollbar flex flex-col animate-slide-up">
+            <div className="absolute inset-0 bg-ink/75 z-50 animate-fade-in flex flex-col justify-end">
+              <div className="bg-canvas border-t border-hairline rounded-t-[32px] max-h-[80%] overflow-y-auto custom-scrollbar flex flex-col animate-slide-up">
                 
-                <div className="p-6 bg-gradient-to-br from-indigo-950 to-slate-900 flex justify-between items-start border-b border-slate-800/60 sticky top-0 z-10">
+                <div className="p-6 bg-jade-light/40 flex justify-between items-start border-b border-hairline sticky top-0 z-10">
                   <div>
-                    <h2 className="font-bold text-base text-white">🏠 当前居住住户身份</h2>
-                    <p className="text-[10px] text-slate-400 mt-0.5">您在社区中的在线人设</p>
+                    <h2 className="font-bold text-base text-ink">🏠 当前居住住户身份</h2>
+                    <p className="text-[10px] text-ink-muted mt-0.5">您在社区中的在线人设</p>
                   </div>
                   <button 
                     onClick={() => setShowResidentModal(false)}
-                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm"
+                    className="w-8 h-8 rounded-full bg-surface hover:bg-canvas text-ink flex items-center justify-center font-bold text-sm border border-hairline shadow-xs"
                   >
                     ✕
                   </button>
@@ -2749,38 +2841,38 @@ export default function App() {
                 <div className="p-4 space-y-4 text-xs">
                   
                   {/* Big avatar card */}
-                  <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xl text-white shadow-md shadow-indigo-950/40">
+                  <div className="bg-surface p-4 rounded-2xl border border-hairline flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-full bg-jade flex items-center justify-center font-bold text-xl text-white shadow-xs">
                       {currentUser.name.charAt(0)}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <h3 className="font-bold text-sm text-white">{currentUser.name}</h3>
-                        <span className="text-[9px] bg-slate-900 text-indigo-400 border border-indigo-950 px-2 py-0.2 rounded font-mono">
+                        <h3 className="font-bold text-sm text-ink">{currentUser.name}</h3>
+                        <span className="text-[9px] bg-canvas text-jade border border-jade/15 px-2 py-0.2 rounded font-number">
                           {currentUser.room}
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-400 mt-1">{currentUser.profession}</p>
+                      <p className="text-[10px] text-ink-muted mt-1">{currentUser.profession}</p>
                     </div>
                   </div>
 
                   {/* Multi stats block */}
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-850">
-                      <span className="block text-[9px] text-slate-500">信用评分</span>
-                      <span className="text-xs font-bold text-emerald-400 font-mono">
+                    <div className="bg-surface p-2.5 rounded-xl border border-hairline">
+                      <span className="block text-[9px] text-ink-subtle">信用评分</span>
+                      <span className="text-xs font-bold text-jade font-number">
                         ★ {currentUser.creditScore}
                       </span>
                     </div>
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-850">
-                      <span className="block text-[9px] text-slate-500">我的积分</span>
-                      <span className="text-xs font-bold text-amber-400 font-mono">
+                    <div className="bg-surface p-2.5 rounded-xl border border-hairline">
+                      <span className="block text-[9px] text-ink-subtle">我的积分</span>
+                      <span className="text-xs font-bold text-amber font-number">
                         🪙 {currentUser.points}
                       </span>
                     </div>
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-850">
-                      <span className="block text-[9px] text-slate-500">累计帮扶</span>
-                      <span className="text-xs font-bold text-indigo-400 font-mono">
+                    <div className="bg-surface p-2.5 rounded-xl border border-hairline">
+                      <span className="block text-[9px] text-ink-subtle">累计帮扶</span>
+                      <span className="text-xs font-bold text-coral font-number">
                         {currentUser.helpCount}次
                       </span>
                     </div>
@@ -2788,10 +2880,10 @@ export default function App() {
 
                   {/* Badges list */}
                   <div className="space-y-1.5">
-                    <h4 className="font-bold text-slate-200">🏆 拥有勋章</h4>
+                    <h4 className="font-bold text-ink">🏆 拥有勋章</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {currentUser.badges?.map((badge, i) => (
-                        <span key={badge} className="bg-slate-950 px-2.5 py-1 border border-slate-850 rounded-lg text-[9px] text-slate-300 font-medium">
+                        <span key={badge} className="bg-canvas px-2.5 py-1 border border-hairline rounded-lg text-[9px] text-ink-muted font-medium">
                           {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'} {badge}
                         </span>
                       ))}
@@ -2799,9 +2891,9 @@ export default function App() {
                   </div>
 
                   {/* Identity explanation alert */}
-                  <div className="bg-indigo-950/20 border border-indigo-900/30 p-3.5 rounded-xl space-y-1">
-                    <p className="text-indigo-300 font-bold text-[10px]">💡 住户视角切换提示</p>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                  <div className="bg-jade-light/30 border border-jade/10 p-3.5 rounded-xl space-y-1">
+                    <p className="text-jade font-bold text-[10px]">💡 住户视角切换提示</p>
+                    <p className="text-[10px] text-ink-muted leading-relaxed">
                       在大屏左侧的<strong>「住户视角切换」</strong>控制面板中，您可以一键在「小雅」、「阿栋」、「小鱼」等十位不同住户间无缝切换，体验不同名下的积分资产、房号和信用勋章！
                     </p>
                   </div>
@@ -2814,17 +2906,17 @@ export default function App() {
 
           {/* OVERLAY MODAL: COMMUNITY ANNOUNCEMENTS LIST (最新公告) */}
           {showAnnouncementsModal && (
-            <div className="absolute inset-0 bg-slate-950/90 z-50 animate-fade-in flex flex-col justify-end">
-              <div className="bg-slate-900 border-t border-slate-800 rounded-t-[32px] max-h-[85%] overflow-y-auto custom-scrollbar flex flex-col animate-slide-up">
+            <div className="absolute inset-0 bg-ink/75 z-50 animate-fade-in flex flex-col justify-end">
+              <div className="bg-canvas border-t border-hairline rounded-t-[32px] max-h-[85%] overflow-y-auto custom-scrollbar flex flex-col animate-slide-up">
                 
-                <div className="p-6 bg-gradient-to-br from-indigo-950 to-slate-900 flex justify-between items-start border-b border-slate-800/60 sticky top-0 z-10 backdrop-blur-md bg-opacity-95">
+                <div className="p-6 bg-jade-light/40 flex justify-between items-start border-b border-hairline sticky top-0 z-10 backdrop-blur-md bg-opacity-95">
                   <div>
-                    <h2 className="font-bold text-base text-white">📢 社区最新公告栏</h2>
-                    <p className="text-[10px] text-slate-400 mt-0.5">泊寓青年社区共治中心发布</p>
+                    <h2 className="font-bold text-base text-ink">📢 社区最新公告栏</h2>
+                    <p className="text-[10px] text-ink-muted mt-0.5">泊寓青年社区共治中心发布</p>
                   </div>
                   <button 
                     onClick={() => setShowAnnouncementsModal(false)}
-                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm border border-slate-750"
+                    className="w-8 h-8 rounded-full bg-surface hover:bg-canvas text-ink flex items-center justify-center font-bold text-sm border border-hairline shadow-xs"
                   >
                     ✕
                   </button>
@@ -2832,24 +2924,24 @@ export default function App() {
 
                 <div className="p-4 space-y-3 text-xs">
                   {announcements.map(ann => (
-                    <div key={ann.id} className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2">
+                    <div key={ann.id} className="bg-surface p-4 rounded-2xl border border-hairline space-y-2">
                       <div className="flex justify-between items-start gap-1.5">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="text-[9px] bg-indigo-950/40 text-indigo-400 border border-indigo-900/30 px-1.5 py-0.2 rounded font-medium shrink-0">
+                          <span className="text-[9px] bg-jade-light/40 text-jade border border-jade/10 px-1.5 py-0.2 rounded font-bold shrink-0">
                             {ann.type}
                           </span>
-                          <h4 className="font-bold text-xs text-white truncate">{ann.title}</h4>
+                          <h4 className="font-bold text-xs text-ink truncate">{ann.title}</h4>
                         </div>
                         <span className={`text-[8px] font-medium px-1.5 py-0.2 rounded shrink-0 ${
                           ann.importance.includes('重要') || ann.importance.includes('紧急') 
-                            ? 'bg-red-950/50 text-red-400 border border-red-900/30' 
-                            : 'bg-slate-900 text-slate-400'
+                            ? 'bg-coral-light/20 text-coral border border-coral/10' 
+                            : 'bg-canvas text-ink-muted border border-hairline'
                         }`}>
                           {ann.importance}
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-400 leading-relaxed">{ann.content}</p>
-                      <p className="text-[8px] text-slate-500 font-mono text-right">{ann.time}</p>
+                      <p className="text-[10px] text-ink-muted leading-relaxed">{ann.content}</p>
+                      <p className="text-[8px] text-ink-subtle font-number text-right">{ann.time}</p>
                     </div>
                   ))}
                 </div>
@@ -2863,19 +2955,19 @@ export default function App() {
       </div>
 
       {/* RIGHT SIDE: ToG Operator / Manager Weekly Analytics Report Dashboard */}
-      <div className="w-full lg:w-96 bg-slate-950 p-6 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+      <div className="w-full lg:w-96 bg-canvas p-6 border-t lg:border-t-0 lg:border-l border-hairline flex flex-col gap-5 overflow-y-auto custom-scrollbar">
         
         <div className="flex items-center gap-3">
-          <div className="bg-emerald-600/20 p-2.5 rounded-xl border border-emerald-500/30">
-            <TrendingUp className="w-6 h-6 text-emerald-400" />
+          <div className="bg-jade-light/50 p-2.5 rounded-xl border border-jade/10">
+            <TrendingUp className="w-6 h-6 text-jade" />
           </div>
           <div>
-            <h2 className="font-bold text-lg text-white font-display">社区运营后置/周报</h2>
-            <p className="text-xs text-slate-400">物业/居委会自治管理控制台</p>
+            <h2 className="font-bold text-lg text-ink font-display">社区运营后置/周报</h2>
+            <p className="text-xs text-ink-muted">物业/居委会自治管理控制台</p>
           </div>
         </div>
 
-        <p className="text-xs text-slate-500 bg-slate-900/50 p-3 rounded-xl border border-slate-800/40 leading-relaxed">
+        <p className="text-xs text-ink-muted bg-surface p-3 rounded-xl border border-hairline leading-relaxed">
           🏆 泊寓A区积极推进 <strong>ToG 邻里共治共建</strong>，通过「搭把手」小程序的邻里圈互助，解决末端配送、闲置置换等难题。以下为本周智能运维产生的真实报表。
         </p>
 
@@ -2883,86 +2975,86 @@ export default function App() {
         <div className="space-y-4">
           
           {/* Header range */}
-          <div className="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs">
-            <span className="text-slate-400 font-medium">统计区间:</span>
-            <span className="font-mono font-bold text-indigo-400">{weeklyReport.weekRange}</span>
+          <div className="flex justify-between items-center bg-surface p-2.5 rounded-xl border border-hairline text-xs">
+            <span className="text-ink-muted font-medium">统计区间:</span>
+            <span className="font-number font-bold text-jade">{weeklyReport.weekRange}</span>
           </div>
 
           {/* Grid numbers */}
           <div className="grid grid-cols-2 gap-2 text-center text-xs">
-            <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850 flex flex-col justify-between h-16">
-              <span className="text-[10px] text-slate-500 block">活跃用户</span>
-              <span className="text-lg font-bold text-white font-mono">{weeklyReport.activeUsers} <span className="text-xs font-normal text-slate-500">人</span></span>
+            <div className="bg-surface p-3 rounded-xl border border-hairline flex flex-col justify-between h-16">
+              <span className="text-[10px] text-ink-subtle block">活跃用户</span>
+              <span className="text-lg font-bold text-ink font-number">{weeklyReport.activeUsers} <span className="text-xs font-normal text-ink-muted">人</span></span>
             </div>
-            <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850 flex flex-col justify-between h-16">
-              <span className="text-[10px] text-slate-500 block">新入驻住户</span>
-              <span className="text-lg font-bold text-emerald-400 font-mono">+{weeklyReport.newUser} <span className="text-xs font-normal text-slate-500">人</span></span>
+            <div className="bg-surface p-3 rounded-xl border border-hairline flex flex-col justify-between h-16">
+              <span className="text-[10px] text-ink-subtle block">新入驻住户</span>
+              <span className="text-lg font-bold text-jade font-number">+{weeklyReport.newUser} <span className="text-xs font-normal text-ink-muted">人</span></span>
             </div>
-            <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850 flex flex-col justify-between h-16">
-              <span className="text-[10px] text-slate-500 block">互助发起 / 完成</span>
-              <span className="text-sm font-bold text-white font-mono">{weeklyReport.helpRequests} / {weeklyReport.helpCompleted} <span className="text-[9px] font-normal text-slate-500">条</span></span>
+            <div className="bg-surface p-3 rounded-xl border border-hairline flex flex-col justify-between h-16">
+              <span className="text-[10px] text-ink-subtle block">互助发起 / 完成</span>
+              <span className="text-sm font-bold text-ink font-number">{weeklyReport.helpRequests} / {weeklyReport.helpCompleted} <span className="text-[9px] font-normal text-ink-muted">条</span></span>
             </div>
-            <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850 flex flex-col justify-between h-16">
-              <span className="text-[10px] text-slate-500 block">互助完成率</span>
-              <span className="text-lg font-bold text-indigo-400 font-mono">{weeklyReport.helpRate}</span>
+            <div className="bg-surface p-3 rounded-xl border border-hairline flex flex-col justify-between h-16">
+              <span className="text-[10px] text-ink-subtle block">互助完成率</span>
+              <span className="text-lg font-bold text-coral font-number">{weeklyReport.helpRate}</span>
             </div>
           </div>
 
           {/* Hot Topics Top */}
-          <div className="bg-slate-900/40 p-4 rounded-xl border border-slate-850 space-y-2">
-            <h4 className="text-xs font-bold text-slate-300 flex items-center gap-1">
-              <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+          <div className="bg-surface p-4 rounded-xl border border-hairline space-y-2">
+            <h4 className="text-xs font-bold text-ink flex items-center gap-1">
+              <MessageSquare className="w-3.5 h-3.5 text-jade" />
               🔥 本周热议话题排行
             </h4>
-            <div className="space-y-1.5 text-xs text-slate-400 pt-1">
+            <div className="space-y-1.5 text-xs text-ink-muted pt-1">
               {weeklyReport.hotTopics.map((item, idx) => (
                 <div key={item.topic} className="flex justify-between items-center">
                   <span>{idx+1}. #{item.topic}</span>
-                  <span className="font-mono text-slate-500">{item.count}人参与</span>
+                  <span className="font-number text-ink-subtle">{item.count}人参与</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Top active building */}
-          <div className="bg-slate-900/40 p-4 rounded-xl border border-slate-850 space-y-2">
-            <h4 className="text-xs font-bold text-slate-300 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-indigo-400" />
+          <div className="bg-surface p-4 rounded-xl border border-hairline space-y-2">
+            <h4 className="text-xs font-bold text-ink flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-jade" />
               📌 本周最活跃楼栋
             </h4>
-            <div className="space-y-1.5 text-xs text-slate-400 pt-1">
+            <div className="space-y-1.5 text-xs text-ink-muted pt-1">
               {weeklyReport.activeBuildings.map((item, idx) => (
                 <div key={item.building} className="flex justify-between items-center">
                   <span>{idx+1 === 1 ? '🥇' : idx+1 === 2 ? '🥈' : '🥉'} {item.building}</span>
-                  <span className="font-mono text-indigo-400 font-bold">{item.count}次需求</span>
+                  <span className="font-number text-jade font-bold">{item.count}次需求</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Resident demands statistics */}
-          <div className="bg-slate-900/40 p-4 rounded-xl border border-slate-850 space-y-2">
-            <h4 className="text-xs font-bold text-slate-300 flex items-center gap-1">
-              <Compass className="w-3.5 h-3.5 text-indigo-400" />
+          <div className="bg-surface p-4 rounded-xl border border-hairline space-y-2">
+            <h4 className="text-xs font-bold text-ink flex items-center gap-1">
+              <Compass className="w-3.5 h-3.5 text-jade" />
               📋 居民核心诉求TOP3
             </h4>
-            <div className="space-y-1.5 text-xs text-slate-400 pt-1">
+            <div className="space-y-1.5 text-xs text-ink-muted pt-1">
               {weeklyReport.residentDemands.map((item, idx) => (
                 <div key={item.demand} className="flex justify-between items-center">
                   <span>{idx+1}. {item.demand}</span>
-                  <span className="font-mono text-slate-500">{item.count}次呼叫</span>
+                  <span className="font-number text-ink-subtle">{item.count}次呼叫</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Warning lists & follow up */}
-          <div className="bg-indigo-950/20 border border-indigo-900/30 p-4 rounded-xl space-y-2">
-            <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1">
-              <AlertTriangle className="w-4 h-4 text-indigo-400" />
+          <div className="bg-coral-light/20 border border-coral/20 p-4 rounded-xl space-y-2">
+            <h4 className="text-xs font-bold text-coral flex items-center gap-1">
+              <AlertTriangle className="w-4 h-4 text-coral" />
               ⚠️ 运维待关注与整改事项
             </h4>
-            <ul className="space-y-2 text-[11px] text-slate-400 leading-relaxed list-disc list-inside">
+            <ul className="space-y-2 text-[11px] text-ink-muted leading-relaxed list-disc list-inside">
               {weeklyReport.followUpItems.map((item, idx) => (
                 <li key={idx}>
                   {item}
@@ -2972,9 +3064,9 @@ export default function App() {
           </div>
 
           {/* Quick toggle announcement trigger */}
-          <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2">
-            <h4 className="text-xs font-bold text-slate-200">🛠️ 快速模拟下发停水/紧急公告</h4>
-            <p className="text-[10px] text-slate-500">点击下发一条全新紧急通知，手机小程序首页将实时展现滚动横幅。</p>
+          <div className="bg-surface p-4 rounded-xl border border-hairline space-y-2">
+            <h4 className="text-xs font-bold text-ink">🛠️ 快速模拟下发停水/紧急公告</h4>
+            <p className="text-[10px] text-ink-muted">点击下发一条全新紧急通知，手机小程序首页将实时展现滚动横幅。</p>
             <button
               onClick={() => {
                 const waterEmergency: Announcement = {
@@ -2988,7 +3080,7 @@ export default function App() {
                 setAnnouncements([waterEmergency, ...announcements]);
                 showToast('紧急电力抢修公告已在手机小程序顶部横幅中生效！', 'success');
               }}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-1"
+              className="w-full bg-coral hover:bg-coral-hover text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs"
             >
               <span>下发抢修停电通知</span>
             </button>

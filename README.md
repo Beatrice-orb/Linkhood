@@ -95,7 +95,7 @@ npm run build
 ## 分支状态
 
 - 分支：`agent/build-tog-demo-v0-1`
-- 基线：`origin/main@13d8ddc`
+- 已同步基线：`origin/main@8240f90`（含 care mode 与公共服务数据 schema）
 - 当前：实现已完成并通过 QA；commit `948ee8f` 已推送并创建 Draft PR #4，Vercel Preview 已上线。
 
 PR #4 与供给数据 PR #1、核心理念 PR #2、ToG PRD PR #3 保持独立，分别 Review、分别合并。
