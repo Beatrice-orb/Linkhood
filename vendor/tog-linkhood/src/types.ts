@@ -22,6 +22,7 @@ export interface TodoItem {
   source: string; // '活动管理' | '需求反馈' | '关怀版数据' | '帮扶管理'
   time: string;
   status: 'pending' | 'resolved';
+  linkTab?: string;
 }
 
 export interface Activity {

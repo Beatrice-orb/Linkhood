@@ -43,7 +43,6 @@ import SpaceManagement from './components/SpaceManagement';
 import ServiceManagement from './components/ServiceManagement';
 import SocialWorkerManagement from './components/SocialWorkerManagement';
 import ResidentManagement from './components/ResidentManagement';
-import AntiFraudManagement from './components/AntiFraudManagement';
 import FeedbackManagement from './components/FeedbackManagement';
 
 export default function App() {
@@ -59,7 +58,6 @@ export default function App() {
   const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
   const [workers, setWorkers] = useState<SocialWorker[]>(INITIAL_SOCIAL_WORKERS);
   const [residents, setResidents] = useState<Resident[]>(INITIAL_RESIDENTS);
-  const [alerts, setAlerts] = useState<AntiFraudReminder[]>(INITIAL_FRAUD_ALERTS);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>(INITIAL_FEEDBACKS);
   const [hotlines, setHotlines] = useState<Hotline[]>(INITIAL_HOTLINES);
 
@@ -72,7 +70,7 @@ export default function App() {
 
   useEffect(() => {
     // Show a welcoming notification on load
-    showToast('「搭把手」To G端社区治理系统加载成功，当前处于：泊寓A区社区。', 'success');
+    showToast('「搭把手」To G端社区治理系统加载成功，当前处于：西红门街道社区。', 'success');
   }, []);
 
   const showToast = (message: string, type: 'success' | 'info' = 'success') => {
@@ -84,14 +82,14 @@ export default function App() {
 
   // Login handler
   const handleLoginSuccess = (phone: string, role: Role) => {
-    let communityName = '泊寓·青年公寓A区';
+    let communityName = '西红门街道社区';
     if (role === 'STREET_STAFF') {
-      communityName = '朝阳街道办事处';
+      communityName = '西红门街道办事处';
     }
 
     const nameMap: Record<Role, string> = {
-      STREET_STAFF: '王科长',
-      COMMUNITY_STAFF: '李主任',
+      STREET_STAFF: '杨主任',
+      COMMUNITY_STAFF: '杨主任',
       PARTY_CENTER_OPERATOR: '高站长',
       WOMEN_FEDERATION: '张大姐',
     };
@@ -105,29 +103,6 @@ export default function App() {
     setIsLoggedIn(true);
     setActiveTab('workbench');
     showToast(`登录成功！欢迎回来，${nameMap[role]}。已载入对应数据。`, 'success');
-  };
-
-  // Role Switcher handler (from sidebar)
-  const handleRoleChange = (role: Role) => {
-    let communityName = '泊寓·青年公寓A区';
-    if (role === 'STREET_STAFF') {
-      communityName = '朝阳街道办事处';
-    }
-
-    const nameMap: Record<Role, string> = {
-      STREET_STAFF: '王科长',
-      COMMUNITY_STAFF: '李主任',
-      PARTY_CENTER_OPERATOR: '高站长',
-      WOMEN_FEDERATION: '张大姐',
-    };
-
-    setCurrentUser({
-      name: nameMap[role],
-      phone: currentUser.phone,
-      role,
-      community: communityName,
-    });
-    showToast(`已切换身份为: ${nameMap[role]} (${role === 'STREET_STAFF' ? '街道级' : '社区级'})`, 'info');
   };
 
   const handleLogout = () => {
@@ -189,8 +164,6 @@ export default function App() {
         return <SocialWorkerManagement workers={workers} setWorkers={setWorkers} />;
       case 'residents':
         return <ResidentManagement residents={residents} setResidents={setResidents} />;
-      case 'antifraud':
-        return <AntiFraudManagement alerts={alerts} setAlerts={setAlerts} />;
       case 'feedback':
         return (
           <FeedbackManagement
@@ -229,7 +202,6 @@ export default function App() {
         activeTab={activeTab === 'workbench' || activeTab === 'dashboard' ? activeTab : activeTab}
         setActiveTab={setActiveTab}
         onLogout={handleLogout}
-        onRoleChange={handleRoleChange}
       />
 
       {/* Main Container Stage */}

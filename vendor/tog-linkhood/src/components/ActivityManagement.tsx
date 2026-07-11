@@ -347,7 +347,7 @@ export default function ActivityManagement({
 
               <div className="p-3 bg-jade-light/10 border border-jade/10 rounded-xl mt-4">
                 <span className="text-[10px] text-ink-subtle block text-center leading-relaxed">
-                  * 居民通过 To C 微信小程序扫码或者在现场通过社工一键勾选，均可实时在此处更新并记录活动学分。
+                  * 居民通过居民端小程序扫码或者在现场通过社工一键勾选，均可实时在此处更新并记录活动学分。
                 </span>
               </div>
             </>
