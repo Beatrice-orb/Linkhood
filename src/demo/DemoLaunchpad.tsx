@@ -11,11 +11,11 @@ import { routeTo } from './navigation';
 
 const entries = [
   {
-    route: '/tog/desktop/services',
+    route: '/tog/desktop/workbench',
     icon: Monitor,
-    eyebrow: '主闭环 · 建议从这里开始',
+    eyebrow: '社区电脑端 · 独立调整版',
     title: '社区运营电脑端',
-    description: '把真实通知整理成可核验、可发布的居民服务卡。',
+    description: '从今日任务进入公共服务、活动、居民跟进与需求回应。',
   },
   {
     route: '/resident/services',

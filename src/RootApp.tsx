@@ -10,8 +10,10 @@ import './demo/demo.css';
 const titles: Record<string, string> = {
   '/demo': '搭把手 · 双端联动 Demo',
   '/resident/services': '搭把手 · 居民端身边服务',
+  '/tog/desktop/workbench': '搭把手 · 社区今日工作台',
   '/tog/desktop/services': '搭把手 · 公共服务接入台',
   '/tog/desktop/activities': '搭把手 · 活动运营台',
+  '/tog/desktop/records': '搭把手 · 居民服务档案',
   '/tog/desktop/insights': '搭把手 · 需求与反馈',
   '/tog/mobile/workbench': '搭把手 · 社区工作台',
   '/tog/mobile/visit': '搭把手 · 走访记录核对',

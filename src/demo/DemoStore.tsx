@@ -19,7 +19,7 @@ import type {
 export const DEMO_STORAGE_KEY = 'dabashou:demo:v0.1:state';
 
 const initialState: DemoState = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   intakePhase: 'source',
   confirmedUnknownFields: [],
   coreFieldsConfirmed: false,
@@ -29,6 +29,7 @@ const initialState: DemoState = {
     facts: '7 月 11 日上午入户走访，居民本人在场。',
     quote: '最近做饭不太方便，想了解社区助餐。',
   },
+  completedResidentFollowUps: [],
   activityChecklist: {
     qrCode: true,
     venue: true,
@@ -46,6 +47,7 @@ type Action =
   | { type: 'resident-event'; event: ResidentActionEvent }
   | { type: 'save-visit'; facts: string; quote: string }
   | { type: 'submit-visit'; facts: string; quote: string }
+  | { type: 'complete-resident-follow-up'; recordId: string }
   | { type: 'toggle-activity-item'; item: keyof DemoState['activityChecklist'] }
   | { type: 'send-notice' }
   | { type: 'reset' };
@@ -82,6 +84,10 @@ function reducer(state: DemoState, action: Action): DemoState {
       return { ...state, visitDraft: { facts: action.facts, quote: action.quote } };
     case 'submit-visit':
       return { ...state, visitDraft: { facts: action.facts, quote: action.quote }, visitStatus: 'submitted' };
+    case 'complete-resident-follow-up':
+      return state.completedResidentFollowUps.includes(action.recordId)
+        ? state
+        : { ...state, completedResidentFollowUps: [...state.completedResidentFollowUps, action.recordId] };
     case 'toggle-activity-item':
       return {
         ...state,
@@ -101,6 +107,7 @@ function reducer(state: DemoState, action: Action): DemoState {
 
 const allowedMissingFields = new Set<MissingFieldKey>(['fee', 'capacity', 'stationHours']);
 const allowedEventTypes = new Set<ResidentActionType>(['service_card_viewed', 'service_source_opened', 'service_interest_expressed']);
+const allowedResidentRecordIds = new Set(['A017', 'A026', 'A041']);
 
 function normalizeState(value: unknown): DemoState {
   if (!value || typeof value !== 'object') return initialState;
@@ -126,6 +133,9 @@ function normalizeState(value: unknown): DemoState {
         quote: typeof candidate.visitDraft.quote === 'string' ? candidate.visitDraft.quote : initialState.visitDraft.quote,
       }
     : initialState.visitDraft;
+  const completedResidentFollowUps = Array.isArray(candidate.completedResidentFollowUps)
+    ? [...new Set(candidate.completedResidentFollowUps.filter((recordId): recordId is string => typeof recordId === 'string' && allowedResidentRecordIds.has(recordId)))]
+    : [];
   const checklist = candidate.activityChecklist && typeof candidate.activityChecklist === 'object'
     ? {
         qrCode: typeof candidate.activityChecklist.qrCode === 'boolean' ? candidate.activityChecklist.qrCode : true,
@@ -140,7 +150,7 @@ function normalizeState(value: unknown): DemoState {
   const intakePhase = requestedIntakePhase === 'published' && (!publishGateSatisfied || !publishedAt) ? 'review' : requestedIntakePhase;
 
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     intakePhase,
     confirmedUnknownFields,
     coreFieldsConfirmed,
@@ -149,6 +159,7 @@ function normalizeState(value: unknown): DemoState {
     residentEvents,
     visitStatus: candidate.visitStatus === 'submitted' ? 'submitted' : 'draft',
     visitDraft,
+    completedResidentFollowUps,
     activityChecklist: checklist,
     noticeSent: candidate.noticeSent === true,
   };
@@ -177,6 +188,7 @@ interface DemoContextValue {
   recordResidentEvent: (type: ResidentActionType, serviceId: string) => void;
   saveVisitDraft: (facts: string, quote: string) => void;
   submitVisit: (facts: string, quote: string) => void;
+  completeResidentFollowUp: (recordId: string) => void;
   toggleActivityItem: (item: keyof DemoState['activityChecklist']) => void;
   sendNotice: () => void;
   resetDemo: () => void;
@@ -266,6 +278,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       recordResidentEvent,
       saveVisitDraft: (facts, quote) => dispatch({ type: 'save-visit', facts, quote }),
       submitVisit: (facts, quote) => dispatch({ type: 'submit-visit', facts, quote }),
+      completeResidentFollowUp: (recordId) => dispatch({ type: 'complete-resident-follow-up', recordId }),
       toggleActivityItem: (item) => dispatch({ type: 'toggle-activity-item', item }),
       sendNotice: () => dispatch({ type: 'send-notice' }),
       resetDemo: () => dispatch({ type: 'reset' }),
