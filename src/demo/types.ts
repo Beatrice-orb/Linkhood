@@ -69,7 +69,7 @@ export interface ResidentActionEvent {
 }
 
 export interface DemoState {
-  schemaVersion: 2;
+  schemaVersion: 3;
   intakePhase: IntakePhase;
   confirmedUnknownFields: MissingFieldKey[];
   coreFieldsConfirmed: boolean;
@@ -81,6 +81,7 @@ export interface DemoState {
     facts: string;
     quote: string;
   };
+  completedResidentFollowUps: string[];
   activityChecklist: Record<'qrCode' | 'venue' | 'speaker', boolean>;
   noticeSent: boolean;
 }

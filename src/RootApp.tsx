@@ -8,10 +8,20 @@ import { TogMobileApp } from './tog/TogMobileApp';
 import './surfaces/surfaces.css';
 import './demo/demo.css';
 
-const titles: Record<ProductSurface, string> = {
+const surfaceTitles: Record<ProductSurface, string> = {
   community: '搭把手 · 社区电脑端',
   'social-worker': '搭把手 · 社工手机端',
   resident: '搭把手 · 居民端',
+};
+
+const routeTitles: Record<string, string> = {
+  '/tog/desktop/workbench': '搭把手 · 社区今日工作台',
+  '/tog/desktop/services': '搭把手 · 公共服务接入台',
+  '/tog/desktop/activities': '搭把手 · 活动运营台',
+  '/tog/desktop/records': '搭把手 · 居民服务档案',
+  '/tog/desktop/insights': '搭把手 · 需求与反馈',
+  '/tog/mobile/workbench': '搭把手 · 社工今日工作台',
+  '/tog/mobile/visit': '搭把手 · 走访记录核对',
 };
 
 function resolveSurface(route: string): ProductSurface {
@@ -37,7 +47,7 @@ export default function RootApp() {
   const activeSurface = resolveSurface(route);
 
   useEffect(() => {
-    document.title = titles[resolveSurface(route)];
+    document.title = routeTitles[route] ?? surfaceTitles[resolveSurface(route)];
     window.scrollTo(0, 0);
   }, [route]);
 

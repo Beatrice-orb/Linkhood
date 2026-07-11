@@ -1,13 +1,11 @@
-import { useState, type ElementType, type ReactNode } from 'react';
+import { useState, type ElementType } from 'react';
 import {
-  Activity,
   ArrowRight,
   BookOpenCheck,
   CalendarDays,
   Check,
   CheckCircle2,
   CircleAlert,
-  Database,
   ExternalLink,
   FileSearch,
   Flame,
@@ -16,20 +14,21 @@ import {
   Info,
   Link2,
   ListChecks,
-  MonitorSmartphone,
   RotateCcw,
   Send,
-  ShieldCheck,
   Sparkles,
   Upload,
   UserRound,
-  Users,
 } from 'lucide-react';
 import moxaSourceImage from '../assets/moxa-service-source.jpg';
 import { useDemoStore } from '../demo/DemoStore';
 import { missingFieldLabels } from '../demo/fixtures';
 import { routeTo } from '../demo/navigation';
 import type { MissingFieldKey } from '../demo/types';
+import { CommunityWorkbenchPage } from './CommunityWorkbenchPage';
+import { DemandFeedbackPage } from './DemandFeedbackPage';
+import { DesktopPageHeader } from './DesktopPageHeader';
+import { ResidentServiceRecordsPage } from './ResidentServiceRecordsPage';
 
 interface NavItem {
   route?: string;
@@ -39,12 +38,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: '今日工作台', icon: Home, disabled: true },
+  { label: '今日工作台', icon: Home, route: '/tog/desktop/workbench' },
   { label: '公共服务库', icon: BookOpenCheck, route: '/tog/desktop/services' },
   { label: '活动运营', icon: CalendarDays, route: '/tog/desktop/activities' },
-  { label: '居民服务档案', icon: UserRound, disabled: true },
+  { label: '居民服务档案', icon: UserRound, route: '/tog/desktop/records' },
   { label: '需求与反馈', icon: Flame, route: '/tog/desktop/insights' },
-  { label: '数据与权限', icon: ShieldCheck, disabled: true },
 ];
 
 function DesktopSidebar({ route }: { route: string }) {
@@ -94,18 +92,6 @@ function DesktopSidebar({ route }: { route: string }) {
   );
 }
 
-function PageHeader({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
-  return (
-    <header className="tog-page-header">
-      <div>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </div>
-      {action}
-    </header>
-  );
-}
-
 function ReviewField({ label, value, status }: { label: string; value: string; status?: 'verified' | 'extracted' | 'pending' }) {
   return (
     <div className="review-field">
@@ -137,7 +123,7 @@ function ServiceIntakePage() {
 
   return (
     <div className="tog-page">
-      <PageHeader
+      <DesktopPageHeader
         title="新增公共服务"
         description="从原始通知到居民服务卡，每一步都可核对"
         action={
@@ -275,7 +261,7 @@ function ActivitiesPage() {
 
   return (
     <div className="tog-page">
-      <PageHeader
+      <DesktopPageHeader
         title="活动运营"
         description="把一次活动，从发布办到有反馈"
         action={<button className="button button--primary" type="button" disabled title="v0.2 开放新建活动">新建活动</button>}
@@ -339,74 +325,23 @@ function ActivitiesPage() {
   );
 }
 
-function InsightsPage() {
-  const { state } = useDemoStore();
-  const [planGenerated, setPlanGenerated] = useState(false);
-  const actionEvents = state.residentEvents.filter((event) => event.type === 'service_interest_expressed' && event.serviceId === 'xhm_sanfu_2026');
-  const uniqueActorCount = new Set(actionEvents.map((event) => event.anonymousActorId)).size;
-  const reachedThreshold = uniqueActorCount >= 5;
-
-  return (
-    <div className="tog-page">
-      <PageHeader
-        title="需求与反馈"
-        description="从居民行动信号到服务补位，不评价个人"
-        action={<button className="button button--primary" type="button" onClick={() => setPlanGenerated(true)}><Sparkles size={17} /> 生成服务补位方案</button>}
-      />
-      <div className="filter-row"><button className="filter-control" type="button" disabled>7 月 6 日—7 月 12 日⌄</button><button className="filter-control" type="button" disabled>西红门社区⌄</button><button className="filter-control" type="button" disabled>全部服务主题⌄</button></div>
-      {actionEvents.length > 0 && (
-        <div className="signal-banner" role="status">
-          <Activity size={20} />
-          <div><strong>刚刚收到 {uniqueActorCount} 条脱敏居民办理意向</strong><span>来自三伏贴服务卡；未传姓名、房号或档案正文。</span></div>
-          <span className="status-chip status-chip--success">本地演示链已连接</span>
-        </div>
-      )}
-      <section className="insights-grid">
-        <article className="insight-card panel">
-          <div className="panel-heading"><strong>本周需关注</strong><span className="status-chip status-chip--demo">演示数据</span></div>
-          <div className="trend-card"><span className="trend-rank">1</span><div><strong>暑期托管需求连续两周上升</strong><div className="trend-line" aria-hidden="true"><i /><i /><i /></div></div></div>
-          <dl className="signal-list"><div><dt>搜索无结果</dt><dd>18 次</dd></div><div><dt>社工咨询</dt><dd>9 次</dd></div><div><dt>活动候补</dt><dd>7 人</dd></div><div><dt>去重后涉及</dt><dd>31 位居民</dd></div></dl>
-          <button className="topic-row" type="button" disabled title="v0.2 开放主题下钻"><span>2</span>老年助餐材料咨询<ArrowRight size={16} /></button>
-          <button className="topic-row" type="button" disabled title="v0.2 开放主题下钻"><span>3</span>周末亲子活动供给不足<ArrowRight size={16} /></button>
-        </article>
-
-        <article className="insight-card panel">
-          <div className="panel-heading"><strong>{reachedThreshold ? '新热点判断' : '新行动信号'}</strong><span className="status-chip status-chip--success">演示联动</span></div>
-          <div className="fresh-signal">
-            <span><MonitorSmartphone aria-hidden="true" /></span>
-            <div><small>三伏贴服务 · 演示联动</small><strong>{uniqueActorCount} 个去重演示主体已表达办理意向</strong><p>{reachedThreshold ? '达到 5 人阈值，可进入热点候选。' : `尚未达到热点阈值（5 人），当前只记录为服务行动信号。`}</p></div>
-          </div>
-          <div className="supply-gap">
-            <h3>供给缺口判断</h3>
-            <p>已核验供给：<strong>1 项</strong></p>
-            <p>仍需确认：各站时段、每日容量</p>
-            <div className="ai-caution"><CircleAlert size={17} /> AI 只聚类信号并提出候选解释，热点命名与原因由工作人员确认。</div>
-          </div>
-          <h3>建议下一步</h3>
-          <ol className="next-step-list"><li><span>1</span>向医院核验各站时段</li><li><span>2</span>在居民端补充“余量需确认”</li><li><span>3</span>累计 5 人后再判断是否成为热点</li></ol>
-          {planGenerated && <p className="inline-success"><CheckCircle2 size={16} /> 补位方案草稿已生成，等待工作人员核对。</p>}
-        </article>
-
-        <aside className="insight-card panel">
-          <div className="panel-heading"><strong>关联跟进</strong><span>{uniqueActorCount} 项新信号</span></div>
-          <p className="muted-copy">只展示当前角色被授权的聚合任务，不展示可反查个人的编号。</p>
-          <div className="follow-up-summary"><Users size={24} /><strong>{uniqueActorCount}</strong><span>条匿名办理意向</span></div>
-          <div className="follow-up-item"><Database size={18} /><span><strong>三伏贴服务卡</strong><small>居民办理意向入口</small></span><em>{actionEvents.length > 0 ? '已收到' : '等待中'}</em></div>
-          <button className="button button--ghost button--block" type="button" disabled title="v0.2 开放任务分派">分配跟进</button>
-        </aside>
-      </section>
-      <div className="privacy-footer"><ShieldCheck size={19} /> 需求与反馈来自脱敏聚合信号；低于阈值的主题不展示为热点，也不用于评价居民个人。</div>
-    </div>
-  );
-}
-
 export function TogDesktopApp({ route }: { route: string }) {
+  const page = route === '/tog/desktop/workbench'
+    ? <CommunityWorkbenchPage />
+    : route === '/tog/desktop/services'
+      ? <ServiceIntakePage />
+      : route === '/tog/desktop/activities'
+        ? <ActivitiesPage />
+        : route === '/tog/desktop/records'
+          ? <ResidentServiceRecordsPage />
+          : route === '/tog/desktop/insights'
+            ? <DemandFeedbackPage />
+            : <CommunityWorkbenchPage />;
+
   return (
     <div className="tog-desktop-shell">
       <DesktopSidebar route={route} />
-      <main className="tog-desktop-main">
-        {route === '/tog/desktop/activities' ? <ActivitiesPage /> : route === '/tog/desktop/insights' ? <InsightsPage /> : <ServiceIntakePage />}
-      </main>
+      <main className="tog-desktop-main">{page}</main>
     </div>
   );
 }
