@@ -81,7 +81,7 @@ npm run build
 
 ## 协作与部署
 
-推荐流程：队友在本地 clone 并从 feature 分支开发；连接 Vercel Git Integration 后，每次 push / PR 自动生成 Preview，团队确认后合并 `main`，Vercel 自动更新生产站。
+当前采用手动发布：队友在本地 clone 并从 feature 分支开发，先用 PR #4 固定 Preview 验收；团队确认后合并 `main`，再由 Bera 从本机专用 worktree 使用 Vercel CLI 发布生产站。当前不连接 Git Integration。
 
 - Vercel Project：`bera-projects-live/linkhood`
 - Production Branch：`main`
@@ -90,12 +90,21 @@ npm run build
 - 当前 `main` 生产站：[https://linkhood-two.vercel.app](https://linkhood-two.vercel.app)
 - 本 PR Preview：[https://linkhood-demo.vercel.app/#/demo](https://linkhood-demo.vercel.app/#/demo)
 
-自动部署启用前，需在 Vercel 项目 **Settings → Git** 连接 `Beatrice-orb/Linkhood`。如果仓库未出现在列表中，需要仓库 owner 为 Vercel GitHub App 授权。
+合并 `main` 后的发布命令：
+
+```bash
+cd /Users/bera/dev/linkhood-main-deploy
+git fetch origin
+git pull --ff-only origin main
+npx vercel deploy --prod --yes --scope bera-projects-live
+```
+
+部署完成后确认 `https://linkhood-two.vercel.app` 可访问，再把本次上线视为完成。
 
 ## 分支状态
 
 - 分支：`agent/build-tog-demo-v0-1`
 - 已同步基线：`origin/main@8240f90`（含 care mode 与公共服务数据 schema）
-- 当前：实现已完成并通过 QA；commit `948ee8f` 已推送并创建 Draft PR #4，Vercel Preview 已上线。
+- 当前：实现已完成并通过 QA；核心 commit `948ee8f` 已推送并创建 Draft PR #4，PR 已同步 `main@8240f90`，Vercel Preview 已上线。
 
 PR #4 与供给数据 PR #1、核心理念 PR #2、ToG PRD PR #3 保持独立，分别 Review、分别合并。

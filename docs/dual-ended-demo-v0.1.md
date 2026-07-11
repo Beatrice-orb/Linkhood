@@ -126,12 +126,13 @@
 
 - 分支：`agent/build-tog-demo-v0-1`
 - worktree：`/Users/bera/dev/dabashou-tog-demo`
-- 当前基线：`origin/main@13d8ddc`
-- commit：`948ee8f`
+- 初始基线：`origin/main@13d8ddc`
+- 当前已同步：`origin/main@8240f90`
+- 核心 commit：`948ee8f`
 - Draft PR：<https://github.com/Beatrice-orb/Linkhood/pull/4>
 - 在线 Preview：<https://linkhood-demo.vercel.app/#/demo>
 - 当前 `main` 生产站：<https://linkhood-two.vercel.app>
-- 自动部署状态：Vercel 项目已创建并完成手动生产 / Preview 部署；GitHub Login Connection 与仓库 Git Integration 尚待账号侧授权。
+- 部署状态：Vercel 项目已完成手动生产 / Preview 部署；已决定不连接 Git Integration，后续从 `/Users/bera/dev/linkhood-main-deploy` 快进最新 `main` 并用 Vercel CLI 手动发布 Production。
 - 本地入口：`http://localhost:3000/#/demo`
 - 状态键：`dabashou:demo:v0.1:state`
 - 质量命令：`npm run lint && npm run build`
