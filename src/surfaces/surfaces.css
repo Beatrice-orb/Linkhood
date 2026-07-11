@@ -1,0 +1,136 @@
+:root {
+  --surface-switcher-height: 72px;
+}
+
+.surface-root {
+  min-height: 100svh;
+}
+
+.surface-switcher {
+  align-items: center;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E3DA;
+  display: flex;
+  height: var(--surface-switcher-height);
+  justify-content: center;
+  padding: 8px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.surface-switcher__panel {
+  background: #FFFFFF;
+  border: 1px solid #E5E3DA;
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 560px;
+  padding: 4px;
+  width: min(100%, 560px);
+}
+
+.surface-switcher__option {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #5A6E74;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 8px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  position: relative;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.surface-switcher__option::after {
+  background: #2F6B5F;
+  border-radius: 4px 4px 0 0;
+  bottom: 0;
+  content: "";
+  height: 3px;
+  left: 12px;
+  opacity: 0;
+  position: absolute;
+  right: 12px;
+  transition: opacity 150ms ease;
+}
+
+.surface-switcher__option svg {
+  height: 18px;
+  stroke-width: 1.8;
+  width: 18px;
+}
+
+.surface-switcher__option:hover {
+  background: #F8F7F0;
+  color: #17313B;
+}
+
+.surface-switcher__option:active {
+  transform: scale(0.96);
+}
+
+.surface-switcher__option:focus-visible {
+  outline: 2px solid #2F6B5F;
+  outline-offset: 2px;
+}
+
+.surface-switcher__option.is-active {
+  background: #E8F2F3;
+  color: #2F6B5F;
+  font-weight: 600;
+}
+
+.surface-switcher__option.is-active::after {
+  opacity: 1;
+}
+
+.surface-stage {
+  min-height: calc(100svh - var(--surface-switcher-height));
+}
+
+.surface-view[hidden] {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  :root {
+    --surface-switcher-height: 64px;
+  }
+
+  .surface-switcher {
+    padding: 8px;
+  }
+
+  .surface-switcher__panel {
+    gap: 0;
+    padding: 2px;
+  }
+
+  .surface-switcher__option {
+    font-size: 12px;
+    gap: 4px;
+    padding: 6px 4px;
+  }
+
+  .surface-switcher__option svg {
+    height: 16px;
+    width: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface-switcher__option,
+  .surface-switcher__option::after {
+    transition: none;
+  }
+}
