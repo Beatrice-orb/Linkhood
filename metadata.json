@@ -1,6 +1,6 @@
 {
   "name": "Remix: 搭把手",
-  "description": "「搭把手」青年社区邻里互助与共享空间小程序。支持社区地图、公共空间预约、周边服务查询、邻里圈动态与互助、社区活动报名及新手指南。",
+  "description": "「搭把手」连接社区与社会公共服务供给和居民，并支持可信、低风险邻里互助的社区服务协作原型。",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

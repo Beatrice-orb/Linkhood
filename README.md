@@ -1,6 +1,6 @@
-# 搭把手 —— 社区生活地图
+# 搭把手 —— 社区服务与邻里互助
 
-> **一个社区，应该有一张地图。**
+> **让公共服务更容易抵达居民，让邻里在可信、低风险的场景下彼此搭把手。**
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![WeChat Mini Program](https://img.shields.io/badge/Platform-WeChat-07C160)](https://developers.weixin.qq.com/miniprogram/dev/framework/)
@@ -10,14 +10,18 @@
 
 ## 📖 项目简介
 
-**「搭把手」是一个社区生活信息平台**，旨在解决社区居民普遍存在的 **“信息不对称”** 问题——新搬来的住户不知道社区有什么设施、周边有什么服务；老住户不知道社区最近有什么活动、公共空间怎么预约；想找人帮忙却不知道找谁。
+**「搭把手」是以社区为入口的公共服务连接与运营协作平台**：把散落在社区、街镇、政府部门、公共机构、企事业单位和社会组织中的服务，转成居民找得到、看得懂、能行动、可追踪的身边服务；对正式服务覆盖不到的低风险生活小事，再由经过社区身份核验的邻里彼此搭把手。
 
-平台以 **“社区生活地图”** 为核心，整合社区公共空间、活动信息、周边服务和社工服务四大板块，让居民打开小程序就能知道 **“社区有什么、在发生什么、能做什么”**。同时通过“邻里圈”的互助和社交功能，促进邻里互动，降低社区治理成本。
+**社区生活地图**是居民端的发现入口，整合社区公共空间、真实公共服务、活动和社工对接，让居民知道“身边有什么、是否适合我、下一步怎么做”。邻里圈只承接借工具、非贵重物品代取、旧物赠送 / 交换等低风险互助，不以陌生人社交或信用评分为产品目的。
+
+> 当前仓库是黑客松 React / Vite 交互原型。现有页面仍保留青年公寓、聊天、积分信用等早期探索，它们不等于最终产品口径。当前真相文件见[核心理念与比赛版边界](docs/product/核心理念与比赛版边界.md)；真实西红门 / 大兴供给见[供给扫描](docs/research/2026-07-11_西红门公共服务供给扫描.md)和[种子数据](data/public-service/README.md)。
 
 ### 🎯 解决的核心问题
 
 | 问题 | 我们的解法 |
 |---|---|
+| 公共服务散落在公众号、政府网站、海报和群通知 | **真实服务供给卡**：来源、对象、资格、状态、下一步 |
+| 社区发了很多信息却不知道居民真正需要什么 | **脱敏需求趋势** + 服务触达 / 报名 / 完成反馈 |
 | 新住户不知道社区有什么 | **社区新手指南** + **社区地图** |
 | 居民不知道周边能干什么 | **周边服务** + **公共空间** 信息聚合 |
 | 社区活动信息传播低效 | **本周活动** 信息流 + 在线报名 |
@@ -66,14 +70,17 @@
 
 | 功能 | 说明 |
 |---|---|
-| **信息管理** | 增删改查公共空间/周边服务/社工信息 |
-| **活动管理** | 发布官方活动、管理报名、签到 |
-| **公告管理** | 发布社区公告（定时发布、分类管理） |
-| **数据看板** | 居民活跃度、活动参与率、互助完成率、满意度 |
+| **供给接入与确认** | 把公众号 / 官网原文转成结构化服务草稿，提示缺失字段，由社工确认发布 |
+| **活动与触达运营** | 管理活动、场所、报名、提醒、签到和复盘 |
+| **服务协作** | 维护社工服务、跨机构转介、待跟进事项与状态 |
+| **需求趋势** | 脱敏聚合居民搜索、收藏、报名、未满足需求和反馈，辅助调整供给 |
+| **AI 运营助手** | 生成供给卡、活动文案、提醒、记录和报表草稿；关键动作必须人工确认 |
 
 ---
 
-## 🏗️ 技术架构
+## 🏗️ 目标技术架构（后续设想）
+
+> 以下是产品走向正式小程序后的目标架构，不代表当前仓库已经实现。当前仓库只有 React / Vite 前端交互原型和 mock / seed 数据。
 
 ### 系统架构图
 
@@ -141,88 +148,35 @@
 
 ## 🚀 快速开始
 
-### 前置条件
-
-- Node.js 18+
-- MySQL 8.0+
-- Redis 7.0+
-- 微信开发者工具
-- 微信小程序 AppID
-
-### 1. 克隆项目
+当前仓库需要 Node.js 18+。
 
 ```bash
-git clone https://github.com/yourusername/dabashou.git
+git clone https://github.com/Beatrice-orb/-.git dabashou
 cd dabashou
-```
-
-### 2. 项目结构
-
-```
-dabashou/
-├── miniprogram/          # 小程序端
-│   ├── pages/           # 页面
-│   │   ├── map/         # 社区地图
-│   │   ├── circle/      # 邻里圈
-│   │   ├── chat/        # 我的聊天
-│   │   └── mine/        # 我的
-│   ├── components/      # 公共组件
-│   ├── utils/           # 工具函数
-│   ├── api/             # 接口封装
-│   └── app.js           # 小程序入口
-├── admin/               # 管理后台
-│   ├── src/
-│   │   ├── pages/       # 页面
-│   │   ├── components/  # 组件
-│   │   └── api/         # 接口
-│   └── package.json
-├── server/              # 后端服务
-│   ├── src/
-│   │   ├── modules/     # 业务模块
-│   │   ├── common/      # 公共模块
-│   │   └── config/      # 配置文件
-│   └── package.json
-├── database/            # 数据库脚本
-│   └── schema.sql
-├── docker/              # Docker配置
-└── README.md
-```
-
-### 3. 后端启动
-
-```bash
-cd server
-npm install
-
-# 配置环境变量
-cp .env.example .env
-# 编辑 .env 配置数据库连接等信息
-
-# 数据库迁移
-npm run migration:run
-
-# 启动开发服务
-npm run start:dev
-```
-
-### 4. 管理后台启动
-
-```bash
-cd admin
 npm install
 npm run dev
 ```
 
-### 5. 小程序启动
+默认开发地址为 `http://localhost:3000`。
 
-1. 用**微信开发者工具**打开 `miniprogram` 目录
-2. 修改 `app.js` 中的 API 地址为本地后端地址
-3. 点击“编译”即可预览
-
-### 6. Docker 部署（生产环境）
+可用检查：
 
 ```bash
-docker-compose up -d
+npm run lint
+npm run build
+```
+
+当前结构：
+
+```
+dabashou/
+├── src/                  # React 交互原型和 mock 数据
+├── docs/
+│   ├── product/          # 当前产品核心口径
+│   └── research/         # 公共服务供给扫描
+├── data/public-service/  # 真实来源、服务种子与 schema
+├── index.html
+└── package.json
 ```
 
 ---
@@ -240,13 +194,13 @@ docker-compose up -d
 | 用户 | 10人 | 覆盖不同年龄/职业 |
 | 互助需求 | 5条 | 拼单/代取/照看/闲置 |
 
-Mock 数据文件位于 `database/mock_data.sql`
+界面 Mock 数据位于 `src/mockData.ts`。真实公共服务种子位于 `data/public-service/`；两者必须在页面和路演中明确区分。
 
 ---
 
-## 📊 试点数据（参考）
+## 📊 模拟指标（仅用于界面占位）
 
-以下为某青年公寓社区试点数据：
+以下数字没有公开来源，是当前 Demo 的模拟占位数据，不得作为真实试点成果对外陈述：
 
 | 指标 | 数据 |
 |---|---|
@@ -324,9 +278,9 @@ furnished to do so, subject to the following conditions:
 
 ## 📞 联系与支持
 
-- **项目地址**：https://github.com/yourusername/dabashou
-- **问题反馈**：[Issues](https://github.com/yourusername/dabashou/issues)
-- **产品文档**：/docs
+- **项目地址**：[Beatrice-orb/-](https://github.com/Beatrice-orb/-)
+- **问题反馈**：[Issues](https://github.com/Beatrice-orb/-/issues)
+- **产品文档**：[`docs/`](docs/)
 
 ---
 
@@ -336,8 +290,6 @@ furnished to do so, subject to the following conditions:
 
 ---
 
-**「搭把手」—— 一个社区，应该有一张地图。**<div align="center">
+**「搭把手」—— 让公共服务更容易抵达居民，让邻里在可信、低风险的场景下彼此搭把手。**<div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
-
-
