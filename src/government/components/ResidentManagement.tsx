@@ -78,8 +78,9 @@ export default function ResidentManagement({ residents, setResidents }: Resident
         <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
           REGISTERED CITIZENS DIRECTORY
         </div>
-        <h1 className="text-lg font-bold font-display text-ink mt-0.5">
-          👥 常住注册居民电子档案库
+        <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
+          <Users className="w-5 h-5 text-jade shrink-0" />
+          <span>常住注册居民电子档案库</span>
         </h1>
         <p className="text-xs text-ink-muted mt-1">
           查阅常住居民自治信任分（小红花、好评数）、标记“空巢老人”、“困难家庭”等关怀标签，防范特殊事件。
@@ -189,8 +190,8 @@ export default function ResidentManagement({ residents, setResidents }: Resident
             })}
 
             {filteredResidents.length === 0 && (
-              <div className="py-16 text-center text-xs text-ink-subtle">
-                🔍 暂无符合检索条件的常住居民档案。
+              <div className="py-16 text-center text-caption text-ink-subtle">
+                暂无符合检索条件的常住居民档案。
               </div>
             )}
           </div>
@@ -217,7 +218,7 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                     <div>
                       <h3 className="text-sm font-bold text-ink">{selectedResident.name}</h3>
                       <p className="text-xs text-ink-muted mt-0.5">
-                        📍 房号: {selectedResident.building} {selectedResident.room}
+                        房号: {selectedResident.building} {selectedResident.room}
                       </p>
                       <span className="text-4xs text-ink-subtle font-mono mt-0.5 block">
                         系统登记时间: {selectedResident.registerTime}
@@ -228,9 +229,10 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                   {/* Citizen Trust Stats Grid */}
                   <div className="grid grid-cols-3 gap-2 text-center text-xs">
                     <div className="p-2 bg-canvas/30 border border-hairline rounded-xl">
-                      <span className="text-4xs text-ink-subtle block">自治信任分</span>
-                      <span className="text-sm font-bold font-mono text-ink block mt-0.5">
-                        🛡️ {selectedResident.creditScore}
+                      <span className="text-caption text-ink-subtle block">自治信任分</span>
+                      <span className="text-sm font-bold font-mono text-ink flex items-center justify-center gap-1 mt-0.5">
+                        <Shield className="w-3.5 h-3.5 text-jade shrink-0" />
+                        {selectedResident.creditScore}
                       </span>
                       <div className="flex justify-center gap-1 mt-1 text-[9px] font-mono">
                         <button
@@ -251,9 +253,10 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                     </div>
 
                     <div className="p-2 bg-canvas/30 border border-hairline rounded-xl">
-                      <span className="text-4xs text-ink-subtle block">小红花徽章</span>
-                      <span className="text-sm font-bold font-mono text-coral block mt-0.5">
-                        🌺 {selectedResident.redFlowers}朵
+                      <span className="text-caption text-ink-subtle block">小红花徽章</span>
+                      <span className="text-sm font-bold font-mono text-coral flex items-center justify-center gap-1 mt-0.5">
+                        <Heart className="w-3.5 h-3.5 text-coral shrink-0" fill="currentColor" />
+                        {selectedResident.redFlowers}朵
                       </span>
                       <button
                         onClick={() => handleAddFlower(selectedResident.id)}
@@ -265,9 +268,10 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                     </div>
 
                     <div className="p-2 bg-canvas/30 border border-hairline rounded-xl flex flex-col justify-center">
-                      <span className="text-4xs text-ink-subtle block">互助被好评</span>
-                      <span className="text-sm font-bold font-mono text-amber block mt-0.5">
-                        ⭐ {selectedResident.goodReviews}次
+                      <span className="text-caption text-ink-subtle block">互助被好评</span>
+                      <span className="text-sm font-bold font-mono text-amber flex items-center justify-center gap-1 mt-0.5">
+                        <Star className="w-3.5 h-3.5 text-amber shrink-0" fill="currentColor" />
+                        {selectedResident.goodReviews}次
                       </span>
                       <span className="text-[9px] text-ink-subtle mt-1 block">参与活动: {selectedResident.activityCount}场</span>
                     </div>
@@ -275,8 +279,8 @@ export default function ResidentManagement({ residents, setResidents }: Resident
 
                   {/* Toggle Special group Tags */}
                   <div className="space-y-2 pt-3 border-t border-hairline">
-                    <span className="text-3xs font-bold text-ink-muted uppercase tracking-wider block">
-                      🏷️ 群组标记配置 (点击快速增删同步)
+                    <span className="text-caption font-bold text-ink-muted uppercase tracking-wider block">
+                      群组标记配置 (点击快速增删同步)
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {availableTags.map((t) => {
@@ -308,8 +312,8 @@ export default function ResidentManagement({ residents, setResidents }: Resident
               </div>
             </>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center text-xs text-ink-subtle p-8">
-              📥 请选择左侧列表中的居民查看详细的学分记录与打标签操作。
+            <div className="h-full flex flex-col items-center justify-center text-center text-caption text-ink-subtle p-8">
+              请选择左侧列表中的居民查看详细的学分记录与打标签操作。
             </div>
           )}
         </div>

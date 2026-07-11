@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Store, Phone, Clock, Award, Plus, Edit, X, Wrench, Search, Star } from 'lucide-react';
+import { Store, Phone, Clock, Award, Plus, Edit, X, Wrench, Search, Star, Gift } from 'lucide-react';
 import { Service } from '../types';
 
 interface ServiceManagementProps {
@@ -89,8 +89,9 @@ export default function ServiceManagement({ services, setServices }: ServiceMana
         <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
           CONVENIENT NEIGHBORHOOD SERVICES
         </div>
-        <h1 className="text-lg font-bold font-display text-ink mt-0.5">
-          🏪 社区周边生活服务商户管理
+        <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
+          <Store className="w-5 h-5 text-jade shrink-0" />
+          <span>社区周边生活服务商户管理</span>
         </h1>
         <p className="text-xs text-ink-muted mt-1">
           审核并展示辖区15分钟生活圈优质加盟商，设置“红色暖心折扣”、一键置顶推荐优质商家。
@@ -165,8 +166,11 @@ export default function ServiceManagement({ services, setServices }: ServiceMana
                     </div>
                   </div>
 
-                  <p className="p-2.5 bg-surface border border-hairline rounded-xl text-4xs text-ink-muted leading-relaxed">
-                    <span className="text-amber font-bold">🎁 暖心优惠：</span>
+                  <p className="p-2.5 bg-surface border border-hairline rounded-xl text-caption text-ink-muted leading-relaxed">
+                    <span className="text-amber font-bold flex items-center gap-1">
+                      <Gift className="w-3.5 h-3.5 text-amber shrink-0" />
+                      暖心优惠：
+                    </span>
                     {svc.discount}
                   </p>
 
@@ -202,8 +206,8 @@ export default function ServiceManagement({ services, setServices }: ServiceMana
             ))}
 
             {filteredServices.length === 0 && (
-              <div className="py-16 text-center text-xs text-ink-subtle">
-                🔍 暂无符合条件的周边商户服务。
+              <div className="py-16 text-center text-caption text-ink-subtle">
+                暂无符合条件的周边商户服务。
               </div>
             )}
           </div>

@@ -51,8 +51,9 @@ export default function AntiFraudManagement({ alerts, setAlerts }: AntiFraudProp
         <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
           CITIZEN ANTI-FRAUD SECURITY PROTOCOL
         </div>
-        <h1 className="text-lg font-bold font-display text-ink mt-0.5">
-          🛡️ 每日社区防诈骗警示公告配置
+        <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
+          <ShieldAlert className="w-5 h-5 text-jade shrink-0" />
+          <span>每日社区防诈骗警示公告配置</span>
         </h1>
         <p className="text-xs text-ink-muted mt-1">
           专供 C端【关怀极简版】首页顶部黄金宣传位！每天推送一条针对独居老人的防诈小常识，强化防范意识。
@@ -69,8 +70,8 @@ export default function AntiFraudManagement({ alerts, setAlerts }: AntiFraudProp
                 配置今日防诈推文内容
               </h2>
             </div>
-            <p className="text-3xs text-ink-muted leading-relaxed mb-4">
-              💡 编写建议：字数控制在100字以内，重点突出常识和“96110咨询电话”。发布后将自动下发到居民关怀小卡片。
+            <p className="text-caption text-ink-muted leading-relaxed mb-4">
+              编写建议：字数控制在100字以内，重点突出常识和“96110咨询电话”。发布后将自动下发到居民关怀小卡片。
             </p>
 
             <textarea
@@ -154,8 +155,8 @@ export default function AntiFraudManagement({ alerts, setAlerts }: AntiFraudProp
             ))}
 
             {alerts.length === 0 && (
-              <div className="py-16 text-center text-xs text-ink-subtle">
-                🍂 暂无防诈骗历史记录，请在左侧配置一条新的。
+              <div className="py-16 text-center text-caption text-ink-subtle">
+                暂无防诈骗历史记录，请在左侧配置一条新的。
               </div>
             )}
           </div>

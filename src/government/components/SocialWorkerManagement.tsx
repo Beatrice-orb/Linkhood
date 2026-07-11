@@ -92,9 +92,10 @@ export default function SocialWorkerManagement({ workers, setWorkers }: SocialWo
           <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
             COMMUNITY SOCIAL WORKER ROSTER
           </div>
-          <h1 className="text-lg font-bold font-display text-ink mt-0.5">
-            🤝 社区网格员与专职社工管理
-          </h1>
+        <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
+          <HeartHandshake className="w-5 h-5 text-jade shrink-0" />
+          <span>社区网格员与专职社工管理</span>
+        </h1>
           <p className="text-xs text-ink-muted mt-1">
             配置社工值班时间表、负责楼宇网格范围及专属心理咨询/帮扶审核等服务清单。
           </p>

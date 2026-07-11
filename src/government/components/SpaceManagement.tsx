@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Clock, Users, Wrench, Check, Plus, Edit, X } from 'lucide-react';
+import { Home, Clock, Users, Wrench, Check, Plus, Edit, X, Building2 } from 'lucide-react';
 import { Space } from '../types';
 
 interface SpaceManagementProps {
@@ -79,8 +79,9 @@ export default function SpaceManagement({ spaces, setSpaces }: SpaceManagementPr
         <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
           PUBLIC PROPERTY & SHARED FACILITIES
         </div>
-        <h1 className="text-lg font-bold font-display text-ink mt-0.5">
-          🏡 社区公共共享空间阵地维护
+        <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-jade shrink-0" />
+          <span>社区公共共享空间阵地维护</span>
         </h1>
         <p className="text-xs text-ink-muted mt-1">
           更新公共空间、共享自习室、老年棋牌室等日常运行状态、配置配套设施并设定预约模式。
@@ -106,7 +107,9 @@ export default function SpaceManagement({ spaces, setSpaces }: SpaceManagementPr
                 >
                   <div>
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-2xl">{sp.photo}</span>
+                      <div className="w-8 h-8 rounded-lg bg-jade-light/20 flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-jade" />
+                      </div>
                       <span className={`text-[9px] px-2 py-0.5 border rounded-full font-bold ${statusColor}`}>
                         {sp.status}
                       </span>

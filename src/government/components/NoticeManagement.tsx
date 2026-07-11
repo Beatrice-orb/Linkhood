@@ -89,8 +89,9 @@ export default function NoticeManagement({
           <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
             COMMUNITY ALERTS & COMMUNICATIONS
           </div>
-          <h1 className="text-lg font-bold font-display text-ink mt-0.5">
-            📢 社区最新公告与已读状态追踪
+          <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
+            <Megaphone className="w-5 h-5 text-jade shrink-0" />
+            <span>社区最新公告与已读状态追踪</span>
           </h1>
           <p className="text-xs text-ink-muted mt-1">
             发布街道政策宣传、水电停运通知、气象及防诈骗安全提醒，实时监控覆盖率。
@@ -198,8 +199,8 @@ export default function NoticeManagement({
             })}
 
             {filteredNotices.length === 0 && (
-              <div className="py-16 text-center text-xs text-ink-subtle">
-                🔍 暂无此分类下的公告内容。请点击右上角撰写发布。
+              <div className="py-16 text-center text-caption text-ink-subtle">
+                暂无此分类下的公告内容。请点击右上角撰写发布。
               </div>
             )}
           </div>
@@ -234,8 +235,8 @@ export default function NoticeManagement({
 
                 {/* Read receipt breakdown */}
                 <div className="mt-4">
-                  <span className="text-3xs font-bold text-ink-muted uppercase tracking-wider block mb-3">
-                    📊 公告触达数据分析 (已读统计)
+                  <span className="text-caption font-bold text-ink-muted uppercase tracking-wider block mb-3">
+                    公告触达数据分析 (已读统计)
                   </span>
 
                   {/* Progress ratio */}
@@ -287,8 +288,8 @@ export default function NoticeManagement({
               </div>
             </>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center text-xs text-ink-subtle p-8">
-              📥 请选择左侧的公告内容查看详细的阅读覆盖报表。
+            <div className="h-full flex flex-col items-center justify-center text-center text-caption text-ink-subtle p-8">
+              请选择左侧的公告内容查看详细的阅读覆盖报表。
             </div>
           )}
         </div>

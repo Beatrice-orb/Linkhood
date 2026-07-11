@@ -13,6 +13,9 @@
   --color-jade: #2F6B5F;
   --color-jade-hover: #3D8274;
   --color-jade-light: #E8F2F3;
+  --color-primary: #2F6B5F;
+  --color-primary-hover: #3D8274;
+  --color-primary-light: #E8F2F3;
   --color-coral: #F06A4B;
   --color-coral-hover: #D85A3D;
   --color-coral-light: #FFF0EA;
@@ -21,44 +24,66 @@
   --color-canvas: #F8F7F0;
   --color-surface: #FFFFFF;
   --color-hairline: #E5E3DA;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
 }
 
 .government-app {
   --font-sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Inter", sans-serif;
-  --font-display: "Space Grotesk", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --font-display: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
   --font-mono: "JetBrains Mono", "Avenir Next Condensed", monospace;
-  --font-number: "JetBrains Mono", "Avenir Next Condensed", sans-serif;
-  --color-canvas: #0D1B21;
-  --color-surface: #162B33;
-  --color-hairline: #2A3F47;
-  --color-ink: #F4F7F8;
-  --color-ink-muted: #A4B4B8;
-  --color-ink-subtle: #70858B;
-  --color-jade: #4DBFA8;
-  --color-jade-hover: #6DD4C0;
-  --color-jade-light: #1E3A3A;
-  --color-coral: #FF8568;
-  --color-coral-hover: #FFA08A;
-  --color-coral-light: #3D2622;
-  --color-amber: #F0B85C;
-  --color-amber-light: #3D3220;
+  --font-number: "Avenir Next Condensed", "Arial Narrow", sans-serif;
+  --color-canvas: #1F4A3A;
+  --color-canvas-light: #2A5A4A;
+  --color-surface: #F5F0EB;
+  --color-surface-elevated: #FAF8F5;
+  --color-hairline: #2A5A4A;
+  --color-ink: #F5F0EB;
+  --color-ink-muted: #B0A89E;
+  --color-ink-subtle: #8A8278;
+  --color-primary: #E6C79C;
+  --color-primary-hover: #D4B88E;
+  --color-primary-light: #4A3D2E;
+  --color-jade: #E6C79C;
+  --color-jade-hover: #D4B88E;
+  --color-jade-light: #4A3D2E;
+  --color-coral: #C75A45;
+  --color-coral-hover: #AD4938;
+  --color-coral-light: #4A2E2A;
+  --color-amber: #C9963C;
+  --color-amber-light: #3A352A;
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
+}
+
+.government-app .bg-surface,
+.government-app [class*="bg-surface"],
+.government-app .bg-surface-elevated,
+.government-app [class*="bg-surface-elevated"] {
+  --color-ink: #1F2E28;
+  --color-ink-muted: #6A6A5E;
+  --color-ink-subtle: #A49E94;
+  --color-hairline: #D9D0C8;
+}
+
+.government-app aside .bg-primary {
+  --color-ink: #1F2E28;
 }
 
 .government-app .text-3xs { font-size: 0.625rem; line-height: 0.875rem; }
 .government-app .font-display { font-family: var(--font-display); }
 .government-app .font-number { font-family: var(--font-number); }
 .government-app ::-webkit-scrollbar { width: 6px; height: 6px; }
-.government-app ::-webkit-scrollbar-track { background: #0D1B21; }
-.government-app ::-webkit-scrollbar-thumb { background: #2A3F47; border-radius: 4px; }
-.government-app ::-webkit-scrollbar-thumb:hover { background: #4DBFA8; }
+.government-app ::-webkit-scrollbar-track { background: var(--color-canvas); }
+.government-app ::-webkit-scrollbar-thumb { background: var(--color-hairline); border-radius: 4px; }
+.government-app ::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
 
 .government-loading {
   align-items: center;
-  background: #0D1B21;
-  color: #A4B4B8;
+  background: #1F4A3A;
+  color: #B0A89E;
   display: flex;
   font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
   font-size: 14px;

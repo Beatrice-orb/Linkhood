@@ -99,8 +99,9 @@ export default function FeedbackManagement({
         <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
           CITIZEN FEEDBACK & HOTLINE MATRIX
         </div>
-        <h1 className="text-lg font-bold font-display text-ink mt-0.5">
-          💬 居民诉求留言板与人工人工通道
+        <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-jade shrink-0" />
+          <span>居民诉求留言板与人工通道</span>
         </h1>
         <p className="text-xs text-ink-muted mt-1">
           对接居民端C端“喊一声”与“帮扶申请”无法被AI完全自主处理的工单，人工回复或指派网格，实现诉求全生命周期闭环。
@@ -169,7 +170,7 @@ export default function FeedbackManagement({
 
                   {fb.helpNeeded && (
                     <div className="text-[10px] text-jade bg-jade-light/10 p-1.5 rounded-lg border border-jade/10 truncate">
-                      💡 帮扶诉求：{fb.helpNeeded}
+                      帮扶诉求：{fb.helpNeeded}
                     </div>
                   )}
                 </div>
@@ -177,8 +178,8 @@ export default function FeedbackManagement({
             })}
 
             {filteredFeedbacks.length === 0 && (
-              <div className="py-16 text-center text-xs text-ink-subtle">
-                🎉 暂无符合条件的居民诉求留言。
+              <div className="py-16 text-center text-caption text-ink-subtle">
+                暂无符合条件的居民诉求留言。
               </div>
             )}
           </div>
@@ -293,8 +294,8 @@ export default function FeedbackManagement({
               </div>
             </>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center text-xs text-ink-subtle p-8">
-              📥 请选择左侧居民留言项开始实时在线对话，标记已办结。
+            <div className="h-full flex flex-col items-center justify-center text-center text-caption text-ink-subtle p-8">
+              请选择左侧居民留言项开始实时在线对话，标记已办结。
             </div>
           )}
         </div>
@@ -306,7 +307,7 @@ export default function FeedbackManagement({
           <div className="flex items-center gap-2">
             <Phone className="w-4 h-4 text-jade shrink-0" />
             <h2 className="text-sm font-bold tracking-tight text-ink font-display">
-              ☎️ 社区常备紧急热线电话名录
+              社区常备紧急热线电话名录
             </h2>
           </div>
           <button

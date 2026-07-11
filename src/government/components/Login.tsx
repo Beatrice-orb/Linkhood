@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Phone, Key, HelpCircle } from 'lucide-react';
+import { ShieldCheck, Phone, Key, HelpCircle, Home, Building2, Flag, Heart } from 'lucide-react';
 import { Role } from '../types';
 
 interface LoginProps {
@@ -129,25 +129,28 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { id: 'COMMUNITY_STAFF', label: '社区居委会', icon: '🏡' },
-                { id: 'STREET_STAFF', label: '街道办事处', icon: '🏢' },
-                { id: 'PARTY_CENTER_OPERATOR', label: '党群中心运营', icon: '🚩' },
-                { id: 'WOMEN_FEDERATION', label: '妇联/群团组织', icon: '🤝' },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setRole(item.id as Role)}
-                  className={`p-3 text-left border rounded-xl transition-all flex flex-col justify-between ${
-                    role === item.id
-                      ? 'border-jade bg-jade-light/20 text-jade shadow-sm'
-                      : 'border-hairline bg-canvas/30 text-ink-muted hover:border-hairline hover:bg-canvas/60'
-                  }`}
-                >
-                  <span className="text-lg mb-1">{item.icon}</span>
-                  <span className="text-xs font-medium">{item.label}</span>
-                </button>
-              ))}
+                { id: 'COMMUNITY_STAFF', label: '社区居委会', icon: Home },
+                { id: 'STREET_STAFF', label: '街道办事处', icon: Building2 },
+                { id: 'PARTY_CENTER_OPERATOR', label: '党群中心运营', icon: Flag },
+                { id: 'WOMEN_FEDERATION', label: '妇联/群团组织', icon: Heart },
+              ].map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setRole(item.id as Role)}
+                    className={`p-3.5 text-left border rounded-xl transition-all flex flex-col justify-between h-22 ${
+                      role === item.id
+                        ? 'border-jade bg-jade-light/20 text-jade shadow-sm'
+                        : 'border-hairline bg-canvas/30 text-ink-muted hover:border-hairline hover:bg-canvas/60'
+                    }`}
+                  >
+                    <IconComponent className="w-5 h-5 mb-1" />
+                    <span className="text-xs font-medium">{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

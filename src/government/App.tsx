@@ -264,8 +264,8 @@ export function GovernmentApp() {
         );
       default:
         return (
-          <div className="py-20 text-center text-xs text-ink-subtle">
-            🛠️ 模块正在紧密开发部署中，请通过侧边栏选择可用控制台。
+          <div className="py-20 text-center text-caption text-ink-subtle">
+            模块正在紧密开发部署中，请通过侧边栏选择可用控制台。
           </div>
         );
     }
@@ -299,14 +299,14 @@ export function GovernmentApp() {
         {/* Top Header Rail */}
         <header className="h-16 bg-surface border-b border-hairline px-6 flex items-center justify-between sticky top-0 z-10 select-none">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-jade animate-pulse" />
-            <span className="text-3xs tracking-widest uppercase font-mono font-bold text-ink-subtle">
-              GOVERNANCE CONSOLE // EXPRESS + SQLITE
+            <span className="inline-block w-2 h-2 rounded-full bg-jade" />
+            <span className="text-xs font-semibold text-ink-muted">
+              {currentUser.community}
             </span>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2 text-3xs text-ink-muted">
+            <div className="hidden md:flex items-center gap-2 text-caption text-ink-muted">
               <Clock className="w-3.5 h-3.5 text-jade shrink-0" />
               <span>
                 {connectionState === 'loading' && '正在连接数据库'}

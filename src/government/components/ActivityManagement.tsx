@@ -134,8 +134,9 @@ export default function ActivityManagement({
           <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
             NEIGHBORHOOD LIFE MAPS
           </div>
-          <h1 className="text-lg font-bold font-display text-ink mt-0.5">
-            📅 社区活动组织与报名管理
+          <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-jade shrink-0" />
+            <span>社区活动组织与报名管理</span>
           </h1>
           <p className="text-xs text-ink-muted mt-1">
             发布本周社区活动，收集居民报名意愿，跟踪日常签到和居民参与率。
@@ -251,8 +252,8 @@ export default function ActivityManagement({
             })}
 
             {filteredActivities.length === 0 && (
-              <div className="py-16 text-center text-xs text-ink-subtle">
-                🔍 暂无符合条件的活动。您可以点击右上角创建一个。
+              <div className="py-16 text-center text-caption text-ink-subtle">
+                暂无符合条件的活动。您可以点击右上角创建一个。
               </div>
             )}
           </div>
@@ -289,8 +290,8 @@ export default function ActivityManagement({
                         当前：已报名 <span className="text-jade font-bold">{selectedActivity.registered}人</span> / 名额上限 {selectedActivity.limit}人（已签到 {selectedActivity.signedIn}人）
                       </span>
                     </div>
-                    <p className="p-3 bg-canvas/40 border border-hairline rounded-xl text-3xs text-ink-muted leading-relaxed">
-                      💡 活动简介：{selectedActivity.description}
+                    <p className="p-3 bg-canvas/40 border border-hairline rounded-xl text-caption text-ink-muted leading-relaxed">
+                      活动简介：{selectedActivity.description}
                     </p>
                   </div>
                 </div>
@@ -336,8 +337,8 @@ export default function ActivityManagement({
                     ))}
 
                     {selectedActivity.registrants.length === 0 && (
-                      <div className="py-8 text-center text-4xs text-ink-subtle">
-                        🍂 该活动目前还没有居民报名。报名开启后，居民数据将自动实时流转到这里。
+                      <div className="py-8 text-center text-caption text-ink-subtle">
+                        该活动目前还没有居民报名。报名开启后，居民数据将自动实时流转到这里。
                       </div>
                     )}
                   </div>
@@ -351,8 +352,8 @@ export default function ActivityManagement({
               </div>
             </>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center text-xs text-ink-subtle p-8">
-              📥 请选择左侧的活动查看详细报名名录与管理签到。
+            <div className="h-full flex flex-col items-center justify-center text-center text-caption text-ink-subtle p-8">
+              请选择左侧的活动查看详细报名名录与管理签到。
             </div>
           )}
         </div>

@@ -19,7 +19,9 @@ import {
   Check,
   Send,
   UserCheck,
-  FileText
+  FileText,
+  Home,
+  Heart
 } from 'lucide-react';
 import { User, Metric, TodoItem, Activity, Feedback } from '../types';
 import {
@@ -112,8 +114,9 @@ export default function Dashboard({
             COMMUNITY CONTROL COCKPIT
           </div>
           <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
-            🏡 <span>您好，{currentUser.name}</span>
-            <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-jade-light text-jade border border-jade/20">
+            <Home className="w-4 h-4 text-jade" />
+            <span>您好，{currentUser.name}</span>
+            <span className="text-caption font-normal px-2 py-0.5 rounded-full bg-jade-light text-jade border border-jade/20">
               {currentUser.community}
             </span>
           </h1>
@@ -241,8 +244,8 @@ export default function Dashboard({
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className={`text-4xs px-2 py-0.5 rounded-full border uppercase ${priorityColor}`}>
-                          {todo.priority === 'high' ? '🔴 高紧急' : todo.priority === 'medium' ? '🟡 中优先' : '🟢 低常规'}
+                        <span className={`text-caption px-2 py-0.5 rounded-full border uppercase ${priorityColor}`}>
+                          {todo.priority === 'high' ? '高紧急' : todo.priority === 'medium' ? '中优先' : '低常规'}
                         </span>
                         {!isResolved && (
                           <ArrowRight className="w-3.5 h-3.5 text-ink-subtle opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
@@ -253,8 +256,8 @@ export default function Dashboard({
                 })}
 
                 {todos.length === 0 && (
-                  <div className="py-8 text-center text-xs text-ink-subtle">
-                    🎉 完美！今天没有任何未处理的事务。
+                  <div className="py-8 text-center text-caption text-ink-subtle">
+                    完美！今天没有任何未处理的事务。
                   </div>
                 )}
               </div>
@@ -357,8 +360,8 @@ export default function Dashboard({
               </div>
 
               <div className="p-3 bg-canvas/30 border border-hairline rounded-xl text-center">
-                <span className="text-[10px] text-ink-subtle">
-                  📞 24h 应急响应中心：已备勤
+                <span className="text-caption text-ink-subtle">
+                  24h 应急响应中心：已备勤
                 </span>
               </div>
             </div>
@@ -531,7 +534,7 @@ export default function Dashboard({
                       cy="50"
                       r="40"
                       fill="transparent"
-                      stroke="#4DBFA8"
+                      stroke="var(--color-primary)"
                       strokeWidth="12"
                       strokeDasharray="100.5 251.2"
                       strokeDashoffset="0"
@@ -542,7 +545,7 @@ export default function Dashboard({
                       cy="50"
                       r="40"
                       fill="transparent"
-                      stroke="#F0B85C"
+                      stroke="var(--color-amber)"
                       strokeWidth="12"
                       strokeDasharray="88 251.2"
                       strokeDashoffset="-100.5"
@@ -553,7 +556,7 @@ export default function Dashboard({
                       cy="50"
                       r="40"
                       fill="transparent"
-                      stroke="#FF8568"
+                      stroke="var(--color-coral)"
                       strokeWidth="12"
                       strokeDasharray="37.7 251.2"
                       strokeDashoffset="-188.5"
@@ -564,7 +567,7 @@ export default function Dashboard({
                       cy="50"
                       r="40"
                       fill="transparent"
-                      stroke="#38BDF8"
+                      stroke="var(--color-primary-light)"
                       strokeWidth="12"
                       strokeDasharray="25.1 251.2"
                       strokeDashoffset="-226.2"
@@ -572,20 +575,20 @@ export default function Dashboard({
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-lg font-bold font-mono text-ink">91%</span>
-                    <span className="text-[9px] text-ink-subtle">平均响应</span>
+                    <span className="text-caption text-ink-subtle">平均响应</span>
                   </div>
                 </div>
 
                 {/* Legend list */}
                 <div className="flex-1 grid grid-cols-2 gap-3 w-full">
                   {[
-                    { name: '日常拼单', val: '40%', color: 'border-[#4DBFA8] text-jade' },
-                    { name: '代跑代取', val: '35%', color: 'border-[#F0B85C] text-amber' },
-                    { name: '闲置交易', val: '15%', color: 'border-[#FF8568] text-coral' },
-                    { name: '照看互助', val: '10%', color: 'border-[#38BDF8] text-sky-400' },
+                    { name: '日常拼单', val: '40%', color: 'border-primary text-primary' },
+                    { name: '代跑代取', val: '35%', color: 'border-amber text-amber' },
+                    { name: '闲置交易', val: '15%', color: 'border-coral text-coral' },
+                    { name: '照看互助', val: '10%', color: 'border-primary-light text-ink-muted' },
                   ].map((leg, idx) => (
                     <div key={idx} className="p-2 bg-canvas/30 border border-hairline rounded-xl flex flex-col justify-center">
-                      <span className="text-3xs text-ink-muted flex items-center gap-1.5">
+                      <span className="text-caption text-ink-muted flex items-center gap-1.5">
                         <span className={`w-2 h-2 rounded-full border-2 ${leg.color}`} />
                         {leg.name}
                       </span>
@@ -603,13 +606,14 @@ export default function Dashboard({
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-3.5 rounded bg-coral" />
                 <h2 className="text-sm font-bold tracking-tight text-ink flex items-center gap-1.5">
-                  👵 <span>关怀版专项老龄守护大屏</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-coral-light/20 text-coral border border-coral/20 font-normal">
+                  <Heart className="w-4 h-4 text-coral shrink-0" />
+                  <span>关怀版专项老龄守护大屏</span>
+                  <span className="text-caption px-2 py-0.5 rounded-full bg-coral-light/20 text-coral border border-coral/20 font-normal">
                     重点监控对象: {CHART_CARE_DATA.totalElderly}人
                   </span>
                 </h2>
               </div>
-              <span className="text-3xs text-ink-subtle">
+              <span className="text-caption text-ink-subtle">
                 每日超时自动预警守护人，配合社区社工上门跟进
               </span>
             </div>
@@ -699,7 +703,7 @@ export default function Dashboard({
                     : 'border-hairline text-ink-muted hover:text-ink'
                 }`}
               >
-                📅 生成本周综合工作报告
+                生成本周综合工作报告
               </button>
               <button
                 onClick={() => {
@@ -712,7 +716,7 @@ export default function Dashboard({
                     : 'border-hairline text-ink-muted hover:text-ink'
                 }`}
               >
-                📊 生成上月治理综合报告
+                生成上月治理综合报告
               </button>
             </div>
 
