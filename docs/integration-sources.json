@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "asOf": "2026-07-12",
+  "target": {
+    "repository": "https://github.com/Beatrice-orb/TOC-Linkhood",
+    "branch": "agent/pr6-resident-agent-bridge",
+    "purpose": "PR #6 resident service agent and anonymous demand bridge"
+  },
+  "sources": {
+    "toc": {
+      "repository": "https://github.com/Beatrice-orb/TOC-Linkhood",
+      "branch": "main",
+      "commit": "3e3b60402624555ef4dade7a137b69b4af746233",
+      "role": "native resident frontend and integration target"
+    },
+    "tog": {
+      "repository": "https://github.com/Beatrice-orb/TOG-Linkhood",
+      "branch": "main",
+      "commit": "7160abc10218653830c4f1d40702890c9ffd08d5",
+      "role": "community desktop frontend upstream",
+      "integrationStrategy": "git-subtree",
+      "prefix": "vendor/tog-linkhood",
+      "localEditsAllowed": false
+    }
+  },
+  "contracts": {
+    "anonymousDemandSignal": "docs/contracts/anonymous-demand-signal-v1.md",
+    "visibility": "community_only",
+    "notACase": true
+  },
+  "boundaries": {
+    "askResidentToSubmit": false,
+    "showResidentRecordSuccess": false,
+    "showResidentAcceptanceStatus": false,
+    "anonymousDemandVisibleOnResidentSurface": false,
+    "anonymousDemandVisibleOnCommunitySurface": true,
+    "retainTogMobileSurface": false
+  }
+}

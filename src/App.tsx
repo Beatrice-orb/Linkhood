@@ -50,8 +50,13 @@ import {
   Sparkles
 } from 'lucide-react';
 import CareModeView from './components/CareModeView';
+import ResidentAgentWidget from './features/resident-agent/ResidentAgentWidget';
 
-export default function App() {
+interface AppProps {
+  embeddedDemo?: boolean;
+}
+
+export default function App({ embeddedDemo = false }: AppProps) {
   // Current logged in user (starts with 小雅)
   const [currentUser, setCurrentUser] = useState<UserProfile>(
     mockUsers.find(u => u.id === 'user_xiaoya') || mockUsers[0]
@@ -819,9 +824,14 @@ export default function App() {
   const totalHelpCountToday = feedItems.filter(i => i.type === 'help' && i.actionStatus !== 'claimed').length;
 
   return (
-    <div className="min-h-screen bg-canvas text-ink flex flex-col lg:flex-row font-sans">
+    <div
+      className={`${
+        embeddedDemo ? 'min-h-[calc(100svh-48px)]' : 'min-h-screen'
+      } bg-canvas text-ink flex flex-col lg:flex-row font-sans`}
+    >
       
       {/* LEFT SIDE: Active User Switcher Panel */}
+      {!embeddedDemo ? (
       <div className="w-full lg:w-72 bg-surface p-6 border-b lg:border-b-0 lg:border-r border-hairline flex flex-col gap-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="bg-jade-light p-2.5 rounded-xl border border-jade/20">
@@ -879,9 +889,14 @@ export default function App() {
           })}
         </div>
       </div>
+      ) : null}
 
       {/* CENTER: Simulated WeChat Mini-Program Smartphone View */}
-      <div className="flex-1 flex items-center justify-center p-4 lg:p-8 bg-canvas">
+      <div
+        className={`flex-1 flex items-center justify-center bg-canvas ${
+          embeddedDemo ? 'p-2 sm:p-3' : 'p-4 lg:p-8'
+        }`}
+      >
         
         {/* Toast Notification Widget */}
         {toast && (
@@ -897,7 +912,12 @@ export default function App() {
         )}
 
         {/* Smartphone Container Mockup */}
-        <div id="smartphone-container" className="w-full max-w-[412px] h-[820px] bg-surface rounded-[48px] border-[12px] border-ink shadow-lg overflow-hidden flex flex-col relative">
+        <div
+          id="smartphone-container"
+          className={`w-full max-w-[412px] bg-surface rounded-[48px] border-[12px] border-ink shadow-lg overflow-hidden flex flex-col relative ${
+            embeddedDemo ? 'h-[calc(100svh-68px)] max-h-[820px]' : 'h-[820px]'
+          }`}
+        >
           
           {/* Top Notch / Camera & Speaker */}
           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-6 w-36 bg-ink rounded-b-2xl z-40 flex items-center justify-center gap-2">
@@ -1885,6 +1905,8 @@ export default function App() {
             )}
 
           </div>
+
+          {!careMode ? <ResidentAgentWidget /> : null}
 
           {/* SIMULATED BOTTOM TAB BAR */}
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-surface border-t border-hairline flex justify-around items-center px-2 z-40 shadow-md">
@@ -2964,7 +2986,7 @@ export default function App() {
                   <p className="text-xs text-ink-muted leading-relaxed font-bold">
                     {showCareModeConfirm.targetMode 
                       ? '关怀版专为社区老年人及视力障碍居民设计，提供超大字体、醒目按键、一键呼救及防诈提醒等贴心功能。'
-                      : '普通版提供更丰富的社区空间预约、邻里活动报名、私聊以及完整的社区运营报表等全功能视角。'}
+                      : '普通版提供更丰富的社区空间预约、邻里活动报名、私聊与社区服务查询。'}
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 pt-2">
@@ -2990,6 +3012,7 @@ export default function App() {
       </div>
 
       {/* RIGHT SIDE: ToG Operator / Manager Weekly Analytics Report Dashboard */}
+      {!embeddedDemo ? (
       <div className="w-full lg:w-96 bg-canvas p-6 border-t lg:border-t-0 lg:border-l border-hairline flex flex-col gap-5 overflow-y-auto custom-scrollbar">
         
         <div className="flex items-center gap-3">
@@ -3124,6 +3147,7 @@ export default function App() {
         </div>
 
       </div>
+      ) : null}
 
     </div>
   );
