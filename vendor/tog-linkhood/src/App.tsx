@@ -187,11 +187,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas text-ink theme-governance-dark flex selection:bg-jade/30 selection:text-jade">
+    <div className="min-h-screen bg-canvas text-ink theme-governance-dark flex selection:bg-primary/30 selection:text-primary">
       {/* Toast Notification Banner */}
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-surface border border-jade/40 text-jade shadow-2xl p-4 rounded-xl z-50 flex items-center gap-3 animate-slide-up max-w-sm">
-          <div className="w-1.5 h-6 bg-jade rounded-full" />
+        <div className="fixed bottom-6 right-6 bg-surface border border-primary/40 text-primary shadow-2xl p-4 rounded-xl z-50 flex items-center gap-3 animate-slide-up max-w-sm">
+          <div className="w-1.5 h-6 bg-primary rounded-full" />
           <span className="text-xs font-semibold leading-snug">{toast.message}</span>
         </div>
       )}
@@ -209,7 +209,7 @@ export default function App() {
         {/* Top Header Rail */}
         <header className="h-16 bg-surface border-b border-hairline px-6 flex items-center justify-between sticky top-0 z-10 select-none">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-jade" />
+            <span className="inline-block w-2 h-2 rounded-full bg-primary" />
             <span className="text-xs font-semibold text-ink-muted">
               {currentUser.community}
             </span>
@@ -217,7 +217,7 @@ export default function App() {
 
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-2 text-3xs text-ink-muted">
-              <Clock className="w-3.5 h-3.5 text-jade shrink-0" />
+              <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
               <span>当前系统时间 (UTC+8): 2026-07-11 16:32</span>
             </div>
 
@@ -225,7 +225,7 @@ export default function App() {
 
             {/* Notification bell icon */}
             <div className="relative cursor-pointer p-1.5 bg-canvas/40 hover:bg-canvas rounded-lg border border-hairline transition-colors">
-              <Bell className="w-4 h-4 text-ink-muted hover:text-jade" />
+              <Bell className="w-4 h-4 text-ink-muted hover:text-primary" />
               <span className="absolute top-1 right-1 flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-coral opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-coral"></span>

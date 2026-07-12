@@ -181,13 +181,14 @@
     /* === REAL PRODUCT SURFACES === */
     .phone { width: 250px; height: 520px; border: 10px solid #18352e; border-radius: 36px; background: var(--paper); box-shadow: 0 26px 50px rgba(15,40,32,.22); overflow: hidden; position: relative; }
     .phone::before { content: ""; position: absolute; top: 8px; left: 50%; width: 72px; height: 7px; transform: translateX(-50%); background: #18352e; border-radius: 9px; z-index: 4; }
-    .gov-screen { width: 720px; height: 450px; background: var(--sand); border: 8px solid #14372b; box-shadow: 0 28px 54px rgba(9,31,24,.28); overflow: hidden; border-radius: 6px; position: relative; }
+    .gov-screen { width: 720px; height: 450px; background: var(--sand); border: 8px solid #8f1c1c; box-shadow: 0 28px 54px rgba(92,18,18,.25); overflow: hidden; border-radius: 6px; position: relative; }
     .product-embed { position: absolute; inset: 0; overflow: hidden; background: var(--paper); }
     .product-embed iframe { border: 0; display: block; pointer-events: none; background: var(--paper); }
     .phone .product-embed { inset: 0; border-radius: 25px; }
     .phone .product-embed iframe { width: 390px; height: 844px; transform: scale(.59); transform-origin: 0 0; }
     .gov-screen .product-embed iframe { width: 1440px; height: 900px; transform: scale(.489); transform-origin: 0 0; }
     .surface-label { position: absolute; z-index: 5; left: 14px; bottom: 13px; padding: 7px 10px; color: white; background: rgba(16,39,31,.88); border: 1px solid rgba(230,199,156,.5); border-radius: 4px; font: 600 11px var(--font-mono); letter-spacing: .05em; }
+    .gov-screen .surface-label { background: rgba(178,34,34,.92); border-color: rgba(255,255,255,.45); }
 
     /* === SLIDE 1 === */
     .cover-grid { display: grid; grid-template-columns: 1.05fr .95fr; height: 100%; align-items: center; }
@@ -201,15 +202,16 @@
     .coordinate { position: absolute; right: 28px; bottom: 22px; font: 500 13px var(--font-mono); color: var(--subtle); }
 
     /* === SLIDE 2 === */
-    .evidence-layout { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-top: 42px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .evidence-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 36px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .evidence-col { min-height: 390px; padding: 34px 40px 26px; border-right: 1px solid var(--line); position: relative; }
     .evidence-col:last-child { border-right: 0; }
     .evidence-col .num { font: 900 66px/1 var(--font-mono); color: var(--jade); }
     .evidence-col:nth-child(2) .num { color: var(--coral); }
-    .evidence-col:nth-child(3) .num { color: var(--amber); }
     .evidence-col h3 { margin: 18px 0 15px; }
     .evidence-col ul { padding-left: 20px; margin: 0; color: var(--muted); font: 500 17px/1.65 var(--font-body); }
-    .source-strip { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; font: 500 13px var(--font-mono); color: var(--subtle); }
+    .source-strip { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font: 500 13px var(--font-mono); color: var(--subtle); }
+    .policy-strip { margin-top:18px; padding:15px 20px; display:flex; justify-content:space-between; gap:36px; border-left:4px solid var(--amber); background:rgba(233,162,59,.08); color:var(--ink); font:600 15px/1.45 var(--font-body); }
+    .policy-strip b { color:#a96300; }
 
     /* === SLIDE 3 === */
     .loop { position: absolute; left: 330px; right: 330px; top: 300px; height: 126px; border-top: 2px solid var(--gold); border-bottom: 2px solid var(--gold); display: grid; grid-template-columns: repeat(7,1fr); align-items: center; }
@@ -325,11 +327,11 @@
             <div class="cover-copy">
               <div class="kicker reveal d1" data-edit>邻里搭把手，服务家门口</div>
               <h1 class="reveal-left d2" data-edit>搭把手</h1>
-              <p class="lead cover-sub reveal d3" data-edit>全龄友好的社区邻里服务与基层治理协作平台</p>
+              <p class="lead cover-sub reveal d3" data-edit>搭把手是连接居民真实需求与社区公共服务供给的社区协作平台，让居民更容易找到、理解和使用身边服务，也让社区更准确地看见需求、优化运营。</p>
               <div class="cover-index reveal d4">
-                <span class="pill" data-edit>居民端 + 小搭 AI</span><span>×</span><span class="pill" data-edit>社区驾驶舱</span>
+                <span class="pill" data-edit>居民端</span><span>×</span><span class="pill" data-edit>社区驾驶舱</span>
               </div>
-              <p class="small reveal d5" style="margin-top:34px" data-edit>一个入口服务居民，一个驾驶舱支撑社区运营。</p>
+              <p class="small reveal d5" style="margin-top:34px" data-edit>让真实需求被看见，让身边服务被用起来。</p>
             </div>
             <div class="cover-visual reveal d3">
               <div class="gov-screen">
@@ -342,7 +344,7 @@
           </div>
         </div>
         <div class="stage-rail bottom"><span data-edit>FULL-STACK MVP · 2026</span><span data-edit>团队【填写】 · 主讲人【填写】</span></div>
-        <aside class="speaker-notes">各位评委老师好，我们的项目叫“搭把手”。最新版产品只保留两个清晰入口：居民端和社区驾驶舱。居民端承载社区地图、活动空间、邻里互助、聊天、积分信用和关怀模式，并在右下角内嵌居民社区生活助理“小搭”；社区驾驶舱面向社区运营人员，集中呈现活动、公告、空间、服务和居民反馈。封面展示的不是示意图，而是这两个入口当前真实首页。</aside>
+        <aside class="speaker-notes">各位评委老师好，我们的项目叫“搭把手”。搭把手是连接居民真实需求与社区公共服务供给的社区协作平台，让居民更容易找到、理解和使用身边服务，也让社区更准确地看见需求、优化运营。我们把这件事概括成一句话：让真实需求被看见，让身边服务被用起来。当前产品只有居民端和社区驾驶舱，没有 AI 助手，也没有智能撮合算法；封面展示的就是两个入口当前真实首页。</aside>
       </section>
 
       <!-- === SLIDE 2: EVIDENCE === -->
@@ -351,52 +353,52 @@
         <div class="wide-frame">
           <span class="slide-no">02 / 09</span><span class="section-tag">为什么是现在</span>
           <div class="slide-pad">
-            <h2 class="reveal-left" data-edit>需求不缺，供给也不缺。<span class="accent">缺的是可信承接。</span></h2>
+            <h2 class="reveal-left" data-edit>居民不是没需求，社区不是没服务。<span class="accent">断在找不到、看不懂、接不准。</span></h2>
             <div class="evidence-layout reveal d2">
-              <div class="evidence-col"><div class="num" data-edit>95.52%</div><h3 data-edit>居民有互助意愿</h3><ul><li data-edit>96.12% 愿意帮助邻居</li><li data-edit>成都 7 社区，n=335</li><li data-edit>高意愿与弱连接并存</li></ul></div>
-              <div class="evidence-col"><div class="num" data-edit>18 / 16</div><h3 data-edit>本地供给真实存在</h3><ul><li data-edit>18 个公开来源节点</li><li data-edit>16 条西红门及大兴素材</li><li data-edit>多数仍需核验名额与状态</li></ul></div>
-              <div class="evidence-col"><div class="num" data-edit>政策窗口</div><h3 data-edit>服务下沉，也要基层减负</h3><ul><li data-edit>公共服务与互助服务下沉</li><li data-edit>社区工作者配置与能力建设</li><li data-edit>一次采集，多端复用</li></ul></div>
+              <div class="evidence-col"><div class="num" data-edit>95.52%</div><h3 data-edit>居民有真实任务，却不知道该找谁</h3><ul><li data-edit>“周六哪里有托管？”“能不能慢慢教我妈挂号缴费？”</li><li data-edit>服务散落在公众号、群聊和公告栏，居民必须先知道该关注谁</li><li data-edit>互助意愿很高，但邻里熟悉度仅 2.7 / 5</li></ul></div>
+              <div class="evidence-col"><div class="num" data-edit>1749 条</div><h3 data-edit>西红门有大量供给，却难转成居民行动</h3><ul><li data-edit>“西红门在线”2025 年发布 1749 条，仍以文章、海报、电话和附件分散呈现</li><li data-edit>三伏贴覆盖 5 个点位，但价格、每日容量缺失，预登记后还需现场缴费</li><li data-edit>社区也难统一看见：居民搜不到什么、哪些服务总满额、哪些区域长期缺供给</li></ul></div>
             </div>
-            <div class="source-strip reveal d3"><span data-edit>居民意愿 → 供给核验 → 服务行动 → 结果反馈</span><span data-edit>来源：区域调研、CNNIC、项目公开信息扫描、正式政策文件</span></div>
+            <div class="policy-strip reveal d3"><span data-edit><b>政策要求：</b>公共服务继续下沉，同时减少基层重复采集、重复填报。</span><span data-edit><b>搭把手补位：</b>把居民生活语言转成可匹配需求，把分散通知转成可行动服务。</span></div>
+            <div class="source-strip reveal d4"><span data-edit>来源：成都 7 社区调研 n=335；香港邻里关系调查 n=1,277</span><span data-edit>西红门镇 2025 政府信息公开年报；西红门医院 2026 三伏贴通知</span></div>
           </div>
         </div>
         <div class="stage-rail bottom"><span>PLATFORM SIGNALS</span><span data-edit>小红书 · 抖音 · 快手热度仅作趋势佐证</span></div>
-        <aside class="speaker-notes">我们不是从单一年龄群体出发，而是从全年龄居民共同存在的“小事互助”出发。成都 7 个社区的 335 份有效问卷显示，95.52% 的受访者希望在困难时获得邻居支持，96.12% 愿意帮助遇到困难的邻居。另一项香港地区调查显示，77% 愿在紧急时援助邻居，但邻里熟悉度只有 2.7 分。与此同时，我们扫描了西红门和大兴的公开服务信息，18 个来源承载了 16 条真实供给，多数信息仍需要核验名额、费用、地点和截止时间。政策端又同时要求公共服务下沉、互助服务发展和基层减负。因此，搭把手补上的是需求、供给和治理之间缺失的结构化连接层。</aside>
+        <aside class="speaker-notes">居民端的真实问题不是没有需求，而是需求通常以生活任务出现：周六哪里能托管孩子，我妈想学挂号缴费但大课跟不上，家门口有没有适合我的活动。成都 7 个社区的调查显示，95.52% 的居民希望困难时得到邻居支持；香港地区调查又显示，邻里熟悉度只有 2.7 分，说明高意愿并没有自然变成有效连接。供给端也不是没有服务。西红门镇 2025 年仅“西红门在线”就发布了 1749 条信息，但居民看到的仍是文章流、海报二维码、电话和附件。例如 2026 年三伏贴覆盖西红门医院和 4 个社区卫生服务站，却缺少价格和每日容量，线上预登记后还要现场缴费。社区自己也很难统一看见居民搜不到什么、哪些服务总是满额、哪些区域长期缺供给。所以真正的断点是找不到、看不懂、接不准；搭把手要把居民生活语言转成可匹配需求，把分散通知转成可行动服务。</aside>
       </section>
 
       <!-- === SLIDE 3: TWO SURFACES === -->
       <section class="slide" data-title="双端架构">
-        <div class="stage-rail top">03 · TWO PRODUCT SURFACES / ONE RESIDENT AGENT</div>
+        <div class="stage-rail top">03 · TWO PRODUCT SURFACES / CLEAR RESPONSIBILITIES</div>
         <div class="wide-frame dark">
           <span class="slide-no">03 / 09</span><span class="section-tag">解决方案</span>
-          <div class="slide-pad"><h2 class="reveal-left" data-edit>两个产品面，<span class="gold">AI 是居民端内嵌能力。</span></h2></div>
+          <div class="slide-pad"><h2 class="reveal-left" data-edit>两个产品面，<span class="gold">分别服务居民与社区运营。</span></h2></div>
           <div class="dual-surfaces">
-            <div class="surface-panel reveal d2"><h3 data-edit>居民端</h3><p data-edit>完整保留社区地图、活动、空间、邻里互助、聊天、积分信用和关怀模式；“小搭”从右下角展开，不替换原 Portal。</p><span class="route">#/resident → ResidentWithAgent</span></div>
+            <div class="surface-panel reveal d2"><h3 data-edit>居民端</h3><p data-edit>通过社区地图和列表发现活动、空间与服务，参与邻里互助，通过聊天、积分信用和关怀模式完成日常社区协作。</p><span class="route">#/resident → 原居民 Portal</span></div>
             <div class="surface-panel reveal d3"><h3 data-edit>社区驾驶舱</h3><p data-edit>集中展示活动、公告、空间、服务与居民反馈；通过独立 tog.html 和 iframe 隔离加载 ToG 上游 UI。</p><span class="route">#/community → iframe /tog.html</span></div>
           </div>
           <div class="bridge-line reveal d4" data-edit>顶部轻量切换 · 无社工移动端 · 无旧五端 Launchpad</div>
         </div>
         <div class="stage-rail bottom"><span>PR #6 CURRENT ARCHITECTURE</span><span data-edit>只呈现当前可访问的两个正式入口</span></div>
-        <aside class="speaker-notes">PR #6 把产品结构收敛成两个表面。居民端完整保留原有 Portal，“小搭”只是挂载在手机界面右下角，不会压缩或替换地图、邻里圈、聊天、积分和关怀模式。社区端通过独立的 tog.html 和 iframe 加载完整运营驾驶舱，从技术上隔离两套全局样式。旧社工移动端、旧五端 Launchpad 和独立 G 端路由都不再是当前产品入口。AI 助手也不是第三个产品端，它是居民端内部的服务理解能力。</aside>
+        <aside class="speaker-notes">当前产品结构只保留两个表面。居民端完整保留原有 Portal，包含地图、活动、空间、邻里互助、聊天、积分信用和关怀模式；没有小搭 AI，也不宣称存在智能撮合算法。社区端通过独立的 tog.html 和 iframe 加载完整运营驾驶舱，从技术上隔离两套全局样式。旧社工移动端、旧五端 Launchpad 和独立 G 端路由都不再是当前产品入口。</aside>
       </section>
 
-      <!-- === SLIDE 4: RESIDENT AGENT === -->
-      <section class="slide" data-title="小搭 AI 助手">
-        <div class="stage-rail top">04 · GROUNDED TWO-TURN RESIDENT ASSISTANT</div>
+      <!-- === SLIDE 4: SERVICE CONNECTION === -->
+      <section class="slide" data-title="服务连接方式">
+        <div class="stage-rail top">04 · FROM SCATTERED INFORMATION TO RESIDENT ACTION</div>
         <div class="wide-frame">
-          <span class="slide-no">04 / 09</span><span class="section-tag">居民服务理解</span>
+          <span class="slide-no">04 / 09</span><span class="section-tag">当前实现</span>
           <div class="slide-pad">
-            <h2 class="reveal-left" data-edit>不是关键词搜索，而是<span class="jade">连续理解生活约束</span>。</h2>
+            <h2 class="reveal-left" data-edit>不宣称算法撮合，先把<span class="jade">发现、判断和行动</span>做清楚。</h2>
             <div class="flow-grid reveal d2">
-              <div class="flow-track"><h3 data-edit>第一轮｜理解真正目标</h3><div class="flow-row"><div class="flow-node" data-edit>家人只会<br>接打电话</div><div class="flow-node" data-edit>想学挂号<br>与生活缴费</div><div class="flow-node" data-edit>推荐慢节奏<br>一对一帮办</div></div></div>
-              <div class="flow-track coral"><h3 data-edit>第二轮｜继承新增限制</h3><div class="flow-row"><div class="flow-node" data-edit>只能周六<br>上午参加</div><div class="flow-node" data-edit>担心付款<br>密码与验证码</div><div class="flow-node" data-edit>切换场次并<br>说明安全规则</div></div></div>
+              <div class="flow-track"><h3 data-edit>居民端｜找到并判断</h3><div class="flow-row"><div class="flow-node" data-edit>地图与列表<br>发现附近资源</div><div class="flow-node" data-edit>查看时间、地点<br>对象与参与方式</div><div class="flow-node" data-edit>进入公开渠道<br>或发起邻里互助</div></div></div>
+              <div class="flow-track coral"><h3 data-edit>社区端｜维护并运营</h3><div class="flow-row"><div class="flow-node" data-edit>集中查看活动<br>公告与空间</div><div class="flow-node" data-edit>维护服务信息<br>和页面状态</div><div class="flow-node" data-edit>观察反馈<br>调整运营安排</div></div></div>
             </div>
-            <div class="sync-band reveal d3"><div class="sync-cell"><b>Grounded</b><span data-edit>只检索提供的结构化演示知识</span></div><div class="sync-cell"><b>Two-turn</b><span data-edit>第二轮继承首轮目标与约束</span></div><div class="sync-cell"><b>Fallback</b><span data-edit>模型异常时使用确定性本地回退</span></div><div class="sync-cell"><b>No ticket</b><span data-edit>不创建留言、申请或社区工单</span></div><div class="sync-cell"><b>No promise</b><span data-edit>不承诺名额与工作人员跟进</span></div></div>
-            <p class="small reveal d4" style="margin-top:24px" data-edit>小搭帮助居民理解和选择服务，但不代替正式办理。</p>
+            <div class="sync-band reveal d3"><div class="sync-cell"><b>地图</b><span data-edit>按社区位置发现资源</span></div><div class="sync-cell"><b>服务</b><span data-edit>查看公开服务信息</span></div><div class="sync-cell"><b>互助</b><span data-edit>发布与响应邻里需求</span></div><div class="sync-cell"><b>聊天</b><span data-edit>双方自行沟通协作</span></div><div class="sync-cell"><b>积分信用</b><span data-edit>记录互助过程与结果</span></div></div>
+            <p class="small reveal d4" style="margin-top:24px" data-edit>当前没有智能撮合算法；筛选、选择和联系均由居民基于公开信息自主完成。</p>
           </div>
         </div>
-        <div class="stage-rail bottom"><span>HELP PEOPLE DECIDE · DO NOT OVERREACH</span><span data-edit>建议可解释，事实有来源，办理回到正式渠道</span></div>
-        <aside class="speaker-notes">小搭解决的不是“再加一个聊天机器人”，而是让居民用生活语言找到适合自己的社区服务。第一轮里，居民说家人只会接电话，想慢慢学会挂号和缴费，小搭会理解为具体任务陪练，而不是泛泛推荐手机课。第二轮再补充只能周六上午、担心付款隐私，小搭会继承原目标，切换到合适场次并解释工作人员只指步骤、不看密码和验证码。它只使用提供的结构化演示资料；模型不可用时还有确定性回退。它不会替居民报名，也不会创建留言、工单或承诺工作人员跟进。</aside>
+        <div class="stage-rail bottom"><span>CLEAR INFORMATION · RESIDENT CHOICE</span><span data-edit>先降低信息与行动成本，再用试点验证后续能力</span></div>
+        <aside class="speaker-notes">当前版本没有小搭 AI，也没有智能撮合算法。居民端做的是把社区地图、活动、空间、公共服务和邻里互助放进一个入口，让居民先看到附近有什么，再根据时间、地点、适用对象和参与方式自行判断；需要邻里帮助时，可以发布需求、等待邻居响应并通过聊天协作。社区端则负责集中展示和维护运营信息。我们不会把普通的列表、筛选或页面跳转包装成算法推荐。</aside>
       </section>
 
       <!-- === SLIDE 5: ARCHITECTURE === -->
@@ -404,15 +406,15 @@
         <div class="stage-rail top">05 · ARCHITECTURE / TRUST BOUNDARIES</div>
         <div class="wide-frame">
           <span class="slide-no">05 / 09</span><span class="section-tag">技术与壁垒</span>
-          <div class="slide-pad"><h2 class="reveal-left" data-edit>两套前端清晰隔离，<span class="accent">AI 边界先进入架构。</span></h2>
+          <div class="slide-pad"><h2 class="reveal-left" data-edit>两套前端清晰隔离，<span class="accent">当前能力与历史代码分开。</span></h2>
             <div class="arch reveal d2">
-              <div class="layers"><div class="layer"><div class="layer-name">入口层</div><div class="layer-copy" data-edit>RootApp｜#/resident 居民端｜#/community 社区驾驶舱</div></div><div class="layer"><div class="layer-name">居民层</div><div class="layer-copy" data-edit>ResidentWithAgent｜原 Portal + 右下角小搭 AI 助手</div></div><div class="layer"><div class="layer-name">社区层</div><div class="layer-copy" data-edit>CommunitySurface｜iframe → /tog.html → ToG vendor 快照</div></div><div class="layer"><div class="layer-name">服务层</div><div class="layer-copy" data-edit>Express + SQLite 既有业务｜POST /api/resident-agent｜本地安全洞察标签</div></div></div>
-              <div class="moats"><div class="moat"><b data-edit>原话不出端</b><span data-edit>不向社区端发送完整问题、回答或个人信息</span></div><div class="moat"><b data-edit>最小化洞察</b><span data-edit>仅允许无 PII 的演示标签保存在浏览器本地</span></div><div class="moat"><b data-edit>不伪造闭环</b><span data-edit>当前社区 iframe 尚未消费 AI 洞察或居民对话</span></div></div>
+              <div class="layers"><div class="layer"><div class="layer-name">入口层</div><div class="layer-copy" data-edit>RootApp｜#/resident 居民端｜#/community 社区驾驶舱</div></div><div class="layer"><div class="layer-name">居民层</div><div class="layer-copy" data-edit>原居民 Portal｜地图、活动、空间、互助、聊天、积分信用、关怀模式</div></div><div class="layer"><div class="layer-name">社区层</div><div class="layer-copy" data-edit>CommunitySurface｜iframe → /tog.html → ToG vendor 快照</div></div><div class="layer"><div class="layer-name">服务层</div><div class="layer-copy" data-edit>Express + SQLite 既有业务模块｜当前社区 iframe 仍是独立 UI 预览</div></div></div>
+              <div class="moats"><div class="moat"><b data-edit>只有两个入口</b><span data-edit>不恢复社工移动端、旧五端启动台或独立 G 端路由</span></div><div class="moat"><b data-edit>没有智能撮合</b><span data-edit>居民根据公开信息、筛选条件和沟通结果自主选择</span></div><div class="moat"><b data-edit>不伪造同步</b><span data-edit>ToG 快照不宣称已经与 SQLite 实时打通</span></div></div>
             </div>
           </div>
         </div>
-        <div class="stage-rail bottom"><span>PRIVACY BY ARCHITECTURE</span><span data-edit>原始对话不进入社区驾驶舱 · API Key 不写入浏览器或 Git</span></div>
-        <aside class="speaker-notes">技术上，RootApp 只暴露居民端和社区端两个路由。居民端由 ResidentWithAgent 组合原 Portal 与小搭；社区端由 CommunitySurface 通过独立 tog.html 和 iframe 加载 ToG vendor 快照。现有 Express、SQLite、邻里互助、活动、空间、积分和聊天代码仍在仓库中，但当前社区 iframe 不等同于此前与 SQLite 同步的 G 端实现。AI 只通过专用接口工作，不保存居民原话、姓名、电话、精确住址或跨会话身份，也不会把单条对话桥接到社区端。这些限制不是路演话术，而是当前代码边界。</aside>
+        <div class="stage-rail bottom"><span>CURRENT PRODUCT BOUNDARY</span><span data-edit>现成功能、演示数据与下一阶段能力分别陈述</span></div>
+        <aside class="speaker-notes">技术上，RootApp 只暴露居民端和社区端两个路由。居民端现在直接加载原居民 Portal，不挂载任何 AI 助手；社区端由 CommunitySurface 通过独立 tog.html 和 iframe 加载 ToG vendor 快照。现有 Express、SQLite、邻里互助、活动、空间、积分和聊天代码仍在仓库中，但当前社区 iframe 不等同于此前与 SQLite 同步的管理实现。实验性 Agent 文件仍可能作为历史代码保留，但不属于当前产品入口、功能清单和路演演示。</aside>
       </section>
 
       <!-- === SLIDE 6: COMMUNITY DASHBOARD === -->
@@ -421,13 +423,13 @@
         <div class="wide-frame">
           <span class="slide-no">06 / 09</span><span class="section-tag">事实边界</span>
           <div class="slide-pad"><h2 class="reveal-left" data-edit>先展示完整运营设计，<span class="accent">再按隐私边界接入数据。</span></h2>
-            <div class="value-cols reveal d2"><div class="value-col"><span class="index">01</span><h3 data-edit>当前可展示</h3><ul><li data-edit>社区运营总览与待办</li><li data-edit>活动、公告与空间管理</li><li data-edit>服务资源与居民反馈界面</li></ul></div><div class="value-col"><span class="index">02</span><h3 data-edit>当前没有打通</h3><ul><li data-edit>AI 单条对话不进入留言板</li><li data-edit>本地洞察标签未接入驾驶舱</li><li data-edit>ToG 快照不宣称与 SQLite 实时同步</li></ul></div><div class="value-col"><span class="index">03</span><h3 data-edit>试点接入原则</h3><ul><li data-edit>只展示达到阈值的聚合趋势</li><li data-edit>无居民原话、无 PII、无敏感推断</li><li data-edit>社区隔离、角色权限与审计可追溯</li></ul></div></div>
-            <div class="kpi-ruler reveal d3"><div data-edit>聚合阈值</div><div data-edit>社区隔离</div><div data-edit>角色权限</div><div data-edit>来源追溯</div><div data-edit>人工复核</div></div>
+            <div class="value-cols reveal d2"><div class="value-col"><span class="index">01</span><h3 data-edit>当前可展示</h3><ul><li data-edit>社区运营总览与待办</li><li data-edit>活动、公告与空间管理</li><li data-edit>服务资源与居民反馈界面</li></ul></div><div class="value-col"><span class="index">02</span><h3 data-edit>当前没有打通</h3><ul><li data-edit>没有智能撮合或自动推荐</li><li data-edit>居民端操作不自动生成社区任务</li><li data-edit>ToG 快照不宣称与 SQLite 实时同步</li></ul></div><div class="value-col"><span class="index">03</span><h3 data-edit>试点接入原则</h3><ul><li data-edit>公开服务保留来源与核验时间</li><li data-edit>居民数据最小化，不展示个人敏感信息</li><li data-edit>社区隔离、角色权限与审计可追溯</li></ul></div></div>
+            <div class="kpi-ruler reveal d3"><div data-edit>来源核验</div><div data-edit>状态更新</div><div data-edit>社区隔离</div><div data-edit>角色权限</div><div data-edit>人工复核</div></div>
             <div class="payer" data-edit>当前社区端为 TOG-Linkhood 上游 UI 的 iframe 隔离快照，重点验证产品设计与双端切换。</div>
           </div>
         </div>
         <div class="stage-rail bottom"><span>UI COMPLETE · DATA BRIDGE PENDING</span><span data-edit>展示能力与生产数据接入分开陈述</span></div>
-        <aside class="speaker-notes">社区驾驶舱保留了完整的运营产品设计，可以展示活动、公告、空间、服务资源和居民反馈。但我们需要清楚说明当前边界：PR #6 使用的是 ToG 上游项目的 vendor 快照，通过 iframe 隔离加载，它不是此前连接 SQLite 的社区管理实现。居民与 AI 的单条对话不会进入留言板，本地洞察标签也还没有接入驾驶舱。下一阶段只有在达到最小聚合阈值后，才向社区端提供无原话、无个人信息的主题和趋势，并补齐社区数据隔离、角色权限和审计机制。</aside>
+        <aside class="speaker-notes">社区驾驶舱保留了完整的运营产品设计，可以展示活动、公告、空间、服务资源和居民反馈。但我们需要清楚说明当前边界：它是 ToG 上游项目通过 iframe 隔离加载的 UI 快照，不是已经与居民端和 SQLite 实时同步的生产系统。当前没有智能撮合，居民端操作也不会自动生成社区任务。下一阶段首先要做的是正式数据接口、来源核验、状态更新、社区隔离、角色权限和审计，而不是先包装一个算法概念。</aside>
       </section>
 
       <!-- === SLIDE 7: VALUE === -->
@@ -436,12 +438,12 @@
         <div class="wide-frame">
           <span class="slide-no">07 / 09</span><span class="section-tag">为什么值得试点</span>
           <div class="slide-pad"><h2 class="reveal-left" data-edit>居民更容易找到服务，社区更容易<span class="jade">持续运营。</span></h2>
-            <div class="team-grid reveal d2"><div class="member"><div class="avatar" data-edit>居</div><h3 data-edit>居民价值</h3><div class="role" data-edit>一个可信入口</div><p data-edit>找服务、看活动、用空间、发互助、聊协作；AI 把复杂信息转成符合时间、距离和数字能力的具体建议。</p></div><div class="member"><div class="avatar" data-edit>社</div><h3 data-edit>社区价值</h3><div class="role" data-edit>一个运营驾驶舱</div><p data-edit>统一观察活动、公告、空间、服务与反馈；未来只接收聚合趋势，减少重复整理并保护居民原始表达。</p></div><div class="member"><div class="avatar" data-edit>商</div><h3 data-edit>落地价值</h3><div class="role" data-edit>试点后再验证采购</div><p data-edit>面向街道、社区运营方、园区和长租社区，探索部署服务与年度 SaaS；演示指标不包装成真实成效。</p></div></div>
-            <div class="team-footer reveal d3"><span data-edit>试点指标：服务找到率 · 建议采纳率 · 互助响应率</span><span data-edit>运营指标：人工整理时长 · 信息有效率 · 居民满意度</span></div>
+            <div class="team-grid reveal d2"><div class="member"><div class="avatar" data-edit>居</div><h3 data-edit>居民价值</h3><div class="role" data-edit>一个可信入口</div><p data-edit>找服务、看活动、用空间、发互助、聊协作；减少在公众号、群聊、海报和不同页面之间反复寻找。</p></div><div class="member"><div class="avatar" data-edit>社</div><h3 data-edit>社区价值</h3><div class="role" data-edit>一个运营驾驶舱</div><p data-edit>统一查看活动、公告、空间、服务和反馈；逐步减少重复整理，并更清楚地维护供给状态。</p></div><div class="member"><div class="avatar" data-edit>商</div><h3 data-edit>落地价值</h3><div class="role" data-edit>试点后再验证采购</div><p data-edit>面向街道、社区运营方、园区和长租社区，探索部署服务与年度 SaaS；演示指标不包装成真实成效。</p></div></div>
+            <div class="team-footer reveal d3"><span data-edit>试点指标：服务找到率 · 页面到达率 · 互助响应率</span><span data-edit>运营指标：人工整理时长 · 信息有效率 · 居民满意度</span></div>
           </div>
         </div>
         <div class="stage-rail bottom"><span>VALUE BEFORE VANITY METRICS</span><span data-edit>真实效果由社区试点数据验证</span></div>
-        <aside class="speaker-notes">居民端的价值是把分散在群聊、公众号和线下公告里的信息，变成一个容易找到、容易理解、容易行动的入口；AI 进一步根据时间、距离、照护和数字能力给出具体建议。社区端的价值是把活动、公告、空间、服务和反馈放到一个运营视图里，并在未来通过聚合趋势判断供给缺口，而不是监控居民个体。商业上，我们会从一个真实社区试点开始，面向街道、社区运营方、园区或长租社区验证部署服务和年度 SaaS，但不会把当前演示数字包装成真实试点成绩。</aside>
+        <aside class="speaker-notes">居民端的价值是把分散在群聊、公众号和线下公告里的信息，变成一个容易找到、容易理解、容易行动的入口；邻里互助、聊天和积分信用帮助居民完成日常协作，但当前不依赖智能撮合。社区端的价值是把活动、公告、空间、服务和反馈放到一个运营视图里。商业上，我们会从一个真实社区试点开始，面向街道、社区运营方、园区或长租社区验证部署服务和年度 SaaS，但不会把当前演示数字包装成真实试点成绩。</aside>
       </section>
 
       <!-- === SLIDE 8: ROADMAP === -->
@@ -450,24 +452,24 @@
         <div class="wide-frame dark">
           <span class="slide-no">08 / 09</span><span class="section-tag">下一步</span>
           <div class="slide-pad"><h2 class="reveal-left" data-edit>双端预览已经完成，下一步用<span class="gold">一个真实社区</span>验证。</h2>
-            <div class="roadmap reveal d2"><div class="phase"><div class="time">NOW</div><h3 data-edit>PR #6 双端版本</h3><p data-edit>居民端 + 小搭 AI；社区驾驶舱；西红门公开服务演示知识与安全回退测试。</p></div><div class="phase"><div class="time">0-3 MONTHS</div><h3 data-edit>可上线试点版</h3><p data-edit>微信适配、社区认证、生产部署、内容安全、正式服务目录和组织权限。</p></div><div class="phase"><div class="time">3-6 MONTHS</div><h3 data-edit>聚合洞察接入</h3><p data-edit>建立最小阈值、社区隔离、角色权限和审计，不传居民原话与个人信息。</p></div><div class="phase"><div class="time">6-12 MONTHS</div><h3 data-edit>验证与复制</h3><p data-edit>验证找到率、采纳率、响应率、人工时长和满意度，沉淀配置与运营 SOP。</p></div></div>
-            <div class="demo-path reveal d3"><div class="demo-step"><b>01</b><br><span data-edit>打开居民端真实首页</span></div><div class="demo-step"><b>02</b><br><span data-edit>展示地图、互助与关怀模式</span></div><div class="demo-step"><b>03</b><br><span data-edit>小搭完成两轮建议</span></div><div class="demo-step"><b>04</b><br><span data-edit>说明隐私与不越权边界</span></div><div class="demo-step"><b>05</b><br><span data-edit>切换社区驾驶舱</span></div></div>
+            <div class="roadmap reveal d2"><div class="phase"><div class="time">NOW</div><h3 data-edit>双端产品预览</h3><p data-edit>居民 Portal 与社区驾驶舱；西红门公开服务素材；当前不含 AI 助手或智能撮合。</p></div><div class="phase"><div class="time">0-3 MONTHS</div><h3 data-edit>可上线试点版</h3><p data-edit>微信适配、社区认证、生产部署、内容安全、正式服务目录和组织权限。</p></div><div class="phase"><div class="time">3-6 MONTHS</div><h3 data-edit>正式数据接入</h3><p data-edit>打通活动、公告、空间与服务接口，建立来源核验、状态维护和审计流程。</p></div><div class="phase"><div class="time">6-12 MONTHS</div><h3 data-edit>验证与复制</h3><p data-edit>验证找到率、到达率、响应率、人工时长和满意度，沉淀配置与运营 SOP。</p></div></div>
+            <div class="demo-path reveal d3"><div class="demo-step"><b>01</b><br><span data-edit>打开居民端真实首页</span></div><div class="demo-step"><b>02</b><br><span data-edit>展示地图与公共服务</span></div><div class="demo-step"><b>03</b><br><span data-edit>展示邻里互助与聊天</span></div><div class="demo-step"><b>04</b><br><span data-edit>展示积分信用与关怀模式</span></div><div class="demo-step"><b>05</b><br><span data-edit>切换社区驾驶舱</span></div></div>
           </div>
         </div>
         <div class="stage-rail bottom"><span>LIVE DEMO · 90 SEC</span><span data-edit>愿景：让每个社区低成本拥有可信、全龄友好的数字服务入口</span></div>
-        <aside class="speaker-notes">当前我们已经完成 PR #6 的双端预览：居民端完整保留原有社区生活功能，并加入小搭 AI；社区端展示完整运营驾驶舱。接下来不是继续增加角色页面，而是完成微信适配、正式社区认证、生产部署、内容安全和正式服务目录。进入试点后，再以最小聚合阈值把无原话、无个人信息的趋势接入社区端。现场演示只走五步：打开居民端首页，展示地图和关怀模式，让小搭完成两轮建议，说明它不会提交工单或泄露原话，最后切换到社区驾驶舱。</aside>
+        <aside class="speaker-notes">当前我们已经完成双端产品预览：居民端保留地图、活动、空间、邻里互助、聊天、积分信用和关怀模式；社区端展示完整运营驾驶舱。当前不包含小搭 AI，也没有智能撮合算法。接下来重点是微信适配、正式社区认证、生产部署、内容安全、正式服务目录和两端数据接口。现场演示只走五步：打开居民端首页，展示地图和公共服务，再展示邻里互助、聊天、积分信用与关怀模式，最后切换到社区驾驶舱。</aside>
       </section>
 
       <!-- === SLIDE 9: CLOSING === -->
       <section class="slide" data-title="结束页">
         <div class="stage-rail top">09 · THANK YOU / QUESTIONS</div>
         <div class="wide-frame dark">
-          <div class="closing"><div class="closing-copy"><div class="kicker gold reveal d1" data-edit>邻里搭把手，共建有温度的数字社区</div><h2 class="reveal-left d2" data-edit>让家门口的服务，<br>真正<span class="gold">连接起来。</span></h2><div class="closing-lines reveal d3"><div class="closing-line"><b data-edit>居民端</b><span data-edit>社区生活、邻里互助与小搭 AI 建议</span></div><div class="closing-line"><b data-edit>社区端</b><span data-edit>活动、公告、空间、服务与反馈驾驶舱</span></div><div class="closing-line"><b data-edit>一个原则</b><span data-edit>建议有依据，服务不越权，数据最小化</span></div><div class="closing-line"><b data-edit>下一步</b><span data-edit>以真实社区试点验证价值与接入边界</span></div></div></div><div class="qr-side"><div><div class="qr" aria-label="二维码占位"> 
+          <div class="closing"><div class="closing-copy"><div class="kicker gold reveal d1" data-edit>邻里搭把手，共建有温度的数字社区</div><h2 class="reveal-left d2" data-edit>让家门口的服务，<br>真正<span class="gold">连接起来。</span></h2><div class="closing-lines reveal d3"><div class="closing-line"><b data-edit>居民端</b><span data-edit>社区生活、公共服务与邻里互助</span></div><div class="closing-line"><b data-edit>社区端</b><span data-edit>活动、公告、空间、服务与反馈驾驶舱</span></div><div class="closing-line"><b data-edit>一个原则</b><span data-edit>现成功能如实展示，演示数据明确标注</span></div><div class="closing-line"><b data-edit>下一步</b><span data-edit>以真实社区试点验证价值与数据接入</span></div></div></div><div class="qr-side"><div><div class="qr" aria-label="二维码占位">
             <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i style="background:white"></i><i></i><i style="background:white"></i><i></i><i style="background:white"></i><i></i><i style="background:white"></i><i></i><i></i><i></i><i></i><i></i><i style="background:white"></i><i></i><i></i><i></i><i></i><i></i><i style="background:white"></i><i></i><i></i><i></i><i></i><i style="background:white"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i style="background:white"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i style="background:white"></i><i></i><i></i><i style="background:white"></i><i></i><i></i><i></i><i></i><i></i><i style="background:white"></i><i></i><i></i><i></i><i style="background:white"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
           </div><p style="text-align:center;margin-top:18px;font:700 16px var(--font-mono);color:var(--peacock)" data-edit>演示二维码【替换】</p></div><div class="contact" data-edit>联系人：【填写】<br>电话 / 微信：【填写】<br>GitHub：TOC-Linkhood</div></div></div>
         </div>
         <div class="stage-rail bottom"><span>可信任 · 低负担 · 可追溯 · 可复制</span><span data-edit>感谢聆听，欢迎提问</span></div>
-        <aside class="speaker-notes">最后总结一下，最新版搭把手只有两个清晰入口：居民端完整承载社区生活、邻里互助和小搭 AI 服务建议，社区端展示完整运营驾驶舱。小搭的目标不是代替社区受理事项，而是把分散的服务信息转成居民真正能理解和使用的建议；同时只用最小化、聚合化的方式帮助社区理解需求趋势。我们希望做的是一个有依据、可行动、不越权、可追溯的社区服务工具。谢谢各位评委老师，欢迎提问。</aside>
+        <aside class="speaker-notes">最后总结一下，最新版搭把手只有两个清晰入口：居民端承载社区生活、公共服务和邻里互助，社区端展示运营驾驶舱。当前没有小搭 AI，也没有智能撮合算法；我们的核心价值是把分散的社区供给放进更容易发现和行动的入口，同时帮助社区逐步建立可维护、可追溯的运营视图。下一步通过真实社区试点验证价值和数据接入。谢谢各位评委老师，欢迎提问。</aside>
       </section>
     </main>
   </div>

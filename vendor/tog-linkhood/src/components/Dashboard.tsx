@@ -316,7 +316,7 @@ export default function Dashboard({
                     ? 'border-coral-light/30 bg-coral-light/10 text-coral'
                     : todo.priority === 'medium'
                     ? 'border-amber-light/30 bg-amber-light/10 text-amber'
-                    : 'border-jade-light/30 bg-jade-light/10 text-jade';
+                    : 'border-primary-light/30 bg-primary-light/10 text-primary';
 
                 return (
                   <div
@@ -332,8 +332,8 @@ export default function Dashboard({
                         disabled={isResolved}
                         className={`mt-0.5 w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                           isResolved
-                            ? 'bg-jade border-jade text-canvas'
-                            : 'border-hairline group-hover:border-jade text-transparent hover:text-jade/60'
+                            ? 'bg-primary border-primary text-canvas'
+                            : 'border-hairline group-hover:border-primary text-transparent hover:text-primary/60'
                         }`}
                       >
                         <Check className="w-3 h-3 stroke-[3px]" />
@@ -372,7 +372,7 @@ export default function Dashboard({
           <div className="bg-surface border border-hairline rounded-2xl p-5 shadow-sm lg:col-span-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 pb-3.5 border-b border-hairline">
-                <div className="w-1.5 h-3.5 bg-jade rounded" />
+                <div className="w-1.5 h-3.5 bg-primary rounded" />
                 <h3 className="text-xs font-bold text-ink uppercase tracking-wider font-display">
                   发布内容与快捷广播
                 </h3>
@@ -385,10 +385,10 @@ export default function Dashboard({
             <div className="space-y-2.5 my-4">
               <button
                 onClick={() => onTriggerPublishForm('activity')}
-                className="w-full p-2.5 bg-canvas hover:bg-jade-light/20 border border-hairline hover:border-jade/35 rounded-xl transition-all flex items-center justify-between text-left group cursor-pointer"
+                className="w-full p-2.5 bg-canvas hover:bg-primary-light/20 border border-hairline hover:border-primary/35 rounded-xl transition-all flex items-center justify-between text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-jade-light text-jade flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-primary-light text-primary flex items-center justify-center">
                     <Calendar className="w-3.5 h-3.5" />
                   </div>
                   <div>
@@ -396,15 +396,15 @@ export default function Dashboard({
                     <span className="text-4xs text-ink-subtle block">同步到“本周活动”</span>
                   </div>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 text-ink-subtle group-hover:text-jade transition-colors" />
+                <ArrowRight className="w-3.5 h-3.5 text-ink-subtle group-hover:text-primary transition-colors" />
               </button>
 
               <button
                 onClick={() => onTriggerPublishForm('notice')}
-                className="w-full p-2.5 bg-canvas hover:bg-jade-light/20 border border-hairline hover:border-jade/35 rounded-xl transition-all flex items-center justify-between text-left group cursor-pointer"
+                className="w-full p-2.5 bg-canvas hover:bg-primary-light/20 border border-hairline hover:border-primary/35 rounded-xl transition-all flex items-center justify-between text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-jade-light text-jade flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-primary-light text-primary flex items-center justify-center">
                     <Megaphone className="w-3.5 h-3.5" />
                   </div>
                   <div>
@@ -412,7 +412,7 @@ export default function Dashboard({
                     <span className="text-4xs text-ink-subtle block">水电停运已读追踪</span>
                   </div>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 text-ink-subtle group-hover:text-jade transition-colors" />
+                <ArrowRight className="w-3.5 h-3.5 text-ink-subtle group-hover:text-primary transition-colors" />
               </button>
             </div>
 
@@ -439,7 +439,7 @@ export default function Dashboard({
             return (
               <div
                 key={idx}
-                className="bg-surface border border-hairline hover:border-jade/35 rounded-2xl p-4 shadow-xs transition-all flex flex-col justify-between"
+                className="bg-surface border border-hairline hover:border-primary/35 rounded-2xl p-4 shadow-xs transition-all flex flex-col justify-between"
               >
                 <div className="text-3xs text-ink-muted font-medium tracking-wide truncate">
                   {m.label}
@@ -454,7 +454,7 @@ export default function Dashboard({
                     {m.source}
                   </span>
                   {m.trend !== 0 ? (
-                    <span className={`text-3xs font-semibold flex items-center gap-0.5 ${isPositive ? 'text-jade' : 'text-coral'}`}>
+                    <span className={`text-3xs font-semibold flex items-center gap-0.5 ${isPositive ? 'text-primary' : 'text-coral'}`}>
                       {isPositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
                       {m.trendLabel}
                     </span>
@@ -471,14 +471,14 @@ export default function Dashboard({
         <div className="bg-surface border border-hairline rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between pb-3.5 border-b border-hairline mb-5">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-3.5 rounded bg-jade" />
+              <div className="w-1.5 h-3.5 rounded bg-primary" />
               <h2 className="text-sm font-bold tracking-tight text-ink font-display">
                 本周社群活跃度趋势 (社区真实访问数据)
               </h2>
             </div>
             <div className="flex items-center gap-3 text-3xs">
               <span className="flex items-center gap-1 text-ink-muted">
-                <span className="w-2.5 h-1.5 bg-jade rounded-sm inline-block" />
+                <span className="w-2.5 h-1.5 bg-primary rounded-sm inline-block" />
                 小程序点击浏览 (UV)
               </span>
               <span className="flex items-center gap-1 text-ink-muted">
@@ -511,7 +511,7 @@ export default function Dashboard({
                     {/* Hover Tooltip */}
                     <div className="absolute -top-12 bg-canvas border border-hairline rounded-lg p-2 shadow-lg hidden group-hover:block z-30 min-w-[100px] text-center pointer-events-none animate-scale-up">
                       <div className="text-[10px] font-bold text-ink">{item.day}</div>
-                      <div className="text-4xs text-jade">PV浏览: {item.visits}人</div>
+                      <div className="text-4xs text-primary">PV浏览: {item.visits}人</div>
                       <div className="text-4xs text-coral">互助参与: {item.active}次</div>
                     </div>
 
@@ -519,7 +519,7 @@ export default function Dashboard({
                     <div className="flex items-end gap-1.5 h-full w-12 justify-center">
                       <div
                         style={{ height: `${visitsHeight}%` }}
-                        className="w-3.5 bg-jade/80 rounded-t-sm group-hover:bg-jade transition-all relative overflow-hidden"
+                        className="w-3.5 bg-primary/80 rounded-t-sm group-hover:bg-primary transition-all relative overflow-hidden"
                       >
                         <div className="absolute inset-x-0 top-0 h-1 bg-white/20" />
                       </div>
@@ -549,7 +549,7 @@ export default function Dashboard({
           <div className="bg-surface border border-hairline rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between pb-3.5 border-b border-hairline mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-3.5 rounded bg-jade" />
+                <div className="w-1.5 h-3.5 rounded bg-primary" />
                 <h2 className="text-sm font-bold tracking-tight text-ink font-display">
                   功能使用热区与高频诉求热词
                 </h2>
@@ -562,7 +562,7 @@ export default function Dashboard({
                 <h3 className="text-xs font-semibold text-ink-muted mb-3">小程序功能板块分布</h3>
                 <div className="space-y-3">
                   {[
-                    { name: '社区地图 (公共空间/活动)', pct: 40, color: 'bg-jade' },
+                    { name: '社区地图 (公共空间/活动)', pct: 40, color: 'bg-primary' },
                     { name: '邻里圈 (生活互助/动态)', pct: 35, color: 'bg-amber' },
                     { name: '关怀极简版 (老人专项)', pct: 15, color: 'bg-coral' },
                     { name: '我的会话 & 咨询', pct: 10, color: 'bg-sky-400' },
@@ -586,7 +586,7 @@ export default function Dashboard({
                   {POPULAR_KEYWORDS.map((k, i) => (
                     <div key={i} className="flex items-center justify-between p-2 bg-canvas/40 border border-hairline rounded-xl">
                       <div className="flex items-center gap-2">
-                        <span className="text-3xs font-bold text-jade bg-jade-light/20 w-4 h-4 rounded-full flex items-center justify-center">
+                        <span className="text-3xs font-bold text-primary bg-primary-light/20 w-4 h-4 rounded-full flex items-center justify-center">
                           {i + 1}
                         </span>
                         <span className="text-xs font-semibold text-ink">{k.word}</span>
@@ -608,7 +608,7 @@ export default function Dashboard({
                   邻里圈互助类型分布 (本周已结案)
                 </h2>
               </div>
-              <span className="text-3xs text-jade font-mono">响应率: 91.2%</span>
+              <span className="text-3xs text-primary font-mono">响应率: 91.2%</span>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
@@ -665,7 +665,7 @@ export default function Dashboard({
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 font-sans text-center">
             <div className="p-4 bg-canvas/40 border border-hairline rounded-xl">
               <div className="text-3xs text-ink-muted">今日老人报平安率</div>
-              <div className="text-2xl font-bold font-mono text-jade my-1.5">{CHART_CARE_DATA.reportedSafeRate}%</div>
+              <div className="text-2xl font-bold font-mono text-primary my-1.5">{CHART_CARE_DATA.reportedSafeRate}%</div>
               <div className="text-[10px] text-ink-subtle">昨日 90% | 稳定递增</div>
             </div>
 
@@ -710,18 +710,18 @@ export default function Dashboard({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in font-sans pb-12 selection:bg-jade/30 selection:text-jade">
+    <div className="space-y-6 animate-fade-in font-sans pb-12 selection:bg-primary/30 selection:text-primary">
       {/* Header section with identity status & reports download */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border border-hairline rounded-2xl p-5 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-jade-light/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full blur-2xl pointer-events-none" />
         <div>
-          <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
+          <div className="text-2xs text-primary font-mono uppercase tracking-widest font-bold">
             COMMUNITY CONTROL COCKPIT
           </div>
           <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
-            <Home className="w-4 h-4 text-jade" />
+            <Home className="w-4 h-4 text-primary" />
             <span>您好，{currentUser.name}</span>
-            <span className="text-caption font-normal px-2 py-0.5 rounded-full bg-jade-light text-jade border border-jade/20">
+            <span className="text-caption font-normal px-2 py-0.5 rounded-full bg-primary-light text-primary border border-primary/20">
               {currentUser.community}
             </span>
           </h1>
@@ -729,7 +729,7 @@ export default function Dashboard({
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleGenerateReport}
-            className="px-4 py-2 bg-jade hover:bg-jade-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
             <FileText className="w-3.5 h-3.5" />
             自动生成周报/月报
@@ -745,7 +745,7 @@ export default function Dashboard({
           <div className="bg-surface border border-hairline rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden animate-scale-up">
             <div className="flex items-center justify-between pb-4 border-b border-hairline mb-4">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-jade" />
+                <FileText className="w-5 h-5 text-primary" />
                 <h3 className="text-sm font-bold text-ink font-display">
                   「搭把手」社区自治周报月报自动生成器
                 </h3>
@@ -767,7 +767,7 @@ export default function Dashboard({
                 }}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                   selectedReportTime === 'weekly'
-                    ? 'bg-jade-light/20 border-jade text-jade font-bold'
+                    ? 'bg-primary-light/20 border-primary text-primary font-bold'
                     : 'border-hairline text-ink-muted hover:text-ink'
                 }`}
               >
@@ -780,7 +780,7 @@ export default function Dashboard({
                 }}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                   selectedReportTime === 'monthly'
-                    ? 'bg-jade-light/20 border-jade text-jade font-bold'
+                    ? 'bg-primary-light/20 border-primary text-primary font-bold'
                     : 'border-hairline text-ink-muted hover:text-ink'
                 }`}
               >
@@ -803,8 +803,8 @@ export default function Dashboard({
                 <>
                   {/* Stats Block */}
                   <div className="space-y-2">
-                    <h5 className="font-bold text-jade font-display flex items-center gap-1">
-                      <span className="w-1.5 h-3.5 rounded bg-jade inline-block" />
+                    <h5 className="font-bold text-primary font-display flex items-center gap-1">
+                      <span className="w-1.5 h-3.5 rounded bg-primary inline-block" />
                       一、核心自治运营指标总览
                     </h5>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
@@ -837,8 +837,8 @@ export default function Dashboard({
 
                   {/* Category Breakdown */}
                   <div className="space-y-1.5">
-                    <h5 className="font-bold text-jade font-display flex items-center gap-1">
-                      <span className="w-1.5 h-3.5 rounded bg-jade inline-block" />
+                    <h5 className="font-bold text-primary font-display flex items-center gap-1">
+                      <span className="w-1.5 h-3.5 rounded bg-primary inline-block" />
                       二、本周居民热点诉求聚类与处置
                     </h5>
                     <p className="text-ink-muted leading-relaxed">
@@ -856,8 +856,8 @@ export default function Dashboard({
 
                   {/* Special Elder care stats */}
                   <div className="space-y-1.5">
-                    <h5 className="font-bold text-jade font-display flex items-center gap-1">
-                      <span className="w-1.5 h-3.5 rounded bg-jade inline-block" />
+                    <h5 className="font-bold text-primary font-display flex items-center gap-1">
+                      <span className="w-1.5 h-3.5 rounded bg-primary inline-block" />
                       三、独居群体平安守护专项周报
                     </h5>
                     <p className="text-ink-muted leading-relaxed">
@@ -872,8 +872,8 @@ export default function Dashboard({
                 <>
                   {/* Monthly Stats */}
                   <div className="space-y-2">
-                    <h5 className="font-bold text-jade font-display flex items-center gap-1">
-                      <span className="w-1.5 h-3.5 rounded bg-jade inline-block" />
+                    <h5 className="font-bold text-primary font-display flex items-center gap-1">
+                      <span className="w-1.5 h-3.5 rounded bg-primary inline-block" />
                       一、全月居民参与度与自治资产总盘
                     </h5>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
@@ -906,8 +906,8 @@ export default function Dashboard({
 
                   {/* Monthly aid distribution */}
                   <div className="space-y-1.5">
-                    <h5 className="font-bold text-jade font-display flex items-center gap-1">
-                      <span className="w-1.5 h-3.5 rounded bg-jade inline-block" />
+                    <h5 className="font-bold text-primary font-display flex items-center gap-1">
+                      <span className="w-1.5 h-3.5 rounded bg-primary inline-block" />
                       二、邻里圈互助与社交资产报告
                     </h5>
                     <p className="text-ink-muted leading-relaxed">
@@ -920,8 +920,8 @@ export default function Dashboard({
 
                   {/* Monthly Elder care stats */}
                   <div className="space-y-1.5">
-                    <h5 className="font-bold text-jade font-display flex items-center gap-1">
-                      <span className="w-1.5 h-3.5 rounded bg-jade inline-block" />
+                    <h5 className="font-bold text-primary font-display flex items-center gap-1">
+                      <span className="w-1.5 h-3.5 rounded bg-primary inline-block" />
                       三、老龄守护及特殊人群帮扶月度总结
                     </h5>
                     <p className="text-ink-muted leading-relaxed">
@@ -954,7 +954,7 @@ export default function Dashboard({
                 <button
                   onClick={handleExportPDF}
                   disabled={exporting}
-                  className="px-5 py-2 bg-jade hover:bg-jade-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-55"
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-55"
                 >
                   {exporting ? (
                     <>

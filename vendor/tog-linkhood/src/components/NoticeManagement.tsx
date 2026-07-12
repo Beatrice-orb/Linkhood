@@ -82,15 +82,15 @@ export default function NoticeManagement({
   });
 
   return (
-    <div className="space-y-6 animate-fade-in font-sans selection:bg-jade/30 selection:text-jade pb-12">
+    <div className="space-y-6 animate-fade-in font-sans selection:bg-primary/30 selection:text-primary pb-12">
       {/* Header card */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border border-hairline rounded-2xl p-5 shadow-sm">
         <div>
-          <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
+          <div className="text-2xs text-primary font-mono uppercase tracking-widest font-bold">
             COMMUNITY ALERTS & COMMUNICATIONS
           </div>
           <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
-            <Megaphone className="w-5 h-5 text-jade shrink-0" />
+            <Megaphone className="w-5 h-5 text-primary shrink-0" />
             <span>社区最新公告与已读状态追踪</span>
           </h1>
           <p className="text-xs text-ink-muted mt-1">
@@ -99,7 +99,7 @@ export default function NoticeManagement({
         </div>
         <button
           onClick={() => setShowPublishModal(true)}
-          className="px-4 py-2 bg-jade hover:bg-jade-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
+          className="px-4 py-2 bg-primary hover:bg-primary-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4 stroke-[3px]" />
           撰写并发布新公告
@@ -117,7 +117,7 @@ export default function NoticeManagement({
                 onClick={() => setFilterCategory(tab)}
                 className={`px-3 py-1.5 text-4xs font-bold rounded-xl border transition-all whitespace-nowrap cursor-pointer shrink-0 ${
                   filterCategory === tab
-                    ? 'bg-jade border-jade text-canvas shadow-sm'
+                    ? 'bg-primary border-primary text-canvas shadow-sm'
                     : 'border-hairline text-ink-muted hover:text-ink hover:border-hairline/80 bg-canvas/20'
                 }`}
               >
@@ -140,7 +140,7 @@ export default function NoticeManagement({
                   onClick={() => setSelectedNoticeId(notice.id)}
                   className={`p-4 border rounded-xl cursor-pointer transition-all flex flex-col gap-2 relative ${
                     isSelected
-                      ? 'border-jade bg-jade-light/10 shadow-sm'
+                      ? 'border-primary bg-primary-light/10 shadow-sm'
                       : 'border-hairline hover:border-hairline hover:bg-canvas/40'
                   }`}
                 >
@@ -189,7 +189,7 @@ export default function NoticeManagement({
                       <Clock className="w-3 h-3" />
                       发布：{notice.publishTime}
                     </span>
-                    <span className="font-semibold text-jade flex items-center gap-1 font-mono">
+                    <span className="font-semibold text-primary flex items-center gap-1 font-mono">
                       <Eye className="w-3 h-3" />
                       覆盖率: {readPct}% ({notice.readCount}人已读)
                     </span>
@@ -212,7 +212,7 @@ export default function NoticeManagement({
             <>
               <div>
                 <div className="flex items-center gap-2 pb-3.5 border-b border-hairline mb-4">
-                  <BellRing className="w-4 h-4 text-jade shrink-0" />
+                  <BellRing className="w-4 h-4 text-primary shrink-0" />
                   <h2 className="text-sm font-bold tracking-tight text-ink">
                     公告覆盖率已读追踪
                   </h2>
@@ -220,7 +220,7 @@ export default function NoticeManagement({
 
                 <div className="space-y-4 pb-4 border-b border-hairline/60">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-jade-light text-jade border border-jade/10 font-bold">
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-primary-light text-primary border border-primary/10 font-bold">
                       {selectedNotice.category}
                     </span>
                     <span className="text-3xs text-ink-subtle">{selectedNotice.publishTime}</span>
@@ -243,7 +243,7 @@ export default function NoticeManagement({
                   <div className="p-4 bg-canvas/30 border border-hairline rounded-xl space-y-3.5">
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-xs font-mono font-bold text-jade">
+                        <span className="text-xs font-mono font-bold text-primary">
                           {selectedNotice.readCount}人
                         </span>
                         <span className="text-[10px] text-ink-muted block mt-0.5">小程序上已点开</span>
@@ -267,7 +267,7 @@ export default function NoticeManagement({
                               100
                             }%`,
                           }}
-                          className="h-full bg-jade"
+                          className="h-full bg-primary"
                         />
                         <div className="flex-1 h-full bg-canvas/80" />
                       </div>
@@ -280,9 +280,9 @@ export default function NoticeManagement({
                 </div>
               </div>
 
-              <div className="p-3.5 bg-jade-light/10 border border-jade/10 rounded-xl mt-4 text-center">
+              <div className="p-3.5 bg-primary-light/10 border border-primary/10 rounded-xl mt-4 text-center">
                 <span className="text-[10px] text-ink-subtle leading-relaxed flex items-center justify-center gap-1">
-                  <CalendarCheck className="w-3.5 h-3.5 text-jade shrink-0" />
+                  <CalendarCheck className="w-3.5 h-3.5 text-primary shrink-0" />
                   已读追踪算法会自动通过微信小助手对未阅老人、网格组长进行定时二次触达。
                 </span>
               </div>
@@ -301,7 +301,7 @@ export default function NoticeManagement({
           <div className="bg-surface border border-hairline rounded-2xl max-w-lg w-full p-6 shadow-2xl relative overflow-hidden animate-scale-up">
             <div className="flex items-center justify-between pb-4 border-b border-hairline mb-4">
               <div className="flex items-center gap-2">
-                <Megaphone className="w-5 h-5 text-jade" />
+                <Megaphone className="w-5 h-5 text-primary" />
                 <h3 className="text-sm font-bold text-ink font-display">
                   撰写并群发社区通知公告
                 </h3>
@@ -322,10 +322,10 @@ export default function NoticeManagement({
                 <input
                   type="text"
                   required
-                  placeholder="如: 关于泊寓A区7月13日配电房停电维护的公示"
+                  placeholder="如: 关于西红门街道社区7月13日配电房停电维护的公示"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-canvas border border-hairline rounded-xl text-3xs text-ink placeholder:text-ink-subtle focus:outline-none focus:border-jade transition-colors"
+                  className="w-full px-3 py-2 bg-canvas border border-hairline rounded-xl text-3xs text-ink placeholder:text-ink-subtle focus:outline-none focus:border-primary transition-colors"
                 />
               </div>
 
@@ -337,7 +337,7 @@ export default function NoticeManagement({
                   <select
                     value={category}
                     onChange={e => setCategory(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-canvas border border-hairline rounded-xl text-3xs text-ink focus:outline-none focus:border-jade transition-colors"
+                    className="w-full px-3 py-2 bg-canvas border border-hairline rounded-xl text-3xs text-ink focus:outline-none focus:border-primary transition-colors"
                   >
                     <option value="停水停电">停水停电通知</option>
                     <option value="活动通知">活动招募通知</option>
@@ -351,18 +351,18 @@ export default function NoticeManagement({
                       type="checkbox"
                       checked={isImportant}
                       onChange={e => setIsImportant(e.target.checked)}
-                      className="rounded border-hairline bg-canvas text-jade focus:ring-0 w-3.5 h-3.5"
+                      className="rounded border-hairline bg-canvas text-primary focus:ring-0 w-3.5 h-3.5"
                     />
-                    <span className="text-[10px] font-semibold text-coral">🔴 置顶展示 (紧急)</span>
+                    <span className="text-[10px] font-semibold text-coral">置顶展示 (紧急)</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isScheduled}
                       onChange={e => setIsScheduled(e.target.checked)}
-                      className="rounded border-hairline bg-canvas text-jade focus:ring-0 w-3.5 h-3.5"
+                      className="rounded border-hairline bg-canvas text-primary focus:ring-0 w-3.5 h-3.5"
                     />
-                    <span className="text-[10px] text-ink-muted">📅 定时发布</span>
+                    <span className="text-[10px] text-ink-muted">定时发布</span>
                   </label>
                 </div>
               </div>
@@ -377,7 +377,7 @@ export default function NoticeManagement({
                   placeholder="请输入公告正文信息，如停运具体时间、恢复供水保障电话、安全避暑小常识等..."
                   value={content}
                   onChange={e => setContent(e.target.value)}
-                  className="w-full px-3 py-2 bg-canvas border border-hairline rounded-xl text-3xs text-ink placeholder:text-ink-subtle focus:outline-none focus:border-jade transition-colors resize-none"
+                  className="w-full px-3 py-2 bg-canvas border border-hairline rounded-xl text-3xs text-ink placeholder:text-ink-subtle focus:outline-none focus:border-primary transition-colors resize-none"
                 />
               </div>
 
@@ -391,7 +391,7 @@ export default function NoticeManagement({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-jade hover:bg-jade-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
                 >
                   群发公示到居民端
                 </button>

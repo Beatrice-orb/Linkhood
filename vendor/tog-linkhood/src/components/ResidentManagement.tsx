@@ -72,14 +72,14 @@ export default function ResidentManagement({ residents, setResidents }: Resident
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in font-sans selection:bg-jade/30 selection:text-jade pb-12">
+    <div className="space-y-6 animate-fade-in font-sans selection:bg-primary/30 selection:text-primary pb-12">
       {/* Header */}
       <div className="bg-surface border border-hairline rounded-2xl p-5 shadow-sm">
-        <div className="text-2xs text-jade font-mono uppercase tracking-widest font-bold">
+        <div className="text-2xs text-primary font-mono uppercase tracking-widest font-bold">
           REGISTERED CITIZENS DIRECTORY
         </div>
         <h1 className="text-lg font-bold font-display text-ink mt-0.5 flex items-center gap-2">
-          <Users className="w-5 h-5 text-jade shrink-0" />
+          <Users className="w-5 h-5 text-primary shrink-0" />
           <span>常住注册居民电子档案库</span>
         </h1>
         <p className="text-xs text-ink-muted mt-1">
@@ -99,7 +99,7 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                   onClick={() => setFilterTag(tag)}
                   className={`px-2 py-1 text-4xs font-bold rounded-lg border transition-all shrink-0 ${
                     filterTag === tag
-                      ? 'bg-jade border-jade text-canvas shadow-sm'
+                      ? 'bg-primary border-primary text-canvas shadow-sm'
                       : 'border-hairline text-ink-muted hover:text-ink hover:bg-canvas/40 bg-canvas/20'
                   }`}
                 >
@@ -117,7 +117,7 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                 placeholder="搜索姓名、房号、手机号..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-canvas border border-hairline rounded-xl text-3xs text-ink placeholder:text-ink-subtle focus:outline-none focus:border-jade transition-all"
+                className="w-full pl-9 pr-3 py-1.5 bg-canvas border border-hairline rounded-xl text-3xs text-ink placeholder:text-ink-subtle focus:outline-none focus:border-primary transition-all"
               />
             </div>
           </div>
@@ -134,13 +134,13 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                   onClick={() => setSelectedResidentId(r.id)}
                   className={`p-3.5 border rounded-xl cursor-pointer transition-all flex items-center justify-between gap-3 ${
                     isSelected
-                      ? 'border-jade bg-jade-light/10 shadow-sm'
+                      ? 'border-primary bg-primary-light/10 shadow-sm'
                       : 'border-hairline hover:border-hairline hover:bg-canvas/40'
                   }`}
                 >
                   <div className="min-w-0 flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                      isElderly ? 'bg-coral/20 text-coral' : 'bg-jade-light/20 text-jade'
+                      isElderly ? 'bg-coral/20 text-coral' : 'bg-primary-light/20 text-primary'
                     }`}>
                       {r.name[0]}
                     </div>
@@ -166,7 +166,7 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                               ? 'bg-coral-light/25 text-coral border border-coral/20'
                               : t === '党员'
                               ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                              : 'bg-jade-light/25 text-jade border border-jade/20'
+                              : 'bg-primary-light/25 text-primary border border-primary/20'
                           }`}
                         >
                           {t}
@@ -203,7 +203,7 @@ export default function ResidentManagement({ residents, setResidents }: Resident
             <>
               <div>
                 <div className="flex items-center gap-2 pb-3.5 border-b border-hairline mb-4">
-                  <Users className="w-4 h-4 text-jade shrink-0" />
+                  <Users className="w-4 h-4 text-primary shrink-0" />
                   <h2 className="text-sm font-bold tracking-tight text-ink">
                     居民详细自治档案卡
                   </h2>
@@ -212,7 +212,7 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                 {/* Profile detail */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-4 bg-canvas/40 border border-hairline rounded-xl">
-                    <div className="w-12 h-12 rounded-full bg-jade-light/30 border border-jade/25 text-jade flex items-center justify-center font-bold text-base font-display">
+                    <div className="w-12 h-12 rounded-full bg-primary-light/30 border border-primary/25 text-primary flex items-center justify-center font-bold text-base font-display">
                       {selectedResident.name[0]}
                     </div>
                     <div>
@@ -231,13 +231,13 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                     <div className="p-2 bg-canvas/30 border border-hairline rounded-xl">
                       <span className="text-caption text-ink-subtle block">自治信任分</span>
                       <span className="text-sm font-bold font-mono text-ink flex items-center justify-center gap-1 mt-0.5">
-                        <Shield className="w-3.5 h-3.5 text-jade shrink-0" />
+                        <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
                         {selectedResident.creditScore}
                       </span>
                       <div className="flex justify-center gap-1 mt-1 text-[9px] font-mono">
                         <button
                           onClick={() => handleAdjustCredit(selectedResident.id, 5)}
-                          className="px-1 text-jade hover:bg-jade/10 rounded"
+                          className="px-1 text-primary hover:bg-primary/10 rounded"
                           title="奖励5学分"
                         >
                           +5
@@ -291,7 +291,7 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                             onClick={() => handleToggleTag(selectedResident.id, t)}
                             className={`px-2.5 py-1 text-4xs rounded-lg transition-all border flex items-center gap-1 cursor-pointer ${
                               hasTag
-                                ? 'bg-jade border-jade text-canvas font-bold'
+                                ? 'bg-primary border-primary text-canvas font-bold'
                                 : 'bg-surface hover:bg-canvas border-hairline text-ink-muted'
                             }`}
                           >
@@ -305,7 +305,7 @@ export default function ResidentManagement({ residents, setResidents }: Resident
                 </div>
               </div>
 
-              <div className="p-3 bg-jade-light/10 border border-jade/10 rounded-xl mt-4">
+              <div className="p-3 bg-primary-light/10 border border-primary/10 rounded-xl mt-4">
                 <span className="text-[10px] text-ink-subtle block leading-relaxed text-center">
                   * 信用评分、好评、小红花替代传统的积分规则，专为配合 C端“关怀版”做更简单直观的积分激励呈现。
                 </span>

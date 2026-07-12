@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Building2, House } from 'lucide-react';
 import { routeTo, useHashRoute } from './demo/navigation';
-import { ResidentWithAgent } from './resident/ResidentWithAgent';
+import App from './App';
 
 const CommunitySurface = lazy(() => import('./integration/CommunitySurface'));
 
@@ -67,7 +67,7 @@ export default function RootApp() {
           <CommunitySurface />
         </Suspense>
       ) : (
-        <ResidentWithAgent />
+        <App />
       )}
     </>
   );

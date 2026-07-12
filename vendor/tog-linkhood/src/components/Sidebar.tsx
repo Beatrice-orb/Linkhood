@@ -82,8 +82,8 @@ export default function Sidebar({
                 杨主任
               </div>
               <div className="text-caption text-ink-muted flex items-center gap-1 mt-0.5 font-sans">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-jade animate-pulse" />
-                西红门街道 · 泊寓社区
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                西红门街道社区
               </div>
             </div>
           </div>
@@ -91,11 +91,11 @@ export default function Sidebar({
 
         <div className="mt-2.5 px-1.5 text-caption text-ink-muted flex flex-col gap-0.5 font-sans">
           <div className="flex items-center gap-1">
-            <span className="text-jade font-semibold">身份:</span>
+            <span className="text-primary font-semibold">身份:</span>
             <span className="text-ink truncate">社区/居委会主任</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-jade font-semibold">权限:</span>
+            <span className="text-primary font-semibold">权限:</span>
             <span className="text-ink-subtle truncate">本社区全要素管理</span>
           </div>
         </div>

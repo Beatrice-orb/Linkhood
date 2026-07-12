@@ -3,8 +3,8 @@
   "asOf": "2026-07-12",
   "target": {
     "repository": "https://github.com/Beatrice-orb/TOC-Linkhood",
-    "branch": "agent/pr6-resident-agent-bridge",
-    "purpose": "PR #6 resident community life assistant, full ToC Portal preservation, and isolated ToG dashboard"
+    "branch": "main",
+    "purpose": "two-surface resident Portal and isolated ToG community dashboard preview"
   },
   "sources": {
     "toc": {
@@ -21,7 +21,7 @@
     "tog": {
       "repository": "https://github.com/Beatrice-orb/TOG-Linkhood",
       "branch": "main",
-      "commit": "dc2dd601ce02ec794b11b648924fd82efcd03525",
+      "commit": "e2ea5a233e856fd478197b2bd79a5ef644195894",
       "role": "complete community desktop dashboard upstream",
       "sourceStrategy": "read-only vendor snapshot",
       "runtimeIntegration": "iframe-isolated",
@@ -29,46 +29,12 @@
       "localEditsAllowed": false
     }
   },
-  "agent": {
-    "role": "resident community life assistant",
-    "capabilities": [
-      "search published community services and activities",
-      "understand and filter by non-sensitive resident constraints",
-      "compose grounded two-turn recommendations",
-      "route to allowlisted simulated department phone at the end of the second answer",
-      "emit aggregate-safe need insight tags"
-    ],
-    "excludedCapabilities": [
-      "create message",
-      "create ticket",
-      "create anonymous demand signal",
-      "bridge a conversation to the ToG message board",
-      "promise acceptance or staff follow-up"
-    ]
-  },
-  "needInsights": {
-    "purpose": "aggregate dashboard topics and trends only",
-    "allowedFields": [
-      "domain",
-      "goalTags",
-      "constraintTags",
-      "knowledgeCoverage",
-      "matchedSupplyIds",
-      "turnCount",
-      "isDemo"
-    ],
-    "forbiddenFields": [
-      "resident raw text",
-      "assistant raw text",
-      "name",
-      "phone",
-      "exact address",
-      "resident id",
-      "profile id",
-      "cross-session identifier",
-      "sensitive inference"
-    ],
-    "messageBoardBridge": false
+  "historicalAgentExperiment": {
+    "exposedInCurrentProduct": false,
+    "serverRoutesMounted": false,
+    "includedInCurrentDemo": false,
+    "includedInCurrentMvpClaims": false,
+    "note": "Historical files may remain for reference, but the current product has no resident AI assistant or intelligent matching algorithm."
   },
   "boundaries": {
     "singlePageSurfaceSwitch": "small resident/community switch",
@@ -80,7 +46,8 @@
     "askResidentToSubmit": false,
     "showResidentRecordSuccess": false,
     "showResidentAcceptanceStatus": false,
-    "writeResidentConversationToMessageBoard": false,
+    "exposeResidentAiAssistant": false,
+    "claimIntelligentMatching": false,
     "retainTogMobileSurface": false
   }
 }

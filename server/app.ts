@@ -1,4 +1,4 @@
-import express, { type Request, type Response } from 'express';
+import express, { type Response } from 'express';
 import { ALLOW_DEMO_LOGIN } from './config.ts';
 import { authenticate, createSession, requireRoles } from './auth.ts';
 import { db, getUser } from './db.ts';
@@ -17,11 +17,6 @@ import {
   INITIAL_SPACES,
   INITIAL_TODOS,
 } from '../src/government/mockData.ts';
-import residentAgentHandler, {
-  clearLocalResidentAgent,
-  configureLocalResidentAgent,
-  getLocalResidentAgentStatus,
-} from '../api/resident-agent.js';
 
 const GOVERNMENT_STATE_KEYS = [
   'todos', 'activities', 'announcements', 'spaces', 'services', 'workers',
@@ -222,37 +217,6 @@ export function createApp() {
     const database = db.prepare('SELECT 1 AS ok').get() as { ok: number };
     res.json({ ok: database.ok === 1, time: now() });
   });
-
-  const isLocalRequest = (req: Request) => {
-    const hostname = req.hostname.replace(/^\[|\]$/g, '');
-    const remoteAddress = req.socket.remoteAddress ?? '';
-    return (
-      ['localhost', '127.0.0.1', '::1', '0.0.0.0'].includes(hostname) &&
-      ['127.0.0.1', '::1', '::ffff:127.0.0.1'].some((value) => remoteAddress.includes(value))
-    );
-  };
-
-  app.get('/api/resident-agent/session-config', (req, res) => {
-    if (!isLocalRequest(req)) return res.status(404).json({ error: 'NOT_FOUND' });
-    return res.json(getLocalResidentAgentStatus());
-  });
-
-  app.post('/api/resident-agent/session-config', (req, res) => {
-    if (!isLocalRequest(req)) return res.status(404).json({ error: 'NOT_FOUND' });
-    try {
-      return res.json(configureLocalResidentAgent(req.body));
-    } catch {
-      return res.status(400).json({ error: 'INVALID_PROVIDER_CONFIG' });
-    }
-  });
-
-  app.delete('/api/resident-agent/session-config', (req, res) => {
-    if (!isLocalRequest(req)) return res.status(404).json({ error: 'NOT_FOUND' });
-    clearLocalResidentAgent();
-    return res.json({ ok: true });
-  });
-
-  app.post('/api/resident-agent', (req, res) => residentAgentHandler(req, res));
 
   app.post('/api/auth/demo-login', (req, res) => {
     if (!ALLOW_DEMO_LOGIN) return res.status(404).json({ error: 'NOT_FOUND' });

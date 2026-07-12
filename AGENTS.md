@@ -1,88 +1,76 @@
-# 搭把手 PR #6｜居民社区生活助理 Agent 协作入口
+# 搭把手双端产品协作入口
 
 > 适用目录：本仓库及其子目录。
->
-> 当前分支：`agent/pr6-resident-agent-bridge`（分支名沿用历史命名，当前产品不再包含需求桥接）。
->
-> 本入口约束 PR #6 的 ToC 原版保留、ToG 完整隔离展示、居民社区生活助理和需求洞察演示。
+
+## 当前目标
+
+当前产品只包含两个公开表面：
+
+- 居民端 `#/resident`
+- 社区驾驶舱 `#/community`
+
+当前没有“小搭”AI 助手，没有智能撮合算法，没有社工移动端。仓库中的 Agent、旧 G 端、旧 ToG 手机端和 Demo Launchpad 文件均为历史或实验代码，不得从文件存在推断为当前产品能力。
 
 ## 启动读取
 
 进入本工作树后，按顺序读取：
 
 1. 本文件。
-2. `docs/integration-sources.json`。
-3. `docs/agent/resident-service-agent.md`。
-4. `docs/demo/resident-agent-demo-script.md`。
-5. 涉及居民端界面时，再读取根目录现有 `README.md`、`DESIGN.md` 和 ToC 原版 Portal 实现。
-6. 涉及 ToG 时，只读检查 `vendor/tog-linkhood/`；先确认其上游提交，再决定同步或 iframe 适配方式。
+2. 根目录 `README.md`。
+3. `docs/integration-sources.json`。
+4. 涉及居民端时读取 `DESIGN.md` 和 `src/App.tsx`。
+5. 涉及 ToG 时只读检查 `vendor/tog-linkhood/`，并确认其上游提交。
 
-旧匿名需求信号与留言板桥接文档已经退出 PR #6 当前入口；如需恢复，必须重新做产品决策和隐私评审，不能从旧分支名推断其仍在范围内。
+`docs/agent/` 与 `docs/demo/resident-agent-demo-script.md` 仅为历史实验资料，不是当前需求规格。
 
 ## 固定来源
 
 | 端 | 仓库 | 基线 |
 |---|---|---|
-| ToC 居民端与 PR #6 目标仓库 | `Beatrice-orb/TOC-Linkhood` | `main@6e5bf2b` |
-| ToG 社区电脑端上游 | `Beatrice-orb/TOG-Linkhood` | `main@dc2dd601ce02ec794b11b648924fd82efcd03525` |
+| ToC 居民端与目标仓库 | `Beatrice-orb/TOC-Linkhood` | 以当前 `main` 为准 |
+| ToG 社区电脑端上游 | `Beatrice-orb/TOG-Linkhood` | `main@e2ea5a233e856fd478197b2bd79a5ef644195894` |
 
 精确提交与集成信息以 `docs/integration-sources.json` 为准。
 
 ## 当前产品边界
 
-- 同一网页只提供一个很小的“居民端 / 社区端”全局切换，默认进入居民端；不保留旧五端首屏或大型 Launchpad。
-- ToC 必须完整保留来源 main 的原版 Portal、内部页面、模式、内容、导航与交互；助手只是外层右下角入口，不能压缩、替换或重写居民端主体。
-- ToG 只保留社区运营人员电脑端，并完整展示上游 UI；不恢复旧 ToG 手机端或社工手机端。
-- ToG 使用 iframe 与 ToC 的 React 根节点、路由和全局样式隔离；不得为了融合而改写上游完整 UI。
-- 居民社区生活助理只查询和解释已发布的社区服务、社区活动与行动方式。
-- Agent 要理解居民真实目标和非敏感约束，组合多个本地事实，并在两轮对话中给出推荐理由，而不是做关键词客服。
-- 资料未覆盖时必须明确说明“当前已核验的演示资料中暂未找到”。
-- 白名单模拟科室电话优先在第二轮结尾出现；不能编造科室、号码、余量、资格、时间、地点或办理承诺。
-- PR #6 不创建居民留言、工单或匿名需求信号，不把单条对话桥接到 ToG 留言板。
-- 需求数据只以无原话、无 PII、无跨会话身份的主题和趋势标签沉淀；驾驶舱只能展示聚合洞察。
-- 居民端不得出现“提交需求”“已记录”“提交成功”“已受理”“工作人员将联系”等按钮、Toast、回执或承诺。
+- 同一网页只提供“居民端 / 社区端”轻量切换，默认进入居民端。
+- 居民端直接加载原版 `src/App.tsx`，不得挂载 AI 助手或重写主体。
+- 居民端保留地图、活动、空间、公共服务、邻里互助、聊天、积分信用和关怀模式。
+- 当前没有智能推荐或智能撮合；居民依据公开信息、筛选条件和实际沟通自主选择。
+- ToG 只保留社区运营人员电脑端，不恢复旧 ToG 手机端或社工移动端。
+- ToG 使用 iframe 与居民端 React 根节点、路由和全局样式隔离。
+- ToG 上游快照不得在 vendor 内手工修改；需要改动时先改上游，再同步提交。
+- 当前社区 iframe 不宣称与 SQLite、居民端操作或正式社区业务实时同步。
+- 公开服务来源不等于项目合作，公开预登记不等于报名成功。
+- 演示看板数字不等于真实社区运营成效。
 
 ## 数据与隐私
 
-- 不写入或展示真实姓名、手机号、身份证号、精确楼栋门牌、账户、密码、验证码、真实个案、原始录音或完整聊天记录。
-- 洞察层不得读取居民档案，也不得关联居民 ID、画像 ID、信用分、风险分、设备指纹或其他可追踪标识。
-- 只允许保存需求领域、目标标签、非敏感约束标签、知识覆盖状态、命中的供给 ID、轮数和演示标识。
-- 居民主动输入个人信息时，必须在进入模型前脱敏；无法可靠脱敏时，不生成该轮洞察。
-- 不把家庭关系、年龄、健康、收入、政治身份、心理状态或风险推断成需求标签。
-- 模拟问答、服务、活动、科室和电话必须显著标注“演示数据”；模拟电话注明不可拨打。
-- 单条洞察不能声称“涉及一位居民”；驾驶舱只能在满足聚合阈值后展示标签次数或趋势。
+- 不写入或展示真实姓名、手机号、身份证号、精确楼栋门牌、账户、密码或验证码。
+- 公共服务卡保留来源、发布时间、适用对象、地点、参与方式和最近核验时间。
+- 名额、费用、容量或状态未知时必须明确提示仍需向正式渠道确认。
+- 居民端操作不能自动生成社区任务、受理回执或工作人员跟进承诺。
 
-## AI 与本地 Key 边界
+## 仓库与同步规则
 
-- 生产与 Preview 的真模型必须通过服务端代理；API Key 不得进入客户端包、提交历史或 GitHub。
-- 本地开发如提供 Key 输入，只允许在 `localhost` 出现：Key 通过同源接口写入本地服务进程内存，输入框提交后立即清空。
-- Key 不得写入 `localStorage`、`sessionStorage`、Cookie、URL、日志、埋点、错误信息或文件；本地服务停止后失效。
-- 固定 Vercel Preview 使用服务端环境变量，不提供访问者自填 Key。
-- 真模型不可成为演示单点故障；无 Key、超时或结构异常时使用确定性回退。
-- Agent 没有留言、工单、报名、预约、通知、派单、建档、受理确认或居民档案查询工具。
-
-## 仓库与融合规则
-
-- ToC 是目标仓库原生代码；同步 main 时优先保留原版 Portal，不把它重建成简化壳。
-- ToG 上游快照位于 `vendor/tog-linkhood/`，不得直接修改。ToG 需要改动时，先进入 `TOG-Linkhood` 上游，再同步新提交。
-- ToG 通过 iframe 运行完整上游入口；不同时导入两端的 `main.tsx`、`index.html` 或全局 `index.css`。
-- 集成壳、Agent、知识库、需求洞察和作用域样式位于 vendor 之外。
-- 每次同步任一上游后，更新 `docs/integration-sources.json`，核对依赖变化，并重新运行构建与双视口验收。
-- 不把旧 PR #5 的 ToG 实现重新合入 PR #6。
+- ToC 是目标仓库原生代码；优先保留原版 Portal、页面、模式、导航与交互。
+- ToG 快照位于 `vendor/tog-linkhood/`，运行入口为 `tog.html`。
+- 每次同步 ToG 上游后，更新 `docs/integration-sources.json`、README 和路演材料中的主题与 commit。
+- 不把 `src/resident/ResidentWithAgent.tsx`、`src/features/resident-agent/` 或 Agent API 重新接回当前入口，除非用户重新明确立项。
+- 不把 `src/demo/`、`src/government/`、`src/tog/TogMobileApp.tsx` 恢复为公开路由。
 
 ## 验收
 
-- 单页入口默认显示居民端；顶部或边缘只保留一个很小的“居民端 / 社区端”切换，不出现旧五端 Launchpad。
-- ToC 居民端约 390×844：原版页面、模式、主导航和内容完整；右下角助手不压缩页面，点击后可以自由文本完成两轮对话。
-- 第一轮体现对生活目标和隐含约束的理解；第二轮继承上下文、调整建议，并在结尾给白名单模拟科室电话。
-- ToG 约 1440×900：iframe 中完整保留上游 UI、路由和视觉，不受 ToC 全局样式影响。
-- ToG 不新增任何由本次 Agent 对话生成的单条居民留言或匿名需求信号；如展示需求洞察，只展示无原话、无 PII 的聚合标签和趋势。
-- 紧急事项、越权请求、PII 输入和模型失败通过安全测试。
-- 至少运行 `npm run lint`、`npm run test:agent`、`npm run build` 和 `git diff --check`。
+- `#/resident` 显示原居民 Portal，页面中没有小搭 AI 悬浮入口。
+- `#/community` 完整显示最新版 ToG 桌面 UI，当前主题为茱萸红。
+- 顶部只保留居民端和社区端两个切换项。
+- 生产构建主包不包含 `resident-agent`、`ResidentAgentWidget` 或“小搭”字符串。
+- 至少运行 `npm run lint`、`npm run build` 和 `git diff --check`。
+- 后端测试若因沙箱禁止监听端口而无法执行，需要明确记录，不得误报为通过。
 
 ## 写回
 
-- Agent 行为、知识字段、洞察标签或话术变化更新 `docs/agent/resident-service-agent.md`。
-- 演示步骤和两轮案例变化更新 `docs/demo/resident-agent-demo-script.md`。
-- 上游仓库、分支、commit 或 iframe 集成方式变化更新 `docs/integration-sources.json`。
-- 已移除的匿名需求桥接与契约不在 PR 内恢复；历史方案只归档到本地项目工作流。
+- 上游仓库、分支、commit 或 iframe 集成变化更新 `docs/integration-sources.json`。
+- 当前产品架构和运行方式更新根目录 `README.md`。
+- 路演内容变化同步更新 `搭把手_9页PPT内容与逐字稿.md` 和 `搭把手_9页路演演示.html`。

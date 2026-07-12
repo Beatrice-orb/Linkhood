@@ -315,7 +315,7 @@ export default function SpaceManagement({ spaces, setSpaces }: SpaceManagementPr
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-jade hover:bg-jade-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-canvas text-xs font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
                 >
                   保存并同步小程序
                 </button>

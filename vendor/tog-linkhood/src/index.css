@@ -90,39 +90,24 @@
   --color-amber-light: #FDF5E6;
 }
 
-/* To G Governance Dark Theme (深孔雀绿底 + 暖沙金面与高亮) */
+/* To G Governance (茱萸红) Theme */
 .theme-governance-dark {
-  --color-canvas: #1F4A3A;          /* 深孔雀绿 Canvas */
-  --color-canvas-light: #2A5A4A;
-  --color-surface: #F5F0EB;         /* 暖白面 Surface */
-  --color-surface-elevated: #FAF8F5;
-  --color-ink: #F5F0EB;             /* 暗底主文字 */
-  --color-ink-muted: #B0A89E;       /* 暗底次要文字 */
-  --color-ink-subtle: #8A8278;      /* 暗底占位符 */
-  --color-primary: #E6C79C;         /* 暖沙金 Sand Gold */
-  --color-primary-hover: #D4B88E;
-  --color-primary-light: #4A3D2E;
-  --color-hairline: #2A5A4A;        /* 暗底边框 */
-  --color-coral: #C75A45;
-  --color-coral-light: #4A2E2A;
-  --color-amber: #C9963C;
-  --color-amber-light: #3A352A;
-}
-
-/* Inside cards with bg-surface, resolve text and dividers colors for light-mode on G-end warm surfaces */
-.theme-governance-dark .bg-surface,
-.theme-governance-dark [class*="bg-surface"],
-.theme-governance-dark .bg-surface-elevated,
-.theme-governance-dark [class*="bg-surface-elevated"] {
-  --color-ink: #1F2E28;             /* 亮面主文字 */
-  --color-ink-muted: #6A6A5E;       /* 亮面次要文字 */
-  --color-ink-subtle: #A49E94;      /* 亮面占位符 */
-  --color-hairline: #D9D0C8;        /* 亮面边框 */
-}
-
-/* Active sidebar item highlighting inside sidebar */
-.theme-governance-dark aside .bg-primary {
-  --color-ink: #1F2E28;
+  --color-canvas: #F8F7F0;          /* Warm page background */
+  --color-canvas-light: #F5E8E8;    /* Vermilion Light or light element background */
+  --color-surface: #FFFFFF;         /* Card, sheet background */
+  --color-surface-elevated: #FFFFFF;
+  --color-ink: #17313B;             /* Primary type */
+  --color-ink-muted: #5A6E74;       /* Secondary type */
+  --color-ink-subtle: #94A4A8;      /* Placeholder, disabled */
+  --color-primary: #B22222;         /* Vermilion 茱萸红 */
+  --color-primary-hover: #D44040;
+  --color-primary-light: #F5E8E8;
+  --color-hairline: #E5E3DA;        /* borders & dividers */
+  --color-coral: #F06A4B;           /* Coral */
+  --color-coral-hover: #D85A3D;
+  --color-coral-light: #FDEBE7;
+  --color-amber: #E9A23B;
+  --color-amber-light: #FDF5E6;
 }
 
 /* Base HTML & Focus Ring Reset matching Accessibility (WCAG AA) requirements */

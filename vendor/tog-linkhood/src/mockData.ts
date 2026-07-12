@@ -220,8 +220,8 @@ export const INITIAL_ACTIVITIES: Activity[] = [
 export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
   {
     id: 'ann-1',
-    title: '【重要】关于泊寓A区7月13日停水检修的通知',
-    content: '各位居民：因自来水管网年度维护，泊寓A区1号楼、2号楼将于2026年7月13日（下周一）09:00至17:00停水检修。请各位提前做好储水准备，并关闭好家中水龙头，以免造成意外损失。停水期间给您带来不便，敬请谅解！',
+    title: '【重要】关于西红门街道社区7月13日停水检修的通知',
+    content: '各位居民：因自来水管网年度维护，西红门街道社区将于2026年7月13日（下周一）09:00至17:00停水检修。请各位提前做好储水准备，并关闭好家中水龙头，以免造成意外损失。停水期间给您带来不便，敬请谅解！',
     category: '停水停电',
     isScheduled: false,
     publishTime: '2026-07-11 08:00',
@@ -314,7 +314,7 @@ export const INITIAL_SPACES: Space[] = [
 export const INITIAL_SERVICES: Service[] = [
   {
     id: 'svc-1',
-    name: '邻里小超 (泊寓A区店)',
+    name: '邻里小超 (西红门店)',
     category: '便民商超',
     location: '1号楼底商105',
     hours: '07:30 - 23:00',
@@ -534,7 +534,7 @@ export const INITIAL_FEEDBACKS: Feedback[] = [
 
 export const INITIAL_HOTLINES: Hotline[] = [
   { id: 'hot-1', name: '居委会办公热线', phone: '0571-87123456', category: '社区/居委会' },
-  { id: 'hot-2', name: '泊寓物业客服电话', phone: '0571-88889999', category: '物业管理' },
+  { id: 'hot-2', name: '社区物业客服电话', phone: '0571-88889999', category: '物业管理' },
   { id: 'hot-3', name: '网格管家值班热线', phone: '13912349911', category: '楼栋管家' },
   { id: 'hot-4', name: '社区家庭保健医生', phone: '18022334455', category: '社区医生' },
   { id: 'hot-5', name: '街道妇联维权帮扶站', phone: '0571-87998822', category: '妇联' }
@@ -551,7 +551,7 @@ export const CHART_VISITS = [
 ];
 
 export const CHART_MUTUAL_CATEGORY = [
-  { name: '日常拼单', value: 40, color: 'text-jade' },
+  { name: '日常拼单', value: 40, color: 'text-primary' },
   { name: '代跑代取', value: 35, color: 'text-amber' },
   { name: '闲置交易', value: 15, color: 'text-coral' },
   { name: '照看互助', value: 10, color: 'text-sky-400' }
